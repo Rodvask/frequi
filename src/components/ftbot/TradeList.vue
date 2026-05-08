@@ -50,8 +50,17 @@ function getColumnAlignmentClass(field: string) {
 }
 
 const increasePosition = ref({ visible: false, trade: {} as Trade });
-function formatPriceWithDecimals(price: number) {
-  return formatPrice(price, botStore.activeBot.stakeCurrencyDecimals);
+function formatStakeAmount(price: number | null | undefined) {
+  if (price === undefined || price === null) {
+    return 'N/A';
+  }
+
+  const decimals = botStore.activeBot.stakeCurrencyDecimals;
+  return price.toLocaleString('fullwide', {
+    useGrouping: false,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
 }
 
 const filteredTrades = computed(() =>
@@ -257,7 +266,7 @@ watch(
             />
           </template>
           <template v-else-if="field === 'stake_amount' || field === 'max_stake_amount'">
-            {{ formatPriceWithDecimals(data[field]) }}
+            {{ formatStakeAmount(data[field]) }}
             <span v-if="data.trading_mode !== 'spot'" class="ft-leverage-chip">
               {{ data.leverage }}X
             </span>
@@ -343,9 +352,7 @@ watch(
           <span>{{ activeTrades ? 'Stake' : 'Total stake' }}</span>
           <b>
             {{
-              formatPriceWithDecimals(
-                (activeTrades ? trade.stake_amount : trade.max_stake_amount) ?? 0,
-              )
+              formatStakeAmount(activeTrades ? trade.stake_amount : trade.max_stake_amount)
             }}
             <span v-if="trade.trading_mode !== 'spot'" class="ft-leverage-chip">
               {{ trade.leverage }}X
