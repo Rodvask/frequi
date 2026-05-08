@@ -6,7 +6,7 @@ const botStore = useBotStore();
   <footer class="ft-navbar ft-mobile-bottom-nav md:hidden">
     <!-- Only visible on xs (phone) viewport! -->
     <hr class="my-0" />
-    <div class="flex gap-2 justify-between px-2">
+    <div class="ft-mobile-bottom-nav-list flex gap-2 justify-between px-2">
       <Button
         v-if="!botStore.canRunBacktest"
         icon-pos="top"

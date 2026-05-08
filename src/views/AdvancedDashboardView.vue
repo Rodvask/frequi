@@ -388,7 +388,7 @@ onMounted(() => {
         </div>
       </article>
 
-      <article class="ft-dashboard-card ft-advanced-panel">
+      <article class="ft-dashboard-card ft-advanced-panel ft-advanced-panel-risk">
         <header>Risk alerts</header>
         <div class="ft-risk-list">
           <div
@@ -403,7 +403,7 @@ onMounted(() => {
         </div>
       </article>
 
-      <article class="ft-dashboard-card ft-advanced-panel">
+      <article class="ft-dashboard-card ft-advanced-panel ft-advanced-panel-pair">
         <header>Pair performance</header>
         <div class="ft-advanced-chart-scroll">
           <ECharts
@@ -446,7 +446,7 @@ onMounted(() => {
         </div>
       </article>
 
-      <article class="ft-dashboard-card ft-advanced-panel">
+      <article class="ft-dashboard-card ft-advanced-panel ft-advanced-panel-open">
         <header>Open trades</header>
         <div v-if="openTrades.length" class="ft-open-trade-list">
           <div v-for="trade in openTrades" :key="trade.botTradeId" class="ft-open-trade-card">

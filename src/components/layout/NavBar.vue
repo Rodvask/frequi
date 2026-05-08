@@ -213,8 +213,8 @@ const drawerVisible = ref(false);
             )"
             :key="index"
             :to="item.to"
-            class="text-surface-200 hover:text-primary-200 flex items-center gap-2 px-1 py-3 transition-colors"
-            active-class="text-primary-100 font-semibold"
+            class="ft-nav-link text-surface-200"
+            active-class="ft-nav-link-active"
           >
             {{ item.label }}
           </RouterLink>
@@ -341,8 +341,8 @@ const drawerVisible = ref(false);
                   v-for="(item, index) in navItems.filter((item) => item.visible ?? true)"
                   :key="index"
                   :to="item.to"
-                  class="text-surface-200 hover:text-primary-200 p-2"
-                  active-class="text-primary-100 font-semibold"
+                  class="ft-drawer-link text-surface-200"
+                  active-class="ft-drawer-link-active"
                 >
                   {{ item.label }}
                 </RouterLink>

@@ -15,10 +15,14 @@ watch(
 </script>
 
 <template>
-  <div id="app" class="ft-app-shell flex flex-col h-dvh" :style="colorStore.cssVars">
+  <div
+    id="app"
+    class="ft-app-shell flex flex-col h-dvh min-h-0 overflow-hidden"
+    :style="colorStore.cssVars"
+  >
     <NavBar />
     <Toast />
-    <BodyLayout class="grow overflow-auto" />
+    <BodyLayout class="min-h-0 grow overflow-auto" />
     <NavFooter />
   </div>
 </template>
