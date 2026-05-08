@@ -67,7 +67,7 @@ const handleForceExit = () => {
 </script>
 
 <template>
-  <div class="flex flex-row gap-1">
+  <div class="ft-bot-controls flex flex-row gap-1">
     <Button
       size="large"
       severity="secondary"

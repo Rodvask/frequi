@@ -2,6 +2,8 @@
 import type { ChartSliderPosition, PairHistory, Trade } from '@/types';
 import { LoadingStatus } from '@/types';
 
+import TradingViewCandleChart from './TradingViewCandleChart.vue';
+
 const props = withDefaults(
   defineProps<{
     trades?: Trade[];
@@ -69,6 +71,10 @@ const noDatasetText = computed((): string => {
     default:
       return 'Unknown';
   }
+});
+const useTradingViewChart = computed(() => {
+  const hasSubplots = Object.keys(plotStore.plotConfig.subplots ?? {}).length > 0;
+  return !hasSubplots && !settingsStore.showMarkArea && !settingsStore.useHeikinAshiCandles;
 });
 
 function refresh() {
@@ -160,8 +166,17 @@ watch(
     </div>
     <div class="h-full flex">
       <div class="min-w-0 w-full flex-1">
+        <TradingViewCandleChart
+          v-if="hasDataset && useTradingViewChart"
+          :dataset="dataset"
+          :trades="trades"
+          :plot-config="plotStore.plotConfig"
+          :color-up="colorStore.colorUp"
+          :color-down="colorStore.colorDown"
+          :start-candle-count="settingsStore.chartDefaultCandleCount"
+        />
         <CandleChart
-          v-if="hasDataset"
+          v-else-if="hasDataset"
           :dataset="dataset"
           :trades="trades"
           :plot-config="plotStore.plotConfig"

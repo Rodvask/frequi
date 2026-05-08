@@ -104,7 +104,7 @@ const combinedPairList = computed(() => {
 </script>
 
 <template>
-  <div>
+  <div class="ft-pair-summary-panel">
     <div
       label-for="trade-filter"
       class="mb-2"

@@ -29,6 +29,7 @@
     "echarts": "^6.0.0",
     "favico.js": "^0.3.10",
     "humanize-duration": "^3.33.2",
+    "lightweight-charts": "^5.2.0",
     "pinia": "3.0.4",
     "pinia-plugin-persistedstate": "^4.7.1",
     "primevue": "^4.5.5",
