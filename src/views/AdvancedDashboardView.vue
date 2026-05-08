@@ -15,6 +15,7 @@ type MetricTone = 'profit' | 'loss' | 'neutral' | 'warning';
 interface MetricCard {
   label: string;
   value: string;
+  change?: string;
   detail?: string;
   tone: MetricTone;
 }
@@ -51,6 +52,10 @@ function latestProfit(records: TimeSummaryRecord[] | undefined): number | undefi
   return records?.at(-1)?.abs_profit;
 }
 
+function latestProfitRatio(records: TimeSummaryRecord[] | undefined): number | undefined {
+  return records?.at(-1)?.rel_profit;
+}
+
 function totalTradeProfit(trade: Trade): number {
   return trade.profit_abs ?? trade.realized_profit ?? 0;
 }
@@ -63,6 +68,10 @@ function metricTone(value: number | undefined | null): MetricTone {
 function formatProfit(value: number | undefined | null): string {
   if (!isDefined(value)) return 'N/A';
   return formatPriceCurrency(value, stakeCurrency.value, stakeCurrencyDecimals.value);
+}
+
+function formatProfitPercent(value: number | undefined | null): string | undefined {
+  return isDefined(value) ? formatPercent(value, 2) : undefined;
 }
 
 function formatTradePrice(value: number | undefined | null): string {
@@ -121,6 +130,11 @@ const totalProfit = computed(() =>
   selectedProfitStats.value.reduce((sum, profit) => sum + (profit.profit_all_coin ?? 0), 0),
 );
 
+const totalProfitRatio = computed(() => {
+  const values = selectedProfitStats.value.map((profit) => profit.profit_all_ratio).filter(isDefined);
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : undefined;
+});
+
 const wins = computed(() =>
   selectedProfitStats.value.reduce((sum, profit) => sum + (profit.winning_trades ?? 0), 0),
 );
@@ -155,24 +169,28 @@ const metrics = computed<MetricCard[]>(() => [
   {
     label: 'Total profit',
     value: formatProfit(totalProfit.value),
+    change: formatProfitPercent(totalProfitRatio.value),
     detail: `${closedTrades.value.length + openTrades.value.length} total trades`,
     tone: metricTone(totalProfit.value),
   },
   {
     label: 'Daily profit',
     value: formatProfit(latestProfit(dailyStats.value.data)),
+    change: formatProfitPercent(latestProfitRatio(dailyStats.value.data)),
     detail: dailyStats.value.data?.at(-1)?.date,
     tone: metricTone(latestProfit(dailyStats.value.data)),
   },
   {
     label: 'Weekly profit',
     value: formatProfit(latestProfit(weeklyStats.value.data)),
+    change: formatProfitPercent(latestProfitRatio(weeklyStats.value.data)),
     detail: weeklyStats.value.data?.at(-1)?.date,
     tone: metricTone(latestProfit(weeklyStats.value.data)),
   },
   {
     label: 'Monthly profit',
     value: formatProfit(latestProfit(monthlyStats.value.data)),
+    change: formatProfitPercent(latestProfitRatio(monthlyStats.value.data)),
     detail: monthlyStats.value.data?.at(-1)?.date,
     tone: metricTone(latestProfit(monthlyStats.value.data)),
   },
@@ -290,11 +308,17 @@ const riskAlerts = computed<RiskAlert[]>(() => {
 
 const topPairChartOptions = computed<EChartsOption>(() => {
   const topRows = pairPerformance.value.slice(0, 8).reverse();
+  const chartTextColor = '#9aa9b8';
+  const chartLineColor = 'rgba(148, 163, 184, 0.16)';
+  const tooltipBg = 'rgba(15, 23, 42, 0.96)';
   return {
     backgroundColor: 'rgba(0, 0, 0, 0)',
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
+      backgroundColor: tooltipBg,
+      borderColor: 'rgba(148, 163, 184, 0.22)',
+      textStyle: { color: '#edf3f8' },
     },
     grid: {
       left: 96,
@@ -304,13 +328,17 @@ const topPairChartOptions = computed<EChartsOption>(() => {
     },
     xAxis: {
       type: 'value',
-      axisLabel: { color: 'var(--ft-text-muted)' },
-      splitLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.12)' } },
+      axisLabel: { color: chartTextColor },
+      axisLine: { lineStyle: { color: chartLineColor } },
+      axisTick: { lineStyle: { color: chartLineColor } },
+      splitLine: { lineStyle: { color: chartLineColor } },
     },
     yAxis: {
       type: 'category',
       data: topRows.map((row) => row.key),
-      axisLabel: { color: 'var(--ft-text-muted)' },
+      axisLabel: { color: chartTextColor },
+      axisLine: { lineStyle: { color: chartLineColor } },
+      axisTick: { lineStyle: { color: chartLineColor } },
     },
     series: [
       {
@@ -369,7 +397,16 @@ onMounted(() => {
         :class="`ft-advanced-${metric.tone}`"
       >
         <span>{{ metric.label }}</span>
-        <strong>{{ metric.value }}</strong>
+        <div class="ft-advanced-metric-value">
+          <strong>{{ metric.value }}</strong>
+          <em
+            v-if="metric.change"
+            class="ft-advanced-metric-change"
+            :class="`ft-advanced-metric-change-${metric.tone}`"
+          >
+            {{ metric.change }}
+          </em>
+        </div>
         <small>{{ metric.detail }}</small>
       </div>
     </section>

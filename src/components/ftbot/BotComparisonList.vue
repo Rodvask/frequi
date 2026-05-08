@@ -97,7 +97,7 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
 </script>
 
 <template>
-  <DataTable class="ft-metric-table" size="small" :value="tableItems">
+  <DataTable class="ft-metric-table ft-bot-comparison-table" size="small" :value="tableItems">
     <Column field="botName">
       <template #header>
         <div class="flex justify-between flex-row w-full">
@@ -201,4 +201,110 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
       </template>
     </Column>
   </DataTable>
+
+  <div class="ft-bot-comparison-mobile">
+    <article
+      v-for="item in tableItems"
+      :key="item.botId ?? 'summary'"
+      class="ft-bot-comparison-card"
+      :class="{ 'ft-bot-comparison-summary': !item.botId }"
+    >
+      <header>
+        <div class="ft-bot-comparison-title">
+          <BaseCheckbox
+            v-if="item.botId && botStore.botCount > 1"
+            v-model="botStore.botStores[item.botId]!.isSelected"
+            title="Show this bot in Dashboard"
+          >
+            {{ item.botName }}
+          </BaseCheckbox>
+          <BaseCheckbox
+            v-else-if="!item.botId && botStore.botCount > 1"
+            v-model="allToggled"
+            title="Toggle all bots"
+            class="font-bold"
+          >
+            {{ item.botName }}
+          </BaseCheckbox>
+          <strong v-else>{{ item.botName }}</strong>
+        </div>
+
+        <Badge
+          v-if="item.isOnline && item.isDryRun"
+          class="items-center bg-green-800 text-slate-200 cursor-pointer"
+          severity="success"
+          title="Click to select all dry run bots"
+          @click="botStore.toggleBotsByState('dry')"
+          >Dry</Badge
+        >
+        <Badge
+          v-else-if="item.isOnline && !item.isDryRun"
+          class="items-center cursor-pointer"
+          severity="warning"
+          title="Click to select all live bots"
+          @click="botStore.toggleBotsByState('live')"
+          >Live</Badge
+        >
+        <Badge v-else-if="item.isOnline === false" class="items-center" severity="secondary"
+          >Offline</Badge
+        >
+        <Badge
+          v-else-if="!item.botId"
+          class="items-center text-slate-200 bg-slate-800 cursor-pointer"
+          severity="contrast"
+          title="Click to select all bots"
+          @click="botStore.toggleBotsByState('all')"
+          >All</Badge
+        >
+      </header>
+
+      <div class="ft-bot-comparison-metrics">
+        <div>
+          <span>Trades</span>
+          <b>{{ item.trades ?? '-' }}</b>
+          <small class="ft-bot-comparison-wl">
+            W/L
+            <span class="text-profit">{{ item.wins }}</span>
+            /
+            <span class="text-loss">{{ item.losses }}</span>
+          </small>
+        </div>
+        <div>
+          <span>Balance</span>
+          <b>
+            {{
+              formatPrice(
+                item.balance ?? 0,
+                item.stakeCurrencyDecimals,
+              )
+            }}
+            <small>{{ item.stakeCurrency }}{{ item.balanceAppendix }}</small>
+          </b>
+        </div>
+        <div class="ft-bot-comparison-profit">
+          <span>Open profit</span>
+          <ProfitPill
+            v-if="item.profitOpen"
+            :profit-ratio="item.profitOpenRatio"
+            :profit-abs="item.profitOpen"
+            :profit-desc="`Total Profit (Open and realized) ${formatPercent(
+              item.profitOpenRatio ?? 0.0,
+            )}`"
+            :stake-currency="item.stakeCurrency"
+          />
+          <b v-else>-</b>
+        </div>
+        <div class="ft-bot-comparison-profit">
+          <span>Closed profit</span>
+          <ProfitPill
+            v-if="item.profitClosed"
+            :profit-ratio="item.profitClosedRatio"
+            :profit-abs="item.profitClosed"
+            :stake-currency="item.stakeCurrency"
+          />
+          <b v-else>-</b>
+        </div>
+      </div>
+    </article>
+  </div>
 </template>

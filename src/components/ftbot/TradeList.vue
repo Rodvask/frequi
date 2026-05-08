@@ -49,6 +49,16 @@ function formatPriceWithDecimals(price: number) {
   return formatPrice(price, botStore.activeBot.stakeCurrencyDecimals);
 }
 
+const filteredTrades = computed(() =>
+  props.trades.filter(
+    (t) =>
+      t.pair.toLowerCase().includes(filterText.value.toLowerCase()) ||
+      t.exit_reason?.toLowerCase().includes(filterText.value.toLowerCase()) ||
+      t.enter_tag?.toLowerCase().includes(filterText.value.toLowerCase()) ||
+      (props.multiBotView ? t.botName?.toLowerCase().includes(filterText.value.toLowerCase()) : false),
+  ),
+);
+
 const tableFields = ref([
   { field: 'trade_id', header: 'ID' },
   { field: 'pair', header: 'Pair' },
@@ -170,6 +180,10 @@ const onRowClicked = ({ data: item }) => {
   }
 };
 
+function onMobileTradeClicked(item: Trade) {
+  onRowClicked({ data: item });
+}
+
 watch(
   () => botStore.activeBot.detailTradeId,
   (val) => {
@@ -187,17 +201,7 @@ watch(
     <DataTable
       ref="tradesTable"
       v-model:selection="selectedItem"
-      :value="
-        trades.filter(
-          (t) =>
-            t.pair.toLowerCase().includes(filterText.toLowerCase()) ||
-            t.exit_reason?.toLowerCase().includes(filterText.toLowerCase()) ||
-            t.enter_tag?.toLowerCase().includes(filterText.toLowerCase()) ||
-            (props.multiBotView
-              ? t.botName?.toLowerCase().includes(filterText.toLowerCase())
-              : false),
-        )
-      "
+      :value="filteredTrades"
       :rows="perPage"
       :paginator="!activeTrades"
       :first="(currentPage - 1) * perPage"
@@ -276,6 +280,80 @@ watch(
         </div>
       </template>
     </DataTable>
+
+    <div class="ft-trade-mobile-list">
+      <article
+        v-for="(trade, index) in filteredTrades"
+        :key="`${trade.botId ?? 'bot'}-${trade.trade_id}`"
+        class="ft-trade-mobile-card"
+        @click="onMobileTradeClicked(trade)"
+      >
+        <header>
+          <div>
+            <strong>{{ trade.pair }}{{ trade.open_order_id || trade.has_open_orders ? '*' : '' }}</strong>
+            <span>
+              <template v-if="multiBotView">{{ trade.botName }} · </template>
+              #{{ trade.trade_id }}
+            </span>
+          </div>
+          <div class="ft-trade-mobile-actions">
+            <span
+              v-if="botStore.activeBot.botFeatures.futures && trade.trading_mode !== 'spot'"
+              class="ft-trade-direction-badge"
+              :class="trade.is_short ? 'ft-trade-direction-short' : 'ft-trade-direction-long'"
+            >
+              <i-mdi-arrow-down-bold v-if="trade.is_short" />
+              <i-mdi-arrow-up-bold v-else />
+              {{ trade.is_short ? 'Short' : 'Long' }}
+            </span>
+            <TradeActionsPopover
+              v-if="activeTrades"
+              :id="index"
+              :enable-force-entry="botStore.activeBot.botState.force_entry_enable"
+              :trade="trade"
+              :bot-features="botStore.activeBot.botFeatures"
+              @click.stop
+              @delete-trade="removeTradeHandler(trade)"
+              @force-exit="forceExitHandler"
+              @force-exit-partial="forceExitPartialHandler"
+              @cancel-open-order="cancelOpenOrderHandler"
+              @reload-trade="reloadTradeHandler"
+              @force-entry="handleForceEntry"
+            />
+          </div>
+        </header>
+
+        <TradeProfit class="ft-trade-mobile-profit" :trade="trade" />
+
+        <div class="ft-trade-mobile-grid">
+          <span>Amount</span>
+          <b>{{ formatPrice(trade.amount) }}</b>
+          <span>{{ activeTrades ? 'Stake' : 'Total stake' }}</span>
+          <b>
+            {{ formatPriceWithDecimals(activeTrades ? trade.stake_amount : trade.max_stake_amount) }}
+            {{ trade.trading_mode !== 'spot' ? `(${trade.leverage}x)` : '' }}
+          </b>
+          <span>Open rate</span>
+          <b>{{ formatPrice(trade.open_rate) }}</b>
+          <span>{{ activeTrades ? 'Current rate' : 'Close rate' }}</span>
+          <b>{{ formatPrice(activeTrades ? trade.current_rate : trade.close_rate) }}</b>
+          <span>Open date</span>
+          <b><DateTimeTZ :date="trade.open_timestamp" /></b>
+          <template v-if="!activeTrades">
+            <span>Close date</span>
+            <b><DateTimeTZ :date="trade.close_timestamp ?? 0" /></b>
+            <span>Reason</span>
+            <b>{{ trade.exit_reason }}</b>
+          </template>
+        </div>
+      </article>
+
+      <div v-if="!filteredTrades.length" class="ft-empty-state">{{ emptyText }}</div>
+
+      <div v-if="showFilter" class="flex justify-end gap-2 p-2">
+        <InputText v-model="filterText" placeholder="Filter" class="w-full" size="small" />
+      </div>
+    </div>
 
     <ForceExitForm
       v-if="activeTrades"
