@@ -56,9 +56,9 @@ const profitString = computed((): string => {
 
 <style scoped lang="css">
 .profit-pill {
-  border-color: var(--color-loss);
+  border-color: rgba(255, 95, 112, 0.52);
 }
 .profit-pill-profit {
-  border-color: var(--color-profit);
+  border-color: rgba(32, 225, 157, 0.5);
 }
 </style>

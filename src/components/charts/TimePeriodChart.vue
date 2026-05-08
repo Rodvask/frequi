@@ -6,9 +6,11 @@ import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import { LineChart, BarChart } from 'echarts/charts';
 import {
+  DataZoomComponent,
   DatasetComponent,
   GridComponent,
   LegendComponent,
+  MarkLineComponent,
   TitleComponent,
   TooltipComponent,
   TransformComponent,
@@ -18,15 +20,17 @@ import {
 import { registerTransform } from 'echarts';
 
 import type { TimeSummaryCols, TimeSummaryReturnValue } from '@/types';
-import type { EChartsOption, LinearGradientObject } from 'echarts';
+import type { EChartsOption } from 'echarts';
 
 use([
   BarChart,
   LineChart,
   CanvasRenderer,
   GridComponent,
+  DataZoomComponent,
   DatasetComponent,
   LegendComponent,
+  MarkLineComponent,
   TitleComponent,
   TooltipComponent,
   VisualMapComponent,
@@ -72,38 +76,29 @@ const absoluteMax = computed(
 
 registerTransform(ftEchartsTransforms.multiple);
 
-const colorStops: LinearGradientObject = {
-  type: 'linear',
-  x: 0,
-  y: 0,
-  x2: 1,
-  y2: 0,
-  colorStops: [
-    {
-      offset: 0,
-      color: colorStore.colorProfit, // color at 0%
-    },
-    {
-      offset: 0.5,
-      color: colorStore.colorProfit, // color at 50%
-    },
-    {
-      offset: 0.5,
-      color: colorStore.colorLoss, // color at 50%
-    },
-    {
-      offset: 1,
-      color: colorStore.colorLoss, // color at 100%
-    },
-  ],
-};
 const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
+  const axisColor = settingsStore.chartTheme === 'dark' ? '#9aa9b8' : '#475569';
+  const gridColor = settingsStore.chartTheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#e2e8f0';
+  const tooltipBg = settingsStore.chartTheme === 'dark' ? 'rgba(5, 8, 20, 0.96)' : '#ffffff';
+  const tooltipText = settingsStore.chartTheme === 'dark' ? '#edf3f8' : '#10202a';
+  const zeroLineColor =
+    settingsStore.chartTheme === 'dark' ? 'rgba(237, 243, 248, 0.52)' : 'rgba(15, 23, 42, 0.42)';
+
   return {
     title: {
       text: 'Daily profit',
       show: props.showTitle,
+      textStyle: {
+        color: tooltipText,
+        fontWeight: 800,
+      },
     },
     backgroundColor: 'rgba(0, 0, 0, 0)',
+    color: [colorStore.colorProfit, 'rgba(148, 163, 184, 0.32)'],
+    animationDuration: 500,
+    animationEasing: 'cubicOut',
+    animationDurationUpdate: 350,
+    animationEasingUpdate: 'cubicOut',
     dataset: [
       {
         dimensions: ['date', props.profitCol, 'trade_count'],
@@ -118,10 +113,52 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
     ],
     tooltip: {
       trigger: 'axis',
+      backgroundColor: tooltipBg,
+      borderColor: 'rgba(251, 191, 36, 0.28)',
+      borderWidth: 1,
+      padding: [10, 12],
+      textStyle: {
+        color: tooltipText,
+        fontWeight: 650,
+      },
+      formatter: (params) => {
+        const points = Array.isArray(params) ? params : [params];
+        const firstPoint = points[0];
+        const rawData = firstPoint?.data as Record<string, number | string> | undefined;
+        const date = rawData?.date ?? firstPoint?.axisValueLabel ?? '';
+        const profitPoint = points.find((point) => point.seriesName === CHART_PROFIT.value);
+        const tradePoint = points.find((point) => point.seriesName === CHART_TRADE_COUNT);
+        const profitData = profitPoint?.data as Record<string, number> | undefined;
+        const tradeData = tradePoint?.data as Record<string, number> | undefined;
+        const rawProfit = profitData?.[props.profitCol] ?? 0;
+        const profitValue = props.profitCol === 'rel_profit' ? rawProfit * 100 : rawProfit;
+        const profitLabel =
+          props.profitCol === 'rel_profit'
+            ? `${formatPrice(profitValue, 2)}%`
+            : formatPrice(profitValue, 3);
+
+        return [
+          `<div style="font-weight:800;margin-bottom:6px;color:#fbbf24">${date}</div>`,
+          `<div>${profitPoint?.marker ?? ''}${CHART_PROFIT.value}: <b>${profitLabel}</b></div>`,
+          `<div>${tradePoint?.marker ?? ''}${CHART_TRADE_COUNT}: <b>${tradeData?.trade_count ?? 0}</b></div>`,
+        ].join('');
+      },
+      extraCssText:
+        'box-shadow: 0 14px 34px rgba(0,0,0,.28); border-radius: 8px; backdrop-filter: blur(10px);',
       axisPointer: {
-        type: 'line',
+        type: 'cross',
+        lineStyle: {
+          color: 'rgba(251, 191, 36, 0.42)',
+          width: 1,
+          type: 'dashed',
+        },
+        crossStyle: {
+          color: 'rgba(251, 191, 36, 0.36)',
+          type: 'dashed',
+        },
         label: {
-          backgroundColor: '#6a7985',
+          backgroundColor: 'rgba(15, 23, 42, 0.94)',
+          color: '#fbbf24',
         },
       },
     },
@@ -130,20 +167,37 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
         {
           name: CHART_PROFIT.value,
           lineStyle: {
-            color: colorStops,
+            color: colorStore.colorProfit,
           },
           itemStyle: {
-            color: colorStops,
+            color: colorStore.colorProfit,
           },
         },
         { name: CHART_TRADE_COUNT },
       ],
       top: 0,
       right: '5%',
+      itemGap: 14,
+      textStyle: {
+        color: axisColor,
+        fontWeight: 650,
+      },
     },
     xAxis: [
       {
         type: 'category',
+        axisLine: {
+          lineStyle: {
+            color: gridColor,
+          },
+        },
+        axisTick: {
+          show: false,
+        },
+        axisLabel: {
+          color: axisColor,
+          fontWeight: 600,
+        },
       },
     ],
     visualMap: [
@@ -170,12 +224,28 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
         type: 'value',
         name: CHART_PROFIT.value,
         splitLine: {
-          show: false,
+          show: true,
+          lineStyle: {
+            color: gridColor,
+            type: 'dashed',
+          },
         },
         nameRotate: 90,
         nameLocation: 'middle',
         nameGap: 35,
+        nameTextStyle: {
+          color: axisColor,
+          fontWeight: 700,
+        },
+        axisLine: {
+          show: false,
+        },
+        axisTick: {
+          show: false,
+        },
         axisLabel: {
+          color: axisColor,
+          fontWeight: 600,
           formatter: (value) => {
             return props.profitCol === 'rel_profit' ? `${value}%` : `${value}`;
           },
@@ -187,26 +257,85 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
         nameRotate: 90,
         nameLocation: 'middle',
         nameGap: 30,
+        nameTextStyle: {
+          color: axisColor,
+          fontWeight: 700,
+        },
+        splitLine: {
+          show: false,
+        },
+        axisLine: {
+          show: false,
+        },
+        axisTick: {
+          show: false,
+        },
+        axisLabel: {
+          color: axisColor,
+          fontWeight: 600,
+        },
       },
     ],
     grid: {
-      left: '50',
-      right: '45',
-      bottom: '15%',
+      left: 52,
+      right: 48,
+      top: 58,
+      bottom: 32,
+      containLabel: false,
     },
+    dataZoom: [
+      {
+        type: 'inside',
+        start: 0,
+        end: 100,
+        zoomOnMouseWheel: true,
+        moveOnMouseMove: true,
+      },
+    ],
     series: [
       {
         type: 'line',
         name: CHART_PROFIT.value,
         // Color is induced by visualMap
         datasetIndex: 1,
+        smooth: 0.18,
+        symbol: 'circle',
+        symbolSize: 7,
+        showSymbol: true,
+        lineStyle: {
+          width: 2.5,
+          cap: 'round',
+        },
+        itemStyle: {
+          borderWidth: 2,
+          borderColor: settingsStore.chartTheme === 'dark' ? '#050814' : '#ffffff',
+        },
+        emphasis: {
+          focus: 'series',
+          scale: 1.25,
+        },
+        markLine: {
+          symbol: 'none',
+          silent: true,
+          lineStyle: {
+            color: zeroLineColor,
+            width: 1.5,
+          },
+          label: {
+            show: false,
+          },
+          data: [{ yAxis: 0 }],
+        },
       },
       {
         type: 'bar',
         name: CHART_TRADE_COUNT,
+        z: 0,
         itemStyle: {
-          color: 'rgba(150,150,150,0.3)',
+          color: 'rgba(148, 163, 184, 0.2)',
+          borderRadius: [4, 4, 0, 0],
         },
+        barMaxWidth: 12,
         yAxisIndex: 1,
         datasetIndex: 1,
       },

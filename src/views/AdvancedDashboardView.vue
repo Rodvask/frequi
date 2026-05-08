@@ -288,46 +288,86 @@ const riskAlerts = computed<RiskAlert[]>(() => {
 
 const topPairChartOptions = computed<EChartsOption>(() => {
   const topRows = pairPerformance.value.slice(0, 8).reverse();
-  const chartTextColor = '#9aa9b8';
-  const chartLineColor = 'rgba(148, 163, 184, 0.16)';
-  const tooltipBg = 'rgba(15, 23, 42, 0.96)';
+  const chartTextColor = settingsStore.chartTheme === 'dark' ? '#b8c5d2' : '#475569';
+  const chartMutedColor = settingsStore.chartTheme === 'dark' ? '#7f8ea3' : '#64748b';
+  const chartLineColor =
+    settingsStore.chartTheme === 'dark' ? 'rgba(148, 163, 184, 0.13)' : '#e2e8f0';
+  const tooltipBg = settingsStore.chartTheme === 'dark' ? 'rgba(5, 8, 20, 0.96)' : '#ffffff';
+  const tooltipText = settingsStore.chartTheme === 'dark' ? '#edf3f8' : '#10202a';
   return {
     backgroundColor: 'rgba(0, 0, 0, 0)',
+    animationDuration: 500,
+    animationEasing: 'cubicOut',
+    animationDurationUpdate: 350,
+    animationEasingUpdate: 'cubicOut',
     tooltip: {
       trigger: 'axis',
-      axisPointer: { type: 'shadow' },
+      axisPointer: {
+        type: 'shadow',
+        shadowStyle: {
+          color: 'rgba(251, 191, 36, 0.08)',
+        },
+      },
       backgroundColor: tooltipBg,
-      borderColor: 'rgba(148, 163, 184, 0.22)',
-      textStyle: { color: '#edf3f8' },
+      borderColor: 'rgba(251, 191, 36, 0.28)',
+      borderWidth: 1,
+      padding: [10, 12],
+      textStyle: { color: tooltipText, fontWeight: 650 },
+      extraCssText:
+        'box-shadow: 0 14px 34px rgba(0,0,0,.28); border-radius: 8px; backdrop-filter: blur(10px);',
+      formatter: (params) => {
+        const points = Array.isArray(params) ? params : [params];
+        const point = points[0];
+        const value = Number(point?.value ?? 0);
+        const row = topRows[point?.dataIndex ?? 0];
+        return [
+          `<div style="font-weight:800;margin-bottom:6px;color:#fbbf24">${row?.key ?? ''}</div>`,
+          `<div>${point?.marker ?? ''}Profit: <b>${formatPrice(
+            value,
+            stakeCurrencyDecimals.value,
+          )} ${stakeCurrency.value}</b></div>`,
+          `<div style="color:${chartMutedColor};margin-top:3px">Trades: <b>${row?.count ?? 0}</b></div>`,
+        ].join('');
+      },
     },
     grid: {
-      left: 96,
-      right: 16,
-      top: 12,
-      bottom: 20,
+      left: 106,
+      right: 20,
+      top: 16,
+      bottom: 28,
     },
     xAxis: {
       type: 'value',
-      axisLabel: { color: chartTextColor },
-      axisLine: { lineStyle: { color: chartLineColor } },
-      axisTick: { lineStyle: { color: chartLineColor } },
-      splitLine: { lineStyle: { color: chartLineColor } },
+      axisLabel: { color: chartTextColor, fontWeight: 600 },
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { lineStyle: { color: chartLineColor, type: 'dashed' } },
     },
     yAxis: {
       type: 'category',
       data: topRows.map((row) => row.key),
-      axisLabel: { color: chartTextColor },
-      axisLine: { lineStyle: { color: chartLineColor } },
-      axisTick: { lineStyle: { color: chartLineColor } },
+      axisLabel: { color: chartTextColor, fontWeight: 650 },
+      axisLine: { show: false },
+      axisTick: { show: false },
     },
     series: [
       {
         type: 'bar',
         data: topRows.map((row) => row.profitAbs),
+        barMaxWidth: 18,
+        barCategoryGap: '40%',
         itemStyle: {
           color: (params) =>
             Number(params.value) >= 0 ? colorStore.colorProfit : colorStore.colorLoss,
-          borderRadius: [3, 3, 3, 3],
+          borderRadius: [4, 4, 4, 4],
+        },
+        emphasis: {
+          focus: 'series',
+          itemStyle: {
+            opacity: 0.92,
+            shadowBlur: 10,
+            shadowColor: 'rgba(0,0,0,0.22)',
+          },
         },
       },
     ],

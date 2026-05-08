@@ -79,7 +79,11 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
     .filter((botId) => legendSelection.value[botId] ?? true);
   const useProfitLossVisualMap = selectedBotIds.length === 1;
   const selectedBotId = selectedBotIds[0];
-  const captureLineColor = settingsStore.chartTheme === 'dark' ? '#c2c2c2' : '#4b5563';
+  const axisColor = settingsStore.chartTheme === 'dark' ? '#b8c5d2' : '#475569';
+  const gridColor = settingsStore.chartTheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#e2e8f0';
+  const tooltipBg = settingsStore.chartTheme === 'dark' ? 'rgba(5, 8, 20, 0.96)' : '#ffffff';
+  const tooltipText = settingsStore.chartTheme === 'dark' ? '#edf3f8' : '#10202a';
+  const captureLineColor = settingsStore.chartTheme === 'dark' ? '#b8c5d2' : '#4b5563';
 
   walletEntries.forEach(([botId, history], botIndex) => {
     const botName = history.botName ?? botId;
@@ -207,6 +211,11 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
         },
         lineStyle: {
           type: 'solid',
+          width: 2.4,
+          cap: 'round',
+        },
+        emphasis: {
+          focus: 'series',
         },
         markLine: {
           symbol: 'none',
@@ -220,6 +229,7 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
         showSymbol: false,
         lineStyle: {
           type: 'dashed',
+          width: 1.8,
         },
         color: seriesColor,
         datasetIndex: preCaptureDatasetIndex,
@@ -240,15 +250,39 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
       text: 'Wallet Balance',
       left: 'center',
       show: props.showTitle,
+      textStyle: {
+        color: tooltipText,
+        fontWeight: 800,
+      },
     },
     backgroundColor: 'rgba(0, 0, 0, 0)',
+    animationDuration: 500,
+    animationEasing: 'cubicOut',
+    animationDurationUpdate: 350,
+    animationEasingUpdate: 'cubicOut',
     dataset,
     tooltip: {
       trigger: 'axis',
+      backgroundColor: tooltipBg,
+      borderColor: 'rgba(251, 191, 36, 0.28)',
+      borderWidth: 1,
+      padding: [10, 12],
+      textStyle: {
+        color: tooltipText,
+        fontWeight: 650,
+      },
+      extraCssText:
+        'box-shadow: 0 14px 34px rgba(0,0,0,.28); border-radius: 8px; backdrop-filter: blur(10px);',
       axisPointer: {
         type: 'line',
+        lineStyle: {
+          color: 'rgba(251, 191, 36, 0.42)',
+          width: 1,
+          type: 'dashed',
+        },
         label: {
-          backgroundColor: '#6a7985',
+          backgroundColor: 'rgba(15, 23, 42, 0.94)',
+          color: '#fbbf24',
         },
       },
       formatter: (params) => {
@@ -272,7 +306,9 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
           return `${typedPoint.marker}${typedPoint.seriesName}: ${formatPrice(walletHistory, 3)}`;
         });
 
-        return `${label}<br />${lines.join('<br />')}`;
+        return `<div style="font-weight:800;margin-bottom:6px;color:#fbbf24">${label}</div>${lines.join(
+          '<br />',
+        )}`;
       },
     },
     grid: {
@@ -285,11 +321,17 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
       show: walletEntries.length > 1,
       selectedMode: true,
       selected: legendSelection.value,
+      textStyle: {
+        color: axisColor,
+        fontWeight: 650,
+      },
     },
     xAxis: [
       {
         type: 'time',
-        axisLine: { onZero: false },
+        axisLine: { onZero: false, lineStyle: { color: gridColor } },
+        axisTick: { show: false },
+        axisLabel: { color: axisColor, fontWeight: 600 },
         axisPointer: {
           label: { show: false },
         },
@@ -301,15 +343,21 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
         type: 'value',
         name: CHART_WALLET_HISTORY,
         splitLine: {
-          show: false,
+          show: true,
+          lineStyle: { color: gridColor, type: 'dashed' },
         },
         nameRotate: 90,
         nameLocation: 'middle',
+        nameTextStyle: { color: axisColor, fontWeight: 700 },
         axisLabel: {
+          color: axisColor,
+          fontWeight: 600,
           formatter: (value) => {
             return formatPrice(value, 2);
           },
         },
+        axisLine: { show: false },
+        axisTick: { show: false },
         nameGap: 35,
         min: 'dataMin',
         max: 'dataMax',
@@ -326,12 +374,17 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
         start: 0,
         end: 100,
         ...dataZoomPartial,
+        borderColor: 'rgba(148, 163, 184, 0.16)',
+        fillerColor: 'rgba(251, 191, 36, 0.1)',
+        handleStyle: {
+          color: '#fbbf24',
+          borderColor: '#fbbf24',
+        },
       },
     ],
     visualMap,
     series,
   };
-  console.log('Wallet balance chart options', option);
   return option;
 });
 </script>

@@ -59,22 +59,49 @@ const data = computed(() => {
 });
 
 const chartOptions = computed((): EChartsOption => {
+  const axisColor = settingsStore.chartTheme === 'dark' ? '#b8c5d2' : '#475569';
+  const gridColor = settingsStore.chartTheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#e2e8f0';
+  const tooltipBg = settingsStore.chartTheme === 'dark' ? 'rgba(5, 8, 20, 0.96)' : '#ffffff';
+  const tooltipText = settingsStore.chartTheme === 'dark' ? '#edf3f8' : '#10202a';
   const chartOptionsLoc: EChartsOption = {
     title: {
       text: 'Profit distribution',
       left: 'center',
       show: props.showTitle,
+      textStyle: {
+        color: tooltipText,
+        fontWeight: 800,
+      },
     },
     backgroundColor: 'rgba(0, 0, 0, 0)',
+    color: ['#fbbf24'],
+    animationDuration: 500,
+    animationEasing: 'cubicOut',
+    animationDurationUpdate: 350,
+    animationEasingUpdate: 'cubicOut',
     dataset: {
       source: data.value,
     },
     tooltip: {
       trigger: 'axis',
+      backgroundColor: tooltipBg,
+      borderColor: 'rgba(251, 191, 36, 0.28)',
+      borderWidth: 1,
+      padding: [10, 12],
+      textStyle: {
+        color: tooltipText,
+        fontWeight: 650,
+      },
+      extraCssText:
+        'box-shadow: 0 14px 34px rgba(0,0,0,.28); border-radius: 8px; backdrop-filter: blur(10px);',
       axisPointer: {
-        type: 'line',
+        type: 'shadow',
+        shadowStyle: {
+          color: 'rgba(251, 191, 36, 0.08)',
+        },
         label: {
-          backgroundColor: '#6a7985',
+          backgroundColor: 'rgba(15, 23, 42, 0.94)',
+          color: '#fbbf24',
         },
       },
     },
@@ -83,24 +110,62 @@ const chartOptions = computed((): EChartsOption => {
       right: '5%',
       top: 0,
       selectedMode: false,
+      textStyle: {
+        color: axisColor,
+        fontWeight: 650,
+      },
     },
     xAxis: {
       type: 'category',
       name: 'Profit %',
       nameLocation: 'middle',
       nameGap: 25,
+      axisLine: {
+        lineStyle: {
+          color: gridColor,
+        },
+      },
+      axisTick: {
+        show: false,
+      },
+      axisLabel: {
+        color: axisColor,
+        fontWeight: 600,
+      },
+      nameTextStyle: {
+        color: axisColor,
+        fontWeight: 700,
+      },
     },
     yAxis: [
       {
         type: 'value',
         name: CHART_PROFIT,
         splitLine: {
-          show: false,
+          show: true,
+          lineStyle: {
+            color: gridColor,
+            type: 'dashed',
+          },
         },
         nameRotate: 90,
         nameLocation: 'middle',
         nameGap: 35,
         position: 'left',
+        nameTextStyle: {
+          color: axisColor,
+          fontWeight: 700,
+        },
+        axisLine: {
+          show: false,
+        },
+        axisTick: {
+          show: false,
+        },
+        axisLabel: {
+          color: axisColor,
+          fontWeight: 600,
+        },
       },
     ],
     grid: {
@@ -117,7 +182,14 @@ const chartOptions = computed((): EChartsOption => {
           x: 'x0',
           y: 'y0',
         },
-
+        barMaxWidth: 18,
+        itemStyle: {
+          color: '#fbbf24',
+          borderRadius: [4, 4, 0, 0],
+        },
+        emphasis: {
+          focus: 'series',
+        },
         // symbol: 'none',
       },
     ],

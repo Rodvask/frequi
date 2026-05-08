@@ -122,16 +122,15 @@ const combinedPairList = computed(() => {
       />
     </div>
     <ul
-      class="divide-y divide-surface-300 dark:divide-surface-700 divide-solid border-x border-y rounded-sm border-surface-300 dark:border-surface-700"
+      class="ft-pair-summary-list divide-y divide-surface-300 dark:divide-surface-700 divide-solid border-x border-y rounded-sm border-surface-300 dark:border-surface-700"
     >
       <li
         v-for="comb in combinedPairList"
         :key="comb.pair"
         button
-        class="flex cursor-pointer last:rounded-b justify-between items-center px-1 py-1.5"
+        class="ft-pair-summary-row flex cursor-pointer last:rounded-b justify-between items-center px-1 py-1.5"
         :class="{
-          'bg-primary dark:border-primary text-primary-contrast':
-            comb.pair === botStore.activeBot.selectedPair,
+          'ft-pair-summary-row-active': comb.pair === botStore.activeBot.selectedPair,
         }"
         :title="`${formatPriceCurrency(comb.profitAbs, botStore.activeBot.stakeCurrency, botStore.activeBot.stakeCurrencyDecimals)} - ${comb.pair} - ${comb.tradeCount} trades`"
         @click="botStore.activeBot.selectedPair = comb.pair"
