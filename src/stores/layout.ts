@@ -40,6 +40,13 @@ const DEFAULT_TRADING_LAYOUT_SM: GridItemData[] = [
 const DEFAULT_DASHBOARD_LAYOUT: GridItemData[] = [
   { i: DashboardLayout.botComparison, x: 0, y: 0, w: 8, h: 6 } /* Bot Comparison */,
   { i: DashboardLayout.dailyChart, x: 8, y: 0, w: 4, h: 6 },
+  { i: DashboardLayout.allOpenTrades, x: 0, y: 6, w: 8, h: 8 },
+  { i: DashboardLayout.cumChartChart, x: 8, y: 6, w: 4, h: 8 },
+];
+
+const LEGACY_DEFAULT_DASHBOARD_LAYOUT: GridItemData[] = [
+  { i: DashboardLayout.botComparison, x: 0, y: 0, w: 8, h: 6 },
+  { i: DashboardLayout.dailyChart, x: 8, y: 0, w: 4, h: 6 },
   { i: DashboardLayout.allOpenTrades, x: 0, y: 6, w: 8, h: 6 },
   { i: DashboardLayout.cumChartChart, x: 8, y: 6, w: 4, h: 6 },
   { i: DashboardLayout.allClosedTrades, x: 0, y: 12, w: 8, h: 6 },
@@ -48,15 +55,21 @@ const DEFAULT_DASHBOARD_LAYOUT: GridItemData[] = [
   { i: DashboardLayout.profitDistributionChart, x: 8, y: 18, w: 4, h: 6 },
 ];
 
+const PREVIOUS_ANALYTICS_DASHBOARD_LAYOUT: GridItemData[] = [
+  { i: DashboardLayout.botComparison, x: 0, y: 0, w: 6, h: 6 },
+  { i: DashboardLayout.dailyChart, x: 6, y: 0, w: 6, h: 6 },
+  { i: DashboardLayout.allOpenTrades, x: 0, y: 6, w: 7, h: 6 },
+  { i: DashboardLayout.cumChartChart, x: 7, y: 6, w: 5, h: 6 },
+  { i: DashboardLayout.tradesLogChart, x: 0, y: 12, w: 7, h: 6 },
+  { i: DashboardLayout.walletHistoryChart, x: 7, y: 12, w: 5, h: 5 },
+  { i: DashboardLayout.profitDistributionChart, x: 7, y: 17, w: 5, h: 5 },
+];
+
 const DEFAULT_DASHBOARD_LAYOUT_SM: GridItemData[] = [
   { i: DashboardLayout.botComparison, x: 0, y: 0, w: 12, h: 6 } /* Bot Comparison */,
   { i: DashboardLayout.allOpenTrades, x: 0, y: 6, w: 12, h: 8 },
   { i: DashboardLayout.dailyChart, x: 0, y: 14, w: 12, h: 6 },
   { i: DashboardLayout.cumChartChart, x: 0, y: 20, w: 12, h: 6 },
-  { i: DashboardLayout.walletHistoryChart, x: 0, y: 26, w: 12, h: 6 },
-  { i: DashboardLayout.profitDistributionChart, x: 0, y: 32, w: 12, h: 6 },
-  { i: DashboardLayout.tradesLogChart, x: 0, y: 38, w: 12, h: 6 },
-  { i: DashboardLayout.allClosedTrades, x: 0, y: 44, w: 12, h: 8 },
 ];
 
 const STORE_LAYOUTS = 'ftLayoutSettings';
@@ -98,6 +111,20 @@ export function findGridLayout(gridLayout: GridItemData[], name: number): GridIt
   return layout;
 }
 
+function isSameGridItem(a: GridItemData, b: GridItemData): boolean {
+  return a.i === b.i && a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h;
+}
+
+function isLegacyDefaultDashboardLayout(layout: GridItemData[]): boolean {
+  return [LEGACY_DEFAULT_DASHBOARD_LAYOUT, PREVIOUS_ANALYTICS_DASHBOARD_LAYOUT].some((legacyLayout) =>
+    legacyLayout.every((legacyItem) => {
+    const currentItem = layout.find((item) => item.i === legacyItem.i);
+
+    return currentItem ? isSameGridItem(currentItem, legacyItem) : false;
+    }),
+  );
+}
+
 export const useLayoutStore = defineStore('layoutStore', {
   state: () => {
     return {
@@ -129,6 +156,9 @@ export const useLayoutStore = defineStore('layoutStore', {
         context.store.dashboardLayout.length < DEFAULT_DASHBOARD_LAYOUT.length
       ) {
         console.log('loading dashboard Layout from default.');
+        context.store.dashboardLayout = JSON.parse(JSON.stringify(DEFAULT_DASHBOARD_LAYOUT));
+      } else if (isLegacyDefaultDashboardLayout(context.store.dashboardLayout)) {
+        console.log('migrating dashboard Layout to desktop optimized default.');
         context.store.dashboardLayout = JSON.parse(JSON.stringify(DEFAULT_DASHBOARD_LAYOUT));
       }
       if (

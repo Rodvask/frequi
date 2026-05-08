@@ -102,20 +102,26 @@ watch(
 // Navigation items array
 const navItems = ref([
   {
-    label: 'Trade',
-    to: '/trade',
-    visible: computed(() => !botStore.canRunBacktest),
-    icon: 'i-mdi-currency-usd',
-  },
-  {
     label: 'Dashboard',
     to: '/dashboard',
     visible: computed(() => !botStore.canRunBacktest),
     icon: 'i-mdi-view-dashboard',
   },
   {
-    label: 'Advanced',
-    to: '/advanced-dashboard',
+    label: 'Trade',
+    to: '/trade',
+    visible: computed(() => !botStore.canRunBacktest),
+    icon: 'i-mdi-currency-usd',
+  },
+  {
+    label: 'History',
+    to: '/trade_history',
+    visible: computed(() => !botStore.canRunBacktest),
+    icon: 'i-mdi-folder-lock',
+  },
+  {
+    label: 'Analytics',
+    to: '/analytics',
     visible: computed(() => !botStore.canRunBacktest),
     icon: 'i-mdi-view-dashboard-edit',
   },
@@ -216,6 +222,16 @@ const drawerVisible = ref(false);
             class="ft-nav-link text-surface-200"
             active-class="ft-nav-link-active"
           >
+            <i-mdi-currency-usd v-if="item.icon === 'i-mdi-currency-usd'" />
+            <i-mdi-folder-lock v-if="item.icon === 'i-mdi-folder-lock'" />
+            <i-mdi-view-dashboard v-if="item.icon === 'i-mdi-view-dashboard'" />
+            <i-mdi-view-dashboard-edit v-if="item.icon === 'i-mdi-view-dashboard-edit'" />
+            <i-mdi-chart-line v-if="item.icon === 'i-mdi-chart-line'" />
+            <i-mdi-format-list-bulleted v-if="item.icon === 'i-mdi-format-list-bulleted'" />
+            <i-mdi-download v-if="item.icon === 'i-mdi-download'" />
+            <i-mdi-format-list-numbered-rtl
+              v-if="item.icon === 'i-mdi-format-list-numbered-rtl'"
+            />
             {{ item.label }}
           </RouterLink>
           <ThemeSelect />

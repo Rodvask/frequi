@@ -74,26 +74,6 @@ function formatProfitPercent(value: number | undefined | null): string | undefin
   return isDefined(value) ? formatPercent(value, 2) : undefined;
 }
 
-function formatTradePrice(value: number | undefined | null): string {
-  return isDefined(value) ? formatPrice(value, stakeCurrencyDecimals.value) : 'N/A';
-}
-
-function formatOpenDuration(trade: Trade): string {
-  if (!trade.open_timestamp) return 'N/A';
-  return humanizeDurationFromSeconds(Math.max(0, (Date.now() - trade.open_timestamp) / 1000));
-}
-
-function tradeDirection(trade: Trade): string {
-  if (trade.trading_mode === 'spot') return 'Spot';
-  return trade.is_short ? 'Short' : 'Long';
-}
-
-function dcaCount(trade: Trade): string {
-  const entries =
-    trade.nr_of_successful_entries ?? trade.orders?.filter((order) => order.ft_is_entry).length;
-  return isDefined(entries) ? `${entries} entries` : 'N/A';
-}
-
 function aggregatePerformance<T extends PerformanceEntry | EntryStats | ExitStats>(
   rows: T[],
   key: keyof T,
@@ -379,8 +359,8 @@ onMounted(() => {
   <div class="ft-advanced-dashboard h-full overflow-auto">
     <div class="ft-advanced-dashboard-header">
       <div>
-        <h1>Advanced Dashboard</h1>
-        <p>Trading decision metrics for selected bots</p>
+        <h1>Analytics</h1>
+        <p>Trading analytics, performance breakdowns and risk signals for selected bots</p>
       </div>
       <Button severity="secondary" size="small" @click="refreshAdvancedDashboard">
         <template #icon>
@@ -412,7 +392,7 @@ onMounted(() => {
     </section>
 
     <section class="ft-advanced-grid">
-      <article class="ft-dashboard-card ft-advanced-panel ft-advanced-panel-large">
+      <article class="ft-dashboard-card ft-advanced-panel ft-analytics-daily-panel">
         <header>Daily profit chart</header>
         <div class="ft-advanced-chart-scroll">
           <div class="ft-advanced-chart">
@@ -425,7 +405,7 @@ onMounted(() => {
         </div>
       </article>
 
-      <article class="ft-dashboard-card ft-advanced-panel ft-advanced-panel-risk">
+      <article class="ft-dashboard-card ft-advanced-panel ft-analytics-risk-panel">
         <header>Risk alerts</header>
         <div class="ft-risk-list">
           <div
@@ -440,7 +420,7 @@ onMounted(() => {
         </div>
       </article>
 
-      <article class="ft-dashboard-card ft-advanced-panel ft-advanced-panel-pair">
+      <article class="ft-dashboard-card ft-advanced-panel ft-analytics-pair-panel">
         <header>Pair performance</header>
         <div class="ft-advanced-chart-scroll">
           <ECharts
@@ -483,37 +463,28 @@ onMounted(() => {
         </div>
       </article>
 
-      <article class="ft-dashboard-card ft-advanced-panel ft-advanced-panel-open">
-        <header>Open trades</header>
-        <div v-if="openTrades.length" class="ft-open-trade-list">
-          <div v-for="trade in openTrades" :key="trade.botTradeId" class="ft-open-trade-card">
-            <div class="ft-open-trade-head">
-              <div>
-                <strong>{{ trade.pair }}</strong>
-                <span>{{ trade.botName }}</span>
-              </div>
-              <Badge
-                :value="tradeDirection(trade)"
-                :severity="trade.is_short ? 'danger' : 'success'"
-              />
-            </div>
-            <TradeProfit :trade="trade" />
-            <div class="ft-open-trade-grid">
-              <span>Entry</span>
-              <b>{{ formatTradePrice(trade.open_rate) }}</b>
-              <span>Current</span>
-              <b>{{ formatTradePrice(trade.current_rate) }}</b>
-              <span>Duration</span>
-              <b>{{ formatOpenDuration(trade) }}</b>
-              <span>DCA/orders</span>
-              <b>{{ dcaCount(trade) }}</b>
-            </div>
-          </div>
+      <article class="ft-dashboard-card ft-advanced-panel ft-analytics-trades-panel">
+        <header>Trades log</header>
+        <div class="ft-analytics-chart-frame">
+          <TradesLogChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
         </div>
-        <div v-else class="ft-empty-state">No open trades.</div>
       </article>
 
-      <article class="ft-dashboard-card ft-advanced-panel">
+      <article class="ft-dashboard-card ft-advanced-panel ft-analytics-wallet-panel">
+        <header>Wallet history</header>
+        <div class="ft-analytics-chart-frame">
+          <WalletHistoryChart :wallet-data="botStore.allBalanceHistory" :show-title="false" />
+        </div>
+      </article>
+
+      <article class="ft-dashboard-card ft-advanced-panel ft-analytics-distribution-panel">
+        <header>Profit distribution</header>
+        <div class="ft-analytics-chart-frame">
+          <ProfitDistributionChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
+        </div>
+      </article>
+
+      <article class="ft-dashboard-card ft-advanced-panel ft-analytics-enter-panel">
         <header>Enter tag performance</header>
         <DataTable
           class="ft-metric-table ft-advanced-desktop-table"
@@ -551,7 +522,7 @@ onMounted(() => {
         </div>
       </article>
 
-      <article class="ft-dashboard-card ft-advanced-panel">
+      <article class="ft-dashboard-card ft-advanced-panel ft-analytics-exit-panel">
         <header>Exit reason performance</header>
         <DataTable
           class="ft-metric-table ft-advanced-desktop-table"

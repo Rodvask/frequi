@@ -18,22 +18,58 @@ const isLayoutLocked = computed(() => {
 });
 const isCompactLayout = computed(() => ['xs', 'xxs'].includes(currentBreakpoint.value));
 const dashboardMargin = computed<[number, number]>(() =>
-  isCompactLayout.value ? [8, 10] : [12, 12],
+  isCompactLayout.value ? [8, 10] : [10, 10],
 );
-const dashboardRowHeight = computed(() => (isCompactLayout.value ? 46 : 54));
+const dashboardRowHeight = computed(() => (isCompactLayout.value ? 46 : 48));
 
-const gridLayoutData = computed((): GridItemData[] => {
+const rawGridLayoutData = computed((): GridItemData[] => {
   if (isResizableLayout.value) {
     return layoutStore.dashboardLayout;
   }
   return [...layoutStore.getDashboardLayoutSm];
 });
 
+function overlapsColumn(item: GridItemData, reference: GridItemData): boolean {
+  return item.x < reference.x + reference.w && item.x + item.w > reference.x;
+}
+
+const dashboardPanelIds = new Set([
+  DashboardLayout.botComparison,
+  DashboardLayout.dailyChart,
+  DashboardLayout.allOpenTrades,
+  DashboardLayout.cumChartChart,
+]);
+
+function operationalDashboardLayout(layout: GridItemData[]): GridItemData[] {
+  const closedTradesPanel = layout.find((item) => item.i === DashboardLayout.allClosedTrades);
+
+  const visibleLayout = layout.filter((item) => dashboardPanelIds.has(item.i));
+
+  if (!closedTradesPanel) {
+    return visibleLayout;
+  }
+
+  return visibleLayout.map((item) => {
+    const shouldMoveUp =
+      item.y >= closedTradesPanel.y + closedTradesPanel.h && overlapsColumn(item, closedTradesPanel);
+
+    return shouldMoveUp ? { ...item, y: item.y - closedTradesPanel.h } : item;
+  });
+}
+
+const gridLayoutData = computed((): GridItemData[] =>
+  operationalDashboardLayout(rawGridLayoutData.value),
+);
+
 function layoutUpdatedEvent(newLayout) {
   if (isResizableLayout.value) {
-    console.log('newlayout', newLayout);
+    const hiddenItems = rawGridLayoutData.value.filter(
+      (item) => !newLayout.some((visibleItem) => visibleItem.i === item.i),
+    );
+
+    console.log('newlayout', [...newLayout, ...hiddenItems]);
     console.log('saving dashboard');
-    layoutStore.dashboardLayout = newLayout;
+    layoutStore.dashboardLayout = [...newLayout, ...hiddenItems];
   }
 }
 
@@ -48,28 +84,14 @@ const gridLayoutBotComparison = computed((): GridItemData => {
 const gridLayoutAllOpenTrades = computed((): GridItemData => {
   return findGridLayout(gridLayoutData.value, DashboardLayout.allOpenTrades);
 });
-const gridLayoutAllClosedTrades = computed((): GridItemData => {
-  return findGridLayout(gridLayoutData.value, DashboardLayout.allClosedTrades);
-});
 
 const gridLayoutCumChart = computed((): GridItemData => {
   return findGridLayout(gridLayoutData.value, DashboardLayout.cumChartChart);
 });
 
-const gridLayoutWalletHistory = computed((): GridItemData => {
-  return findGridLayout(gridLayoutData.value, DashboardLayout.walletHistoryChart);
-});
-
-const gridLayoutProfitDistribution = computed((): GridItemData => {
-  return findGridLayout(gridLayoutData.value, DashboardLayout.profitDistributionChart);
-});
-const gridLayoutTradesLogChart = computed((): GridItemData => {
-  return findGridLayout(gridLayoutData.value, DashboardLayout.tradesLogChart);
-});
-
 const responsiveGridLayouts = computed(() => {
   return {
-    sm: layoutStore.getDashboardLayoutSm,
+    sm: operationalDashboardLayout(layoutStore.getDashboardLayoutSm),
   };
 });
 
@@ -170,80 +192,6 @@ onMounted(async () => {
             :open-trades="botStore.allOpenTradesSelectedBots"
             :show-title="false"
           />
-        </DraggableContainer>
-      </GridItem>
-      <GridItem
-        v-bind="gridItemProps"
-        :i="gridLayoutWalletHistory.i"
-        :x="gridLayoutWalletHistory.x"
-        :y="gridLayoutWalletHistory.y"
-        :w="gridLayoutWalletHistory.w"
-        :h="gridLayoutWalletHistory.h"
-        :min-w="3"
-        :min-h="4"
-        drag-allow-from=".drag-header"
-      >
-        <DraggableContainer header="Wallet History">
-          <WalletHistoryChart :wallet-data="botStore.allBalanceHistory" :show-title="false" />
-        </DraggableContainer>
-      </GridItem>
-      <GridItem
-        v-bind="gridItemProps"
-        :i="gridLayoutAllClosedTrades.i"
-        :x="gridLayoutAllClosedTrades.x"
-        :y="gridLayoutAllClosedTrades.y"
-        :w="gridLayoutAllClosedTrades.w"
-        :h="gridLayoutAllClosedTrades.h"
-        :min-w="3"
-        :min-h="4"
-        drag-allow-from=".drag-header"
-      >
-        <DraggableContainer>
-          <template #header>
-            <div class="flex justify-content-center">
-              Closed Trades
-              <InfoBox
-                class="ms-2"
-                hint="Closed trades for all selected bots. Click on a trade to go to the trade page for that trade/bot."
-              />
-            </div>
-          </template>
-          <TradeList
-            :active-trades="false"
-            show-filter
-            :trades="botStore.allClosedTradesSelectedBots"
-            multi-bot-view
-          />
-        </DraggableContainer>
-      </GridItem>
-      <GridItem
-        v-bind="gridItemProps"
-        :i="gridLayoutProfitDistribution.i"
-        :x="gridLayoutProfitDistribution.x"
-        :y="gridLayoutProfitDistribution.y"
-        :w="gridLayoutProfitDistribution.w"
-        :h="gridLayoutProfitDistribution.h"
-        :min-w="3"
-        :min-h="4"
-        drag-allow-from=".drag-header"
-      >
-        <DraggableContainer header="Profit Distribution">
-          <ProfitDistributionChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
-        </DraggableContainer>
-      </GridItem>
-      <GridItem
-        v-bind="gridItemProps"
-        :i="gridLayoutTradesLogChart.i"
-        :x="gridLayoutTradesLogChart.x"
-        :y="gridLayoutTradesLogChart.y"
-        :w="gridLayoutTradesLogChart.w"
-        :h="gridLayoutTradesLogChart.h"
-        :min-w="3"
-        :min-h="4"
-        drag-allow-from=".drag-header"
-      >
-        <DraggableContainer header="Trades Log">
-          <TradesLogChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
         </DraggableContainer>
       </GridItem>
     </template>

@@ -224,11 +224,13 @@ watch(
         <template #body="{ data, field, index }">
           <template v-if="field === 'trade_id'">
             {{ data.trade_id }}
-            {{
-              botStore.activeBot.botFeatures.futures && data.trading_mode !== 'spot'
-                ? (data.trade_id ? '| ' : '') + (data.is_short ? 'Short' : 'Long')
-                : ''
-            }}
+            <span
+              v-if="botStore.activeBot.botFeatures.futures && data.trading_mode !== 'spot'"
+              class="ft-trade-table-direction"
+              :class="data.is_short ? 'ft-trade-table-direction-short' : 'ft-trade-table-direction-long'"
+            >
+              {{ `${data.trade_id ? '| ' : ''}${data.is_short ? 'Short' : 'Long'}` }}
+            </span>
           </template>
           <template v-else-if="field === 'pair'">
             {{ `${data.pair}${data.open_order_id || data.has_open_orders ? '*' : ''}` }}
@@ -301,9 +303,10 @@ watch(
               v-if="botStore.activeBot.botFeatures.futures && trade.trading_mode !== 'spot'"
               class="ft-trade-direction-badge"
               :class="trade.is_short ? 'ft-trade-direction-short' : 'ft-trade-direction-long'"
+              :title="trade.is_short ? 'Short position' : 'Long position'"
             >
-              <i-mdi-arrow-down-bold v-if="trade.is_short" />
-              <i-mdi-arrow-up-bold v-else />
+              <i-mdi-trending-down v-if="trade.is_short" />
+              <i-mdi-trending-up v-else />
               {{ trade.is_short ? 'Short' : 'Long' }}
             </span>
             <TradeActionsPopover

@@ -1,111 +1,152 @@
 <script setup lang="ts">
 const botStore = useBotStore();
+
+const botState = computed(() => botStore.activeBot.botState);
+const botProfit = computed(() => botStore.activeBot.profit);
+
+const runStateTone = computed(() => {
+  const state = `${botState.value?.state ?? ''}`.toLowerCase();
+
+  if (state.includes('run')) {
+    return 'profit';
+  }
+
+  if (state.includes('stop')) {
+    return 'warning';
+  }
+
+  return 'neutral';
+});
+
+const runModeTone = computed(() => (botState.value?.dry_run ? 'warning' : 'profit'));
+
+const stakeLabel = computed(() => {
+  const state = botState.value;
+
+  if (!state) {
+    return '';
+  }
+
+  return `${state.max_open_trades}x${state.stake_amount} ${state.stake_currency}`;
+});
+
+const marketLabel = computed(() => {
+  const state = botState.value;
+
+  if (!state) {
+    return '';
+  }
+
+  const marginMode = state.trading_mode !== 'spot' ? state.margin_mode : undefined;
+
+  return [state.trading_mode || 'spot', marginMode].filter(Boolean).join(' ');
+});
 </script>
 
 <template>
-  <div v-if="botStore.activeBot.botState" class="p-4">
-    <p class="mb-4">
-      Running Freqtrade <strong>{{ botStore.activeBot.version }}</strong>
-    </p>
-    <p class="mb-4">
-      Running with
-      <strong>
-        {{ botStore.activeBot.botState.max_open_trades }}x{{
-          botStore.activeBot.botState.stake_amount
-        }}
-        {{ botStore.activeBot.botState.stake_currency }}
-      </strong>
-      on
-      <strong class="text-nowrap"
-        >{{ botStore.activeBot.botState.exchange }}
-        {{ botStore.activeBot.botState.demo_trading ? '(Demo)' : '' }}</strong
-      >
-      in
-      <strong
-        >{{ botStore.activeBot.botState.trading_mode || 'spot' }}
-        {{
-          botStore.activeBot.botState.trading_mode !== 'spot'
-            ? (botStore.activeBot.botState.margin_mode ?? '')
-            : ''
-        }}</strong
-      >
-      markets, with Strategy <strong>{{ botStore.activeBot.botState.strategy }}</strong
-      >.
-    </p>
-    <p v-if="'stoploss_on_exchange' in botStore.activeBot.botState" class="mb-4">
-      Stoploss on exchange is
-      <strong>{{
-        botStore.activeBot.botState.stoploss_on_exchange ? 'enabled' : 'disabled'
-      }}</strong
-      >.
-    </p>
-    <p class="mb-4">
-      Currently <strong>{{ botStore.activeBot.botState.state }}</strong
-      >,
-      <strong>force entry: {{ botStore.activeBot.botState.force_entry_enable }}</strong>
-    </p>
-    <p>
-      <strong>{{ botStore.activeBot.botState.dry_run ? 'Dry-Run' : 'Live' }}</strong>
-    </p>
-    <Divider />
-    <p class="mb-4" v-if="botStore.activeBot.profit">
-      Avg Profit {{ formatPercent(botStore.activeBot.profit.profit_all_ratio_mean) }} (&sum;
-      {{ formatPercent(botStore.activeBot.profit.profit_all_ratio_sum) }}) in
-      {{ botStore.activeBot.profit.trade_count }} Trades, with an average duration of
-      {{ botStore.activeBot.profit.avg_duration }}. Best pair:
-      {{ botStore.activeBot.profit.best_pair }}.
-    </p>
-    <p v-if="botStore.activeBot.profit?.first_trade_timestamp" class="mb-4">
-      <span v-if="botStore.activeBot.profit.bot_start_timestamp" class="block">
-        Bot start date:
+  <div v-if="botState" class="ft-bot-status">
+    <section class="ft-bot-status-hero">
+      <div>
+        <span class="ft-bot-status-eyebrow">Bot status</span>
+        <h2>Freqtrade {{ botStore.activeBot.version }}</h2>
+        <p>{{ botState.strategy }}</p>
+      </div>
+      <div class="ft-bot-status-badges">
+        <span class="ft-status-badge" :class="`ft-status-badge-${runStateTone}`">
+          {{ botState.state }}
+        </span>
+        <span class="ft-status-badge" :class="`ft-status-badge-${runModeTone}`">
+          {{ botState.dry_run ? 'Dry-Run' : 'Live' }}
+        </span>
+      </div>
+    </section>
+
+    <section class="ft-bot-status-grid">
+      <article class="ft-bot-status-item">
+        <span>Stake setup</span>
+        <strong>{{ stakeLabel }}</strong>
+      </article>
+      <article class="ft-bot-status-item">
+        <span>Exchange</span>
+        <strong>{{ botState.exchange }} {{ botState.demo_trading ? '(Demo)' : '' }}</strong>
+      </article>
+      <article class="ft-bot-status-item">
+        <span>Market mode</span>
+        <strong>{{ marketLabel }}</strong>
+      </article>
+      <article class="ft-bot-status-item">
+        <span>Force entry</span>
+        <strong>{{ botState.force_entry_enable ? 'Enabled' : 'Disabled' }}</strong>
+      </article>
+    </section>
+
+    <section class="ft-bot-status-grid ft-bot-status-grid-compact">
+      <article v-if="'stoploss_on_exchange' in botState" class="ft-bot-status-item">
+        <span>Stoploss on exchange</span>
+        <strong>{{ botState.stoploss_on_exchange ? 'Enabled' : 'Disabled' }}</strong>
+      </article>
+      <article v-if="botProfit" class="ft-bot-status-item">
+        <span>Avg profit</span>
+        <strong>{{ formatPercent(botProfit.profit_all_ratio_mean) }}</strong>
+        <small>Total ratio {{ formatPercent(botProfit.profit_all_ratio_sum) }}</small>
+      </article>
+      <article v-if="botProfit" class="ft-bot-status-item">
+        <span>Trades</span>
+        <strong>{{ botProfit.trade_count }}</strong>
+        <small>Avg duration {{ botProfit.avg_duration }}</small>
+      </article>
+      <article v-if="botProfit?.best_pair" class="ft-bot-status-item">
+        <span>Best pair</span>
+        <strong>{{ botProfit.best_pair }}</strong>
+      </article>
+      <article v-if="botProfit?.profit_factor" class="ft-bot-status-item">
+        <span>Profit factor</span>
+        <strong>{{ formatNumber(botProfit.profit_factor, 2) }}</strong>
+      </article>
+      <article v-if="botProfit?.trading_volume" class="ft-bot-status-item">
+        <span>Trading volume</span>
         <strong>
-          <DateTimeTZ :date="botStore.activeBot.profit.bot_start_timestamp" show-timezone />
+          {{
+            formatPriceCurrency(
+              botProfit.trading_volume,
+              botState.stake_currency,
+              botState.stake_currency_decimals ?? 3,
+            )
+          }}
         </strong>
-      </span>
-      <span class="block">
-        First trade opened:
-        <strong>
-          <DateTimeTZ :date="botStore.activeBot.profit.first_trade_timestamp" show-timezone />
-        </strong>
-      </span>
-      <span class="block">
-        Last trade opened:
-        <strong>
-          <DateTimeTZ :date="botStore.activeBot.profit.latest_trade_timestamp" show-timezone />
-        </strong>
-      </span>
-    </p>
-    <p>
-      <span v-if="botStore.activeBot.profit?.profit_factor" class="block">
-        Profit factor:
-        {{ formatNumber(botStore.activeBot.profit?.profit_factor, 2) }}
-      </span>
-      <span v-if="botStore.activeBot.profit?.trading_volume" class="block mb-4">
-        Trading volume:
-        {{
-          formatPriceCurrency(
-            botStore.activeBot.profit.trading_volume,
-            botStore.activeBot.botState.stake_currency,
-            botStore.activeBot.botState.stake_currency_decimals ?? 3,
-          )
-        }}
-      </span>
-    </p>
+      </article>
+    </section>
+
+    <section v-if="botProfit?.first_trade_timestamp" class="ft-bot-status-timeline">
+      <div v-if="botProfit.bot_start_timestamp">
+        <span>Bot start</span>
+        <strong><DateTimeTZ :date="botProfit.bot_start_timestamp" show-timezone /></strong>
+      </div>
+      <div>
+        <span>First trade</span>
+        <strong><DateTimeTZ :date="botProfit.first_trade_timestamp" show-timezone /></strong>
+      </div>
+      <div>
+        <span>Last trade</span>
+        <strong><DateTimeTZ :date="botProfit.latest_trade_timestamp" show-timezone /></strong>
+      </div>
+    </section>
+
     <Panel
       v-if="botStore.activeBot.strategy?.params"
       header="Strategy parameters"
       toggleable
       collapsed
+      class="ft-bot-status-panel"
     >
       <StrategyParameters :strategy="botStore.activeBot.strategy" />
     </Panel>
-    <Divider />
     <BotProfit
-      class="mx-1"
+      class="ft-bot-status-profit"
       v-if="botStore.activeBot.profitAll"
       :profit-all="botStore.activeBot.profitAll"
-      :stake-currency="botStore.activeBot.botState.stake_currency ?? 'USDT'"
-      :stake-currency-decimals="botStore.activeBot.botState.stake_currency_decimals ?? 3"
+      :stake-currency="botState.stake_currency ?? 'USDT'"
+      :stake-currency-decimals="botState.stake_currency_decimals ?? 3"
     />
   </div>
 </template>

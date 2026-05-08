@@ -10,8 +10,8 @@ defineProps<{
 </script>
 
 <template>
-  <div class="text-start grid grid-cols-[repeat(auto-fit,minmax(500px,1fr))] gap-4 px-2">
-    <div class="">
+  <div class="ft-trade-detail-grid text-start">
+    <section class="ft-trade-detail-panel">
       <h5 class="detail-header">General</h5>
       <ValuePair description="Trade Id">{{ trade.trade_id }}</ValuePair>
       <ValuePair description="Pair">{{ trade.pair }}</ValuePair>
@@ -82,8 +82,8 @@ defineProps<{
           }})
         </ValuePair>
       </details>
-    </div>
-    <div class="mt-2 lg:mt-0">
+    </section>
+    <section class="ft-trade-detail-panel">
       <h5 class="detail-header">Stoploss</h5>
       <ValuePair description="Stoploss">
         {{ formatPercent(trade.stop_loss_ratio) }} |
@@ -131,45 +131,81 @@ defineProps<{
       </div>
       <details v-if="trade.orders">
         <summary>Orders {{ trade.orders.length > 1 ? `[${trade.orders.length}]` : '' }}</summary>
-        <div
-          v-for="(order, key) in trade.orders"
-          :key="key"
-          class="flex items-center gap-1 2"
-          :title="`${order.ft_order_side} ${order.order_type} order for ${formatPriceCurrency(
-            order.amount,
-            trade.base_currency ?? '',
-          )} at ${formatPriceCurrency(
-            order.safe_price,
-            trade.quote_currency ?? '',
-          )}, filled ${formatPrice(order.filled)}`"
-        >
-          (#{{ key + 1 }})
-          <i-mdi-triangle
-            v-if="order.ft_order_side === 'buy'"
-            class="me-1 color-up"
-            style="font-size: 0.6rem"
-          />
-          <i-mdi-triangle-down v-else class="me-1 color-down" style="font-size: 0.6rem" />
-          <DateTimeTZ v-if="order.order_timestamp" :date="order.order_timestamp" show-timezone />
-          <b class="ms-1" :class="order.ft_order_side === 'buy' ? 'color-up' : 'color-down'">{{
-            order.ft_order_side
-          }}</b>
-          for <b>{{ formatPrice(order.safe_price) }}</b> |
-          <span v-if="order.remaining && order.remaining !== 0" title="remaining"
-            >{{ formatPrice(order.remaining, 8) }} /
-          </span>
-          <span title="Filled">{{ formatPrice(order.filled ?? 0, 8) }}</span>
-          <template v-if="order.ft_order_tag"> | {{ order.ft_order_tag ?? '' }}</template>
+        <div class="ft-order-list">
+          <article
+            v-for="(order, key) in trade.orders"
+            :key="key"
+            class="ft-order-card"
+            :title="`${order.ft_order_side} ${order.order_type} order for ${formatPriceCurrency(
+              order.amount,
+              trade.base_currency ?? '',
+            )} at ${formatPriceCurrency(
+              order.safe_price,
+              trade.quote_currency ?? '',
+            )}, filled ${formatPrice(order.filled)}`"
+          >
+            <header>
+              <span class="ft-order-index">#{{ key + 1 }}</span>
+              <span
+                class="ft-order-side"
+                :class="order.ft_order_side === 'buy' ? 'color-up' : 'color-down'"
+              >
+                <i-mdi-triangle v-if="order.ft_order_side === 'buy'" />
+                <i-mdi-triangle-down v-else />
+                {{ order.ft_order_side }}
+              </span>
+            </header>
+            <div class="ft-order-meta">
+              <span v-if="order.order_timestamp">
+                <DateTimeTZ :date="order.order_timestamp" show-timezone />
+              </span>
+              <span v-if="order.ft_order_tag">{{ order.ft_order_tag }}</span>
+            </div>
+            <div class="ft-order-grid">
+              <span>Rate</span>
+              <b>{{ formatPrice(order.safe_price) }}</b>
+              <span>Filled</span>
+              <b>{{ formatPrice(order.filled ?? 0, 8) }}</b>
+              <template v-if="order.remaining && order.remaining !== 0">
+                <span>Remaining</span>
+                <b>{{ formatPrice(order.remaining, 8) }}</b>
+              </template>
+            </div>
+          </article>
         </div>
       </details>
-    </div>
+    </section>
   </div>
 </template>
 <style scoped>
 @reference '../../styles/tailwind.css';
 
+.ft-trade-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr));
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.ft-trade-detail-panel {
+  min-width: 0;
+  padding: 0.95rem;
+  border: 1px solid var(--ft-panel-border);
+  border-radius: var(--ft-card-radius);
+  background: rgba(15, 23, 42, 0.78);
+  box-shadow: var(--ft-shadow-soft);
+}
+
 .detail-header {
-  @apply text-xl font-semibold border-b pb-1 w-full block mb-1;
+  @apply w-full block;
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ft-panel-border);
+  color: var(--p-primary-color);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 .color-up {
   color: v-bind('colorStore.colorUp');
@@ -177,5 +213,166 @@ defineProps<{
 
 .color-down {
   color: v-bind('colorStore.colorDown');
+}
+
+:deep(.flex.w-full) {
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.34rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+:deep(.flex.w-full:last-child) {
+  border-bottom: 0;
+}
+
+:deep(label) {
+  color: var(--ft-text-muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+:deep([class~='w-8/12']),
+:deep([class~='w-4/12']) {
+  min-width: 0;
+}
+
+:deep([class~='w-8/12']) {
+  color: var(--ft-text);
+  font-family: var(--ft-font-mono);
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+details {
+  margin-top: 0.65rem;
+}
+
+summary {
+  cursor: pointer;
+  color: var(--p-primary-color);
+  font-weight: 900;
+}
+
+.ft-order-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.65rem;
+}
+
+.ft-order-card {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 0.7fr) minmax(12rem, 1.25fr) minmax(10rem, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 0.45rem;
+  background: rgba(5, 8, 20, 0.38);
+}
+
+.ft-order-card header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 0;
+}
+
+.ft-order-index {
+  color: var(--ft-text-muted);
+  font-family: var(--ft-font-mono);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.ft-order-side {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid currentColor;
+  border-radius: 0.35rem;
+  background: rgba(15, 23, 42, 0.68);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.ft-order-side svg {
+  width: 0.82rem;
+  height: 0.82rem;
+}
+
+.ft-order-meta {
+  display: grid;
+  gap: 0.2rem;
+  margin-bottom: 0;
+  color: var(--ft-text-muted);
+  font-size: 0.76rem;
+  overflow-wrap: anywhere;
+}
+
+.ft-order-grid {
+  display: grid;
+  grid-template-columns: minmax(4rem, 0.7fr) minmax(0, 1fr);
+  gap: 0.26rem 0.75rem;
+}
+
+.ft-order-grid span {
+  color: var(--ft-text-muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.ft-order-grid b {
+  color: var(--ft-text);
+  font-family: var(--ft-font-mono);
+  font-weight: 900;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .ft-trade-detail-panel {
+    padding: 0.8rem;
+  }
+
+  :deep(.flex.w-full) {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+
+  :deep([class~='w-4/12']),
+  :deep([class~='w-8/12']) {
+    width: 100%;
+  }
+
+  .ft-order-card {
+    display: block;
+    padding: 0.65rem;
+  }
+
+  .ft-order-card header {
+    justify-content: space-between;
+    margin-bottom: 0.45rem;
+  }
+
+  .ft-order-meta {
+    margin-bottom: 0.5rem;
+  }
+
+  .ft-order-grid {
+    grid-template-columns: 1fr;
+    gap: 0.16rem;
+  }
+
+  .ft-order-grid b {
+    text-align: left;
+  }
 }
 </style>

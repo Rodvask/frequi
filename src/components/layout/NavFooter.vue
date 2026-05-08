@@ -14,6 +14,21 @@ const botStore = useBotStore();
         size="small"
         as="router-link"
         class="ft-mobile-nav-action align-items-center"
+        to="/dashboard"
+        label="Dashboard"
+        aria-label="Dashboard"
+      >
+        <template #icon>
+          <i-mdi-view-dashboard-outline height="24" width="24" />
+        </template>
+      </Button>
+      <Button
+        v-if="!botStore.canRunBacktest"
+        icon-pos="top"
+        variant="link"
+        size="small"
+        as="router-link"
+        class="ft-mobile-nav-action align-items-center"
         to="/open_trades"
         label="Trades"
         aria-label="Open trades"
@@ -44,6 +59,21 @@ const botStore = useBotStore();
         size="small"
         as="router-link"
         class="ft-mobile-nav-action align-items-center"
+        to="/analytics"
+        label="Analytics"
+        aria-label="Analytics"
+      >
+        <template #icon>
+          <i-mdi-view-dashboard-edit-outline height="24" width="24" />
+        </template>
+      </Button>
+      <Button
+        v-if="!botStore.canRunBacktest"
+        icon-pos="top"
+        variant="link"
+        size="small"
+        as="router-link"
+        class="ft-mobile-nav-action align-items-center"
         to="/pairlist"
         label="Pairlist"
         aria-label="Pairlist"
@@ -65,36 +95,6 @@ const botStore = useBotStore();
       >
         <template #icon>
           <i-mdi-bank height="24" width="24" />
-        </template>
-      </Button>
-      <Button
-        v-if="!botStore.canRunBacktest"
-        icon-pos="top"
-        variant="link"
-        size="small"
-        as="router-link"
-        class="ft-mobile-nav-action align-items-center"
-        to="/dashboard"
-        label="Dashboard"
-        aria-label="Dashboard"
-      >
-        <template #icon>
-          <i-mdi-view-dashboard-outline height="24" width="24" />
-        </template>
-      </Button>
-      <Button
-        v-if="!botStore.canRunBacktest"
-        icon-pos="top"
-        variant="link"
-        size="small"
-        as="router-link"
-        class="ft-mobile-nav-action align-items-center"
-        to="/advanced-dashboard"
-        label="Advanced"
-        aria-label="Advanced dashboard"
-      >
-        <template #icon>
-          <i-mdi-view-dashboard-edit-outline height="24" width="24" />
         </template>
       </Button>
     </nav>

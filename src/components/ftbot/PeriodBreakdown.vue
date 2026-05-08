@@ -109,6 +109,7 @@ onMounted(() => {
     </div>
 
     <div
+      class="ft-period-chart-wrap"
       v-if="
         !props.multiBotView ||
         botStore.selectedBotCount <= 1 ||
