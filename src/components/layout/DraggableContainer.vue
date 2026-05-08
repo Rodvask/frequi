@@ -13,17 +13,13 @@ withDefaults(
 </script>
 
 <template>
-  <div
-    class="flex flex-col h-full w-full border dark:border-surface-800 border-surface-200 rounded-sm"
-  >
-    <div
-      class="drag-header py-1 px-2 dark:bg-surface-800 bg-surface-100 border-b border-surface-300 dark:border-surface-700"
-    >
+  <div class="ft-dashboard-card flex flex-col h-full w-full">
+    <div class="ft-dashboard-card-header drag-header flex items-center py-1 px-3">
       <slot name="header">
         {{ header }}
       </slot>
     </div>
-    <div class="p-0 h-full w-full overflow-auto" v-bind="$attrs">
+    <div class="ft-dashboard-card-body p-0 h-full w-full overflow-auto" v-bind="$attrs">
       <slot></slot>
     </div>
   </div>

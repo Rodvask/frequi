@@ -1,5 +1,5 @@
 <template>
-  <main class="dark:bg-[#010101]">
+  <main class="ft-page-surface">
     <RouterView />
   </main>
 </template>

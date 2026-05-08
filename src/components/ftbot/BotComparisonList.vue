@@ -97,7 +97,7 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
 </script>
 
 <template>
-  <DataTable size="small" :value="tableItems">
+  <DataTable class="ft-metric-table" size="small" :value="tableItems">
     <Column field="botName">
       <template #header>
         <div class="flex justify-between flex-row w-full">

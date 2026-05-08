@@ -16,6 +16,11 @@ const isResizableLayout = computed(() =>
 const isLayoutLocked = computed(() => {
   return layoutStore.layoutLocked || !isResizableLayout.value;
 });
+const isCompactLayout = computed(() => ['xs', 'xxs'].includes(currentBreakpoint.value));
+const dashboardMargin = computed<[number, number]>(() =>
+  isCompactLayout.value ? [8, 10] : [12, 12],
+);
+const dashboardRowHeight = computed(() => (isCompactLayout.value ? 46 : 54));
 
 const gridLayoutData = computed((): GridItemData[] => {
   if (isResizableLayout.value) {
@@ -78,12 +83,11 @@ onMounted(async () => {
 
 <template>
   <GridLayout
-    class="h-full w-full"
-    style="padding: 1px"
-    :row-height="50"
+    class="ft-dashboard-grid h-full w-full"
+    :row-height="dashboardRowHeight"
     :layout="gridLayoutData"
     :vertical-compact="false"
-    :margin="[2, 2]"
+    :margin="dashboardMargin"
     :responsive-layouts="responsiveGridLayouts"
     :is-resizable="!isLayoutLocked"
     :is-draggable="!isLayoutLocked"

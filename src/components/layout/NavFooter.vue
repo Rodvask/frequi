@@ -3,7 +3,7 @@ const botStore = useBotStore();
 </script>
 
 <template>
-  <footer class="md:hidden">
+  <footer class="ft-navbar md:hidden">
     <!-- Only visible on xs (phone) viewport! -->
     <hr class="my-0" />
     <div class="flex gap-2 justify-between px-2">

@@ -15,7 +15,7 @@ watch(
 </script>
 
 <template>
-  <div id="app" class="flex flex-col h-dvh" :style="colorStore.cssVars">
+  <div id="app" class="ft-app-shell flex flex-col h-dvh" :style="colorStore.cssVars">
     <NavBar />
     <Toast />
     <BodyLayout class="grow overflow-auto" />

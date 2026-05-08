@@ -194,7 +194,7 @@ const drawerVisible = ref(false);
 
 <template>
   <header>
-    <div class="flex bg-primary-500 border-b border-primary">
+    <div class="ft-navbar flex border-b">
       <RouterLink class="ms-2 flex flex-row items-center pe-2 gap-2" exact to="/">
         <img class="h-[30px] align-middle" src="@/assets/freqtrade-logo.png" alt="Home Logo" />
         <span class="text-slate-200 text-xl md:hidden lg:inline text-nowrap">Freqtrade UI</span>
@@ -207,8 +207,8 @@ const drawerVisible = ref(false);
             )"
             :key="index"
             :to="item.to"
-            class="text-surface-200 flex items-center gap-2"
-            active-class="underline"
+            class="text-surface-200 hover:text-primary-200 flex items-center gap-2 px-1 py-3 transition-colors"
+            active-class="text-primary-100 font-semibold"
           >
             {{ item.label }}
           </RouterLink>
@@ -315,7 +315,7 @@ const drawerVisible = ref(false);
             v-model:visible="drawerVisible"
             header="Drawer"
             position="right"
-            class="bg-primary-500"
+            class="ft-navbar"
           >
             <template #container>
               <div class="flex flex-row items-center">
@@ -335,8 +335,8 @@ const drawerVisible = ref(false);
                   v-for="(item, index) in navItems.filter((item) => item.visible ?? true)"
                   :key="index"
                   :to="item.to"
-                  class="text-surface-200 p-2"
-                  active-class="underline"
+                  class="text-surface-200 hover:text-primary-200 p-2"
+                  active-class="text-primary-100 font-semibold"
                 >
                   {{ item.label }}
                 </RouterLink>

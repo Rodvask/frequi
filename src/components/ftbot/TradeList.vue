@@ -202,7 +202,7 @@ watch(
       :paginator="!activeTrades"
       :first="(currentPage - 1) * perPage"
       selection-mode="single"
-      class="text-center"
+      class="ft-trading-table text-center"
       size="small"
       :scrollable="true"
       scroll-height="flex"

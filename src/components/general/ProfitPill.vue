@@ -31,7 +31,7 @@ const profitString = computed((): string => {
 
 <template>
   <div
-    class="flex justify-between items-center ps-2 pe-1 rounded-sm border-2 border-solid"
+    class="ft-profit-pill flex justify-between items-center ps-2 pe-2 rounded-sm border border-solid"
     :class="{
       'profit-pill-profit': isProfitable === true,
       'profit-pill': isProfitable === false,
