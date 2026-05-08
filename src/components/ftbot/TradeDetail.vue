@@ -192,7 +192,7 @@ defineProps<{
   padding: 0.95rem;
   border: 1px solid var(--ft-panel-border);
   border-radius: var(--ft-card-radius);
-  background: rgba(15, 23, 42, 0.78);
+  background: rgba(5, 8, 20, 0.56);
   box-shadow: var(--ft-shadow-soft);
 }
 
@@ -240,7 +240,8 @@ defineProps<{
 
 :deep([class~='w-8/12']) {
   color: var(--ft-text);
-  font-family: var(--ft-font-mono);
+  font-family: var(--ft-font-sans);
+  font-variant-numeric: tabular-nums;
   font-weight: 850;
   overflow-wrap: anywhere;
 }
@@ -263,11 +264,11 @@ summary {
 
 .ft-order-card {
   display: grid;
-  grid-template-columns: minmax(6.5rem, 0.7fr) minmax(12rem, 1.25fr) minmax(10rem, 1fr);
+  grid-template-columns: minmax(6rem, 0.55fr) minmax(12rem, 1.25fr) minmax(12rem, 1fr);
   align-items: center;
   gap: 0.75rem;
   min-width: 0;
-  padding: 0.6rem 0.7rem;
+  padding: 0.72rem 0.8rem;
   border: 1px solid rgba(148, 163, 184, 0.14);
   border-radius: 0.45rem;
   background: rgba(5, 8, 20, 0.38);
@@ -283,7 +284,8 @@ summary {
 
 .ft-order-index {
   color: var(--ft-text-muted);
-  font-family: var(--ft-font-mono);
+  font-family: var(--ft-font-sans);
+  font-variant-numeric: tabular-nums;
   font-size: 0.78rem;
   font-weight: 900;
 }
@@ -311,14 +313,15 @@ summary {
   gap: 0.2rem;
   margin-bottom: 0;
   color: var(--ft-text-muted);
-  font-size: 0.76rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
   overflow-wrap: anywhere;
 }
 
 .ft-order-grid {
   display: grid;
-  grid-template-columns: minmax(4rem, 0.7fr) minmax(0, 1fr);
-  gap: 0.26rem 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem;
 }
 
 .ft-order-grid span {
@@ -329,10 +332,14 @@ summary {
 }
 
 .ft-order-grid b {
+  display: block;
+  margin-top: 0.12rem;
   color: var(--ft-text);
-  font-family: var(--ft-font-mono);
+  font-family: var(--ft-font-sans);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
   font-weight: 900;
-  text-align: right;
+  text-align: left;
   overflow-wrap: anywhere;
 }
 
@@ -353,22 +360,26 @@ summary {
   }
 
   .ft-order-card {
-    display: block;
-    padding: 0.65rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.55rem 0.75rem;
+    padding: 0.7rem;
   }
 
   .ft-order-card header {
+    grid-column: 1 / -1;
     justify-content: space-between;
-    margin-bottom: 0.45rem;
+    margin-bottom: 0;
   }
 
   .ft-order-meta {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
   }
 
   .ft-order-grid {
-    grid-template-columns: 1fr;
-    gap: 0.16rem;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
   }
 
   .ft-order-grid b {

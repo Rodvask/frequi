@@ -17,6 +17,8 @@
     "test:e2e-firefox": "playwright test --project=firefox"
   },
   "dependencies": {
+    "@fontsource-variable/arimo": "^5.2.8",
+    "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@noction/vue-draggable-grid": "1.9.16",
     "@primeuix/themes": "^2.0.3",
     "@vuepic/vue-datepicker": "^12.1.0",

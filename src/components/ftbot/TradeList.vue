@@ -251,7 +251,9 @@ watch(
           </template>
           <template v-else-if="field === 'stake_amount' || field === 'max_stake_amount'">
             {{ formatPriceWithDecimals(data[field]) }}
-            {{ data.trading_mode !== 'spot' ? `(${data.leverage}x)` : '' }}
+            <span v-if="data.trading_mode !== 'spot'" class="ft-leverage-chip">
+              {{ data.leverage }}X
+            </span>
           </template>
           <template
             v-else-if="field === 'open_rate' || field === 'current_rate' || field === 'close_rate'"
@@ -334,7 +336,9 @@ watch(
           <span>{{ activeTrades ? 'Stake' : 'Total stake' }}</span>
           <b>
             {{ formatPriceWithDecimals(activeTrades ? trade.stake_amount : trade.max_stake_amount) }}
-            {{ trade.trading_mode !== 'spot' ? `(${trade.leverage}x)` : '' }}
+            <span v-if="trade.trading_mode !== 'spot'" class="ft-leverage-chip">
+              {{ trade.leverage }}X
+            </span>
           </b>
           <span>Open rate</span>
           <b>{{ formatPrice(trade.open_rate) }}</b>

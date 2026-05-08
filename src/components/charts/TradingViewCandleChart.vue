@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PairHistory, PlotConfig, Trade } from '@/types';
 import { ChartType } from '@/types';
+import { heikinAshiDataset } from '@/utils/charts/heikinAshiDataset';
 
 import {
   CandlestickSeries,
@@ -17,6 +18,7 @@ import {
   type ISeriesMarkersPluginApi,
   type LineData,
   type SeriesMarker,
+  type SingleValueData,
   type Time,
   type UTCTimestamp,
 } from 'lightweight-charts';
@@ -25,6 +27,7 @@ const props = defineProps<{
   trades: Trade[];
   dataset: PairHistory;
   plotConfig: PlotConfig;
+  heikinAshi: boolean;
   colorUp: string;
   colorDown: string;
   startCandleCount: number;
@@ -47,21 +50,35 @@ function columnIndex(name: string) {
   return props.dataset.columns.findIndex((column) => column === name);
 }
 
+function rowValue(row: number[], column: number): number | null {
+  const value = Number(row[column]);
+  return Number.isFinite(value) ? value : null;
+}
+
+function hasSignalValue(row: number[], column: number): boolean {
+  const value = rowValue(row, column);
+  return value !== null && Math.abs(value) > Number.EPSILON;
+}
+
 function asTime(timestamp?: number | null): UTCTimestamp | null {
   if (!timestamp) return null;
   return Math.floor(timestamp / 1000) as UTCTimestamp;
 }
 
 function buildCandleData(): CandlestickData<Time>[] {
-  const colDate = columnIndex('__date_ts');
-  const colOpen = columnIndex('open');
-  const colHigh = columnIndex('high');
-  const colLow = columnIndex('low');
-  const colClose = columnIndex('close');
+  const columns = props.dataset.columns.slice();
+  const source = props.heikinAshi
+    ? heikinAshiDataset(columns, props.dataset.data)
+    : props.dataset.data;
+  const colDate = columns.findIndex((column) => column === '__date_ts');
+  const colOpen = columns.findIndex((column) => column === 'open');
+  const colHigh = columns.findIndex((column) => column === 'high');
+  const colLow = columns.findIndex((column) => column === 'low');
+  const colClose = columns.findIndex((column) => column === 'close');
 
   if ([colDate, colOpen, colHigh, colLow, colClose].some((index) => index < 0)) return [];
 
-  return props.dataset.data
+  return source
     .map((row) => ({
       time: asTime(row[colDate]) as UTCTimestamp,
       open: Number(row[colOpen]),
@@ -99,18 +116,101 @@ function buildVolumeData(): HistogramData<Time>[] {
     .filter((bar) => bar.time && Number.isFinite(bar.value));
 }
 
-function buildIndicatorData(columnName: string): LineData<Time>[] {
+function buildSeriesData(columnName: string): SingleValueData<Time>[] {
   const colDate = columnIndex('__date_ts');
   const colValue = columnIndex(columnName);
 
   if (colDate < 0 || colValue < 0) return [];
 
   return props.dataset.data
-    .map((row) => ({
-      time: asTime(row[colDate]) as UTCTimestamp,
-      value: Number(row[colValue]),
-    }))
+    .map((row) => {
+      const value = rowValue(row, colValue);
+      return {
+        time: asTime(row[colDate]) as UTCTimestamp,
+        value: value ?? Number.NaN,
+      };
+    })
     .filter((point) => point.time && Number.isFinite(point.value));
+}
+
+function buildSignalMarkers(): SeriesMarker<Time>[] {
+  const colDate = columnIndex('__date_ts');
+  const colEnterTag = columnIndex('enter_tag');
+  const colExitTag = columnIndex('exit_tag');
+  const signalColumns = [
+    {
+      column: '_buy_signal_close',
+      label: 'Long entry',
+      position: 'belowBar' as const,
+      shape: 'arrowUp' as const,
+      color: props.colorUp,
+      tagColumn: colEnterTag,
+    },
+    {
+      column: '_enter_long_signal_close',
+      label: 'Long entry',
+      position: 'belowBar' as const,
+      shape: 'arrowUp' as const,
+      color: props.colorUp,
+      tagColumn: colEnterTag,
+    },
+    {
+      column: '_sell_signal_close',
+      label: 'Long exit',
+      position: 'aboveBar' as const,
+      shape: 'circle' as const,
+      color: amber,
+      tagColumn: colExitTag,
+    },
+    {
+      column: '_exit_long_signal_close',
+      label: 'Long exit',
+      position: 'aboveBar' as const,
+      shape: 'circle' as const,
+      color: amber,
+      tagColumn: colExitTag,
+    },
+    {
+      column: '_enter_short_signal_close',
+      label: 'Short entry',
+      position: 'aboveBar' as const,
+      shape: 'arrowDown' as const,
+      color: props.colorDown,
+      tagColumn: colEnterTag,
+    },
+    {
+      column: '_exit_short_signal_close',
+      label: 'Short exit',
+      position: 'belowBar' as const,
+      shape: 'circle' as const,
+      color: amber,
+      tagColumn: colExitTag,
+    },
+  ];
+
+  if (colDate < 0) return [];
+
+  return signalColumns.flatMap((signal) => {
+    const signalColumn = columnIndex(signal.column);
+    if (signalColumn < 0) return [];
+
+    return props.dataset.data
+      .filter((row) => hasSignalValue(row, signalColumn))
+      .map((row) => {
+        const tag =
+          signal.tagColumn >= 0 && row[signal.tagColumn]
+            ? String(row[signal.tagColumn]).slice(0, 38)
+            : '';
+        return {
+          time: asTime(row[colDate]) as UTCTimestamp,
+          position: signal.position,
+          color: signal.color,
+          shape: signal.shape,
+          text: tag ? `${signal.label}: ${tag}` : signal.label,
+        };
+      })
+      .filter((marker) => marker.time);
+  });
 }
 
 function buildTradeMarkers(): SeriesMarker<Time>[] {
@@ -140,7 +240,51 @@ function buildTradeMarkers(): SeriesMarker<Time>[] {
     }
   });
 
-  return markers.sort((left, right) => Number(left.time) - Number(right.time));
+  return [...buildSignalMarkers(), ...markers].sort((left, right) => Number(left.time) - Number(right.time));
+}
+
+function addIndicatorSeries(
+  key: string,
+  config = {},
+  paneIndex = 0,
+) {
+  if (!chart) return;
+
+  const typedConfig = config as { color?: string; type?: ChartType | keyof typeof ChartType };
+  const data = buildSeriesData(key);
+  if (!data.length) return;
+
+  if (typedConfig.type === ChartType.bar || typedConfig.type === 'bar') {
+    const barSeries = chart.addSeries(
+      HistogramSeries,
+      {
+        color: typedConfig.color || 'rgba(246, 178, 26, 0.48)',
+        priceLineVisible: false,
+        lastValueVisible: false,
+        title: key,
+      },
+      paneIndex,
+    );
+    barSeries.setData(data as HistogramData<Time>[]);
+    return;
+  }
+
+  const isScatter = typedConfig.type === ChartType.scatter || typedConfig.type === 'scatter';
+  const lineSeries = chart.addSeries(
+    LineSeries,
+    {
+      color: typedConfig.color || amber,
+      lineVisible: !isScatter,
+      lineWidth: 2,
+      pointMarkersVisible: isScatter,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      title: key,
+    },
+    paneIndex,
+  );
+
+  lineSeries.setData(data as LineData<Time>[]);
 }
 
 function destroyChart() {
@@ -164,7 +308,7 @@ function createTradingChart() {
       attributionLogo: true,
       background: { type: ColorType.Solid, color: 'transparent' },
       fontFamily:
-        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        '"Arimo Variable", "Helvetica Neue", Helvetica, Arial, "Nimbus Sans", "Segoe UI", ui-sans-serif, system-ui, sans-serif',
       textColor: text,
     },
     grid: {
@@ -233,21 +377,17 @@ function createTradingChart() {
   });
 
   Object.entries(props.plotConfig.main_plot).forEach(([key, config]) => {
-    if (config.type && config.type !== ChartType.line) return;
-
-    const indicatorData = buildIndicatorData(key);
-    if (!indicatorData.length) return;
-
-    const indicatorSeries = chart?.addSeries(LineSeries, {
-      color: config.color || amber,
-      lineWidth: 2,
-      priceLineVisible: false,
-      lastValueVisible: false,
-      title: key,
-    });
-
-    indicatorSeries?.setData(indicatorData);
+    addIndicatorSeries(key, config, 0);
   });
+
+  Object.entries(props.plotConfig.subplots ?? {}).forEach(([, subplot], index) => {
+    const paneIndex = index + 1;
+    Object.entries(subplot).forEach(([key, config]) => {
+      addIndicatorSeries(key, config, paneIndex);
+    });
+    chart?.panes()[paneIndex]?.setStretchFactor(0.34);
+  });
+  chart.panes()[0]?.setStretchFactor(1);
 
   const startIndex = Math.max(buildCandleData().length - props.startCandleCount, 0);
   if (startIndex > 0) {
@@ -286,7 +426,15 @@ onBeforeUnmount(() => {
 });
 
 watch(
-  () => [props.dataset, props.trades, props.plotConfig, props.colorUp, props.colorDown, props.startCandleCount],
+  () => [
+    props.dataset,
+    props.trades,
+    props.plotConfig,
+    props.heikinAshi,
+    props.colorUp,
+    props.colorDown,
+    props.startCandleCount,
+  ],
   () => nextTick(createTradingChart),
   { deep: true },
 );

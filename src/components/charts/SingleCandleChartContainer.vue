@@ -72,11 +72,6 @@ const noDatasetText = computed((): string => {
       return 'Unknown';
   }
 });
-const useTradingViewChart = computed(() => {
-  const hasSubplots = Object.keys(plotStore.plotConfig.subplots ?? {}).length > 0;
-  return !hasSubplots && !settingsStore.showMarkArea && !settingsStore.useHeikinAshiCandles;
-});
-
 function refresh() {
   emit('refreshData', props.pair, plotStore.usedColumns);
 }
@@ -167,28 +162,14 @@ watch(
     <div class="h-full flex">
       <div class="min-w-0 w-full flex-1">
         <TradingViewCandleChart
-          v-if="hasDataset && useTradingViewChart"
-          :dataset="dataset"
-          :trades="trades"
-          :plot-config="plotStore.plotConfig"
-          :color-up="colorStore.colorUp"
-          :color-down="colorStore.colorDown"
-          :start-candle-count="settingsStore.chartDefaultCandleCount"
-        />
-        <CandleChart
-          v-else-if="hasDataset"
+          v-if="hasDataset"
           :dataset="dataset"
           :trades="trades"
           :plot-config="plotStore.plotConfig"
           :heikin-ashi="settingsStore.useHeikinAshiCandles"
-          :show-mark-area="settingsStore.showMarkArea"
-          :use-u-t-c="settingsStore.timezone === 'UTC'"
-          :theme="settingsStore.chartTheme"
-          :slider-position="sliderPosition"
           :color-up="colorStore.colorUp"
           :color-down="colorStore.colorDown"
           :start-candle-count="settingsStore.chartDefaultCandleCount"
-          :label-side="settingsStore.chartLabelSide"
         />
         <div v-else class="m-auto">
           <ProgressSpinner v-if="isLoadingDataset" class="w-5 h-5" label="Spinning" />

@@ -30,11 +30,11 @@ const DEFAULT_TRADING_LAYOUT: GridItemData[] = [
 
 // Currently only multiPane is visible
 const DEFAULT_TRADING_LAYOUT_SM: GridItemData[] = [
-  { i: TradeLayout.multiPane, x: 0, y: 0, w: 12, h: 16 },
-  { i: TradeLayout.chartView, x: 0, y: 16, w: 12, h: 0 },
-  { i: TradeLayout.tradeDetail, x: 0, y: 19, w: 12, h: 0 },
-  { i: TradeLayout.openTrades, x: 0, y: 8, w: 12, h: 0 },
-  { i: TradeLayout.tradeHistory, x: 0, y: 25, w: 12, h: 0 },
+  { i: TradeLayout.multiPane, x: 0, y: 0, w: 12, h: 9 },
+  { i: TradeLayout.chartView, x: 0, y: 9, w: 12, h: 9 },
+  { i: TradeLayout.tradeDetail, x: 0, y: 18, w: 12, h: 0 },
+  { i: TradeLayout.openTrades, x: 0, y: 18, w: 12, h: 0 },
+  { i: TradeLayout.tradeHistory, x: 0, y: 18, w: 12, h: 0 },
 ];
 
 const DEFAULT_DASHBOARD_LAYOUT: GridItemData[] = [

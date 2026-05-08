@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/arimo';
+@import '@fontsource-variable/jetbrains-mono';
 
 @plugin 'tailwindcss-primeui';
 
@@ -64,9 +66,11 @@
     --ft-card-padding: 0.75rem;
     --ft-grid-gap: 0.75rem;
     --ft-font-sans:
-      Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      'Arimo Variable', 'Helvetica Neue', Helvetica, Arial, 'Nimbus Sans', 'Segoe UI Variable Text',
+      'Segoe UI', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     --ft-font-mono:
-      'SFMono-Regular', 'Roboto Mono', 'Cascadia Code', Consolas, ui-monospace, monospace;
+      'JetBrains Mono Variable', 'JetBrains Mono', 'Cascadia Mono', 'SFMono-Regular',
+      'Roboto Mono', Consolas, ui-monospace, monospace;
 
     --p-tabs-tabpanel-padding: unset;
 
@@ -137,10 +141,24 @@
     font-family: var(--ft-font-sans);
     background: var(--ft-bg);
     color: var(--ft-text);
-    font-weight: 500;
+    font-weight: 560;
     line-height: 1.5;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+    font-feature-settings:
+      'cv02' 1,
+      'cv03' 1,
+      'cv04' 1,
+      'cv11' 1;
+    font-variation-settings: 'opsz' 14;
+  }
+
+  button,
+  input,
+  textarea,
+  select,
+  .p-component {
+    font-family: var(--ft-font-sans);
   }
 
   .ft-dark-theme,
@@ -732,7 +750,7 @@
     min-width: 0;
     overflow: hidden;
     color: var(--ft-text);
-    font-weight: 550;
+    font-weight: 620;
     background: rgba(8, 13, 26, 0.96);
     border: 1px solid var(--ft-panel-border);
     border-radius: var(--ft-card-radius);
@@ -846,8 +864,8 @@
   .ft-trading-table .p-datatable-table,
   .ft-metric-table .p-datatable-table {
     min-width: max-content;
-    font-size: 0.84rem;
-    font-weight: 600;
+    font-size: 0.88rem;
+    font-weight: 650;
   }
 
   .ft-trading-table .p-datatable,
@@ -874,7 +892,7 @@
   .ft-trading-table .p-datatable-tbody > tr > td,
   .ft-metric-table .p-datatable-tbody > tr > td {
     font-variant-numeric: tabular-nums;
-    font-weight: 600;
+    font-weight: 650;
   }
 
   .ft-trading-table .p-datatable-tbody > tr,
@@ -992,6 +1010,47 @@
     background: rgba(3, 10, 22, 0.18);
   }
 
+  .ft-bot-comparison-balance {
+    box-shadow: none;
+    text-align: center;
+  }
+
+  .ft-bot-comparison-balance .ft-bot-balance-value {
+    display: block;
+    margin: 0.24rem 0 0.08rem;
+    color: #e5edf9;
+    font-size: 0.94rem;
+    font-weight: 850;
+    line-height: 1.1;
+  }
+
+  .ft-bot-comparison-balance-profit {
+    border-color: rgba(148, 163, 184, 0.1) !important;
+    background: rgba(3, 10, 22, 0.18) !important;
+  }
+
+  .ft-bot-comparison-balance-profit .ft-bot-balance-value {
+    color: var(--color-profit);
+  }
+
+  .ft-bot-comparison-balance-loss {
+    border-color: rgba(148, 163, 184, 0.1) !important;
+    background: rgba(3, 10, 22, 0.18) !important;
+  }
+
+  .ft-bot-comparison-balance-loss .ft-bot-balance-value {
+    color: var(--color-loss);
+  }
+
+  .ft-bot-comparison-balance .ft-bot-balance-currency {
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    font-size: 0.66rem;
+    font-weight: 800;
+    line-height: 1.05;
+  }
+
   .ft-bot-comparison-metrics > div > span,
   .ft-bot-comparison-metrics small {
     color: var(--ft-text-muted);
@@ -1008,9 +1067,10 @@
     display: block;
     margin-top: 0.2rem;
     color: var(--ft-text);
-    font-family: var(--ft-font-mono);
-    font-size: 0.82rem;
+    font-family: var(--ft-font-sans);
+    font-size: 0.88rem;
     font-variant-numeric: tabular-nums;
+    font-weight: 800;
     line-height: 1.25;
     overflow-wrap: anywhere;
   }
@@ -1040,9 +1100,9 @@
 
   .ft-bot-comparison-profit .ft-profit-pill {
     width: 100%;
-    min-height: 1.7rem;
-    margin-top: 0.2rem;
-    font-size: 0.8rem;
+    min-height: 2.15rem;
+    margin-top: 0.25rem;
+    font-size: 0.92rem;
   }
 
   .ft-trade-mobile-list {
@@ -1109,9 +1169,11 @@
     border: 1px solid rgba(148, 163, 184, 0.14);
     border-radius: 0.4rem;
     background: rgba(15, 23, 42, 0.74);
-    font-size: 0.66rem;
+    font-size: 0.68rem;
     font-weight: 900;
     line-height: 1;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.85);
     text-transform: uppercase;
   }
 
@@ -1123,15 +1185,42 @@
   }
 
   .ft-trade-direction-short {
-    color: var(--color-loss);
-    border-color: color-mix(in srgb, var(--color-loss) 34%, rgba(148, 163, 184, 0.14));
-    background: color-mix(in srgb, var(--color-loss) 12%, rgba(15, 23, 42, 0.86));
+    color: #ffd9de;
+    border-color: color-mix(in srgb, var(--color-loss) 42%, rgba(148, 163, 184, 0.14));
+    background: color-mix(in srgb, var(--color-loss) 15%, rgba(15, 23, 42, 0.9));
   }
 
   .ft-trade-direction-long {
-    color: var(--color-profit);
-    border-color: color-mix(in srgb, var(--color-profit) 34%, rgba(148, 163, 184, 0.14));
-    background: color-mix(in srgb, var(--color-profit) 12%, rgba(15, 23, 42, 0.86));
+    color: #dffef2;
+    border-color: color-mix(in srgb, var(--color-profit) 42%, rgba(148, 163, 184, 0.14));
+    background: color-mix(in srgb, var(--color-profit) 15%, rgba(15, 23, 42, 0.9));
+  }
+
+  .ft-trade-direction-short svg {
+    color: #ff5f70;
+  }
+
+  .ft-trade-direction-long svg {
+    color: #20e19d;
+  }
+
+  .ft-leverage-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.85rem;
+    margin-left: 0.28rem;
+    padding: 0.08rem 0.34rem;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-radius: 999px;
+    background: rgba(245, 158, 11, 0.12);
+    color: #ffd86a;
+    font-size: 0.72em;
+    font-weight: 900;
+    line-height: 1.15;
+    text-shadow: none;
+    vertical-align: 0.08em;
+    white-space: nowrap;
   }
 
   .ft-trade-table-direction {
@@ -1182,46 +1271,56 @@
   .ft-trade-mobile-grid b {
     min-width: 0;
     color: var(--ft-text);
-    font-family: var(--ft-font-mono);
-    font-size: 0.8rem;
+    font-family: var(--ft-font-sans);
+    font-size: 0.86rem;
     font-variant-numeric: tabular-nums;
+    font-weight: 800;
     text-align: right;
     overflow-wrap: anywhere;
+  }
+
+  .ft-trade-mobile-grid .ft-leverage-chip {
+    font-size: 0.8em;
   }
 
   .ft-profit-pill {
     position: relative;
     overflow: hidden;
-    min-height: 1.8rem;
-    gap: 0.38rem;
+    min-height: 2.05rem;
+    gap: 0.5rem;
+    padding-inline: 0.55rem;
     border-width: 1px;
-    border-radius: 0.38rem;
+    border-radius: 0.45rem;
     background: rgba(7, 12, 23, 0.94);
     color: #f8fafc;
     font-weight: 900;
     font-variant-numeric: tabular-nums;
     letter-spacing: 0;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.92);
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.035);
   }
 
   .ft-profit-pill > .d-inline-block {
     display: grid;
     place-items: center;
-    width: 1.15rem;
-    height: 1.15rem;
+    width: 0.95rem;
+    height: 0.95rem;
     flex: 0 0 auto;
-    border-radius: 999px;
-    background: rgba(148, 163, 184, 0.1);
+    background: transparent;
   }
 
   .ft-profit-pill > div:last-child {
-    font-family: var(--ft-font-mono);
-    font-size: 0.82rem;
-    line-height: 1;
+    min-width: 0;
+    font-family: var(--ft-font-sans);
+    font-size: 1rem;
+    font-weight: 850;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.05;
+    white-space: nowrap;
   }
 
   .ft-profit-pill .triangle {
-    transform: scale(0.72);
+    transform: scale(0.82);
   }
 
   .ft-profit-pill.profit-pill-profit {
@@ -1231,7 +1330,7 @@
   }
 
   .ft-profit-pill.profit-pill-profit > .d-inline-block {
-    background: rgba(32, 225, 157, 0.13);
+    background: transparent;
   }
 
   .ft-profit-pill.profit-pill {
@@ -1241,12 +1340,14 @@
   }
 
   .ft-profit-pill.profit-pill > .d-inline-block {
-    background: rgba(255, 95, 112, 0.13);
+    background: transparent;
   }
 
   .ft-profit-pill .small {
-    color: color-mix(in srgb, currentColor 82%, #ffffff);
-    font-weight: 900;
+    color: currentColor;
+    font-size: 1em;
+    font-weight: inherit;
+    opacity: 1;
   }
 
   .text-profit {
@@ -1354,7 +1455,7 @@
     color: var(--ft-text);
     font-size: 1.18rem;
     font-weight: 850;
-    font-family: var(--ft-font-mono);
+    font-family: var(--ft-font-sans);
     font-variant-numeric: tabular-nums;
     line-height: 1.15;
     overflow-wrap: anywhere;
@@ -1367,7 +1468,7 @@
     padding: 0.12rem 0.45rem;
     border: 1px solid currentColor;
     border-radius: 0.35rem;
-    font-family: var(--ft-font-mono);
+    font-family: var(--ft-font-sans);
     font-size: 0.78rem;
     font-style: normal;
     font-weight: 850;
@@ -1511,7 +1612,7 @@
 
   .ft-mobile-row-card b {
     flex: 0 0 auto;
-    font-family: var(--ft-font-mono);
+    font-family: var(--ft-font-sans);
     font-size: 0.86rem;
     font-variant-numeric: tabular-nums;
     text-align: right;
@@ -1586,9 +1687,10 @@
     min-width: 0;
     margin-top: 0.12rem;
     color: var(--ft-text);
-    font-family: var(--ft-font-mono);
+    font-family: var(--ft-font-sans);
     font-size: 0.82rem;
     font-variant-numeric: tabular-nums;
+    font-weight: 800;
     text-align: left;
     overflow-wrap: anywhere;
   }
@@ -1687,9 +1789,10 @@
     display: block;
     margin: 0.28rem 0 0.2rem;
     color: var(--ft-text);
-    font-family: var(--ft-font-mono);
+    font-family: var(--ft-font-sans);
     font-size: 1.05rem;
     font-weight: 900;
+    font-variant-numeric: tabular-nums;
     overflow-wrap: anywhere;
   }
 
@@ -2264,12 +2367,12 @@ body.ft-theme-transition *:after {
 
 html {
   /*  Slightly larger base type for better dashboard readability. */
-  font-size: 15px;
+  font-size: 15.5px;
 }
 
 @media (max-width: 640px) {
   html {
-    font-size: 14px;
+    font-size: 14.5px;
   }
 }
 

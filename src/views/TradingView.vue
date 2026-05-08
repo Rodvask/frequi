@@ -238,7 +238,7 @@ function refreshOHLCV(pair: string, columns: string[]) {
         </DraggableContainer>
       </GridItem>
       <GridItem
-        v-if="gridLayoutTradeDetail.h !== 0"
+        v-if="gridLayoutChartView.h !== 0"
         v-bind="gridItemProps"
         :i="gridLayoutChartView.i"
         :x="gridLayoutChartView.x"

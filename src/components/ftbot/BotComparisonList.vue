@@ -269,17 +269,23 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
             <span class="text-loss">{{ item.losses }}</span>
           </small>
         </div>
-        <div>
+        <div
+          class="ft-bot-comparison-balance"
+          :class="{
+            'ft-bot-comparison-balance-profit': (item.profitClosed ?? 0) > 0,
+            'ft-bot-comparison-balance-loss': (item.profitClosed ?? 0) < 0,
+          }"
+        >
           <span>Balance</span>
-          <b>
+          <b class="ft-bot-balance-value">
             {{
               formatPrice(
                 item.balance ?? 0,
                 item.stakeCurrencyDecimals,
               )
             }}
-            <small>{{ item.stakeCurrency }}{{ item.balanceAppendix }}</small>
           </b>
+          <small class="ft-bot-balance-currency">{{ item.stakeCurrency }}{{ item.balanceAppendix }}</small>
         </div>
         <div class="ft-bot-comparison-profit">
           <span>Open profit</span>
