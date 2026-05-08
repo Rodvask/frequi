@@ -3,7 +3,7 @@ const botStore = useBotStore();
 </script>
 
 <template>
-  <footer class="ft-navbar md:hidden">
+  <footer class="ft-navbar ft-mobile-bottom-nav md:hidden">
     <!-- Only visible on xs (phone) viewport! -->
     <hr class="my-0" />
     <div class="flex gap-2 justify-between px-2">
@@ -75,6 +75,20 @@ const botStore = useBotStore();
       >
         <template #icon>
           <i-mdi-view-dashboard-outline height="24" width="24" />
+        </template>
+      </Button>
+      <Button
+        v-if="!botStore.canRunBacktest"
+        icon-pos="top"
+        variant="link"
+        size="small"
+        as="router-link"
+        class="align-items-center"
+        to="/advanced-dashboard"
+        label="Advanced"
+      >
+        <template #icon>
+          <i-mdi-view-dashboard-edit-outline height="24" width="24" />
         </template>
       </Button>
     </div>

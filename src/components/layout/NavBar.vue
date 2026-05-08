@@ -114,6 +114,12 @@ const navItems = ref([
     icon: 'i-mdi-view-dashboard',
   },
   {
+    label: 'Advanced',
+    to: '/advanced-dashboard',
+    visible: computed(() => !botStore.canRunBacktest),
+    icon: 'i-mdi-view-dashboard-edit',
+  },
+  {
     label: 'Chart',
     to: '/graph',
     icon: 'i-mdi-chart-line',
