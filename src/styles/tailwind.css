@@ -2110,12 +2110,91 @@
   }
 
   @media (max-width: 768px) {
+    .ft-page-surface {
+      height: auto;
+      min-height: 100%;
+    }
+
+    .ft-page-surface > .h-full,
+    .ft-page-surface > .overflow-auto,
+    .ft-advanced-dashboard,
+    .ft-history-view,
+    .ft-history-detail {
+      height: auto !important;
+      min-height: 100%;
+      overflow: visible !important;
+    }
+
+    .ft-dashboard-grid,
+    .ft-trading-layout {
+      display: grid !important;
+      height: auto !important;
+      min-height: 100%;
+      align-content: start;
+      gap: 0.65rem;
+    }
+
     .ft-dashboard-grid {
       padding: 0.45rem;
     }
 
+    .ft-trading-layout {
+      padding: 0.45rem !important;
+    }
+
+    .ft-dashboard-grid.vue-grid-layout,
+    .ft-trading-layout.vue-grid-layout {
+      height: auto !important;
+    }
+
     .ft-dashboard-grid .vue-grid-item {
       max-width: calc(100vw - 0.75rem);
+    }
+
+    .ft-dashboard-grid .vue-grid-item,
+    .ft-trading-layout .vue-grid-item {
+      position: relative !important;
+      inset: auto !important;
+      width: 100% !important;
+      height: auto !important;
+      max-width: calc(100vw - 0.9rem);
+      transform: none !important;
+    }
+
+    .ft-dashboard-grid .vue-grid-item > .ft-dashboard-card,
+    .ft-trading-layout .vue-grid-item > .ft-dashboard-card {
+      height: auto !important;
+      min-height: unset;
+    }
+
+    .ft-dashboard-grid .ft-dashboard-card-body,
+    .ft-trading-layout .ft-dashboard-card-body {
+      height: auto !important;
+      min-height: 0;
+      overflow: visible !important;
+    }
+
+    .ft-trading-layout .ft-trade-multipane,
+    .ft-trading-layout .ft-trade-multipane-tabs,
+    .ft-trading-layout .ft-trade-multipane-tabs .p-tabpanels,
+    .ft-trading-layout .ft-trade-multipane-tabs .p-tabpanel,
+    .ft-trading-layout .ft-trade-multipane-tabs .p-tabpanel > div {
+      height: auto;
+      min-height: 0;
+    }
+
+    .ft-trading-layout .ft-pair-summary-list {
+      max-height: 18rem;
+    }
+
+    .ft-trading-layout .ft-bot-controls {
+      width: 100%;
+    }
+
+    .ft-trading-layout .ft-chart-toolbar,
+    .ft-trading-layout .flex.align-center,
+    .ft-trading-layout .flex.items-center {
+      flex-wrap: wrap;
     }
 
     .ft-dashboard-card {
