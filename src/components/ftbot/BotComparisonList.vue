@@ -184,7 +184,7 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
             >{{
               formatPrice(
                 (data as ComparisonTableItems).balance ?? 0,
-                (data as ComparisonTableItems).stakeCurrencyDecimals,
+                2,
               )
             }}
           </span>
@@ -281,7 +281,7 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
             {{
               formatPrice(
                 item.balance ?? 0,
-                item.stakeCurrencyDecimals,
+                2,
               )
             }}
           </b>

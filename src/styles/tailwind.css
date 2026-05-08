@@ -889,6 +889,14 @@
     color: #fbbf24;
   }
 
+  .ft-trading-table .ft-trade-table-number {
+    text-align: right;
+  }
+
+  .ft-trading-table .ft-trade-table-number .p-datatable-column-header-content {
+    justify-content: flex-end;
+  }
+
   .ft-trading-table .p-datatable-tbody > tr > td,
   .ft-metric-table .p-datatable-tbody > tr > td {
     font-variant-numeric: tabular-nums;

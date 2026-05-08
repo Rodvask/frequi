@@ -8,7 +8,6 @@ import {
   ColorType,
   CrosshairMode,
   HistogramSeries,
-  LastPriceAnimationMode,
   LineSeries,
   createChart,
   createSeriesMarkers,
@@ -251,10 +250,11 @@ function addIndicatorSeries(
   if (!chart) return;
 
   const typedConfig = config as { color?: string; type?: ChartType | keyof typeof ChartType };
+  const indicatorType = String(typedConfig.type ?? ChartType.line);
   const data = buildSeriesData(key);
   if (!data.length) return;
 
-  if (typedConfig.type === ChartType.bar || typedConfig.type === 'bar') {
+  if (indicatorType === ChartType.bar) {
     const barSeries = chart.addSeries(
       HistogramSeries,
       {
@@ -269,7 +269,7 @@ function addIndicatorSeries(
     return;
   }
 
-  const isScatter = typedConfig.type === ChartType.scatter || typedConfig.type === 'scatter';
+  const isScatter = indicatorType === ChartType.scatter;
   const lineSeries = chart.addSeries(
     LineSeries,
     {
@@ -357,7 +357,6 @@ function createTradingChart() {
     borderDownColor: props.colorDown,
     wickUpColor: props.colorUp,
     wickDownColor: props.colorDown,
-    lastPriceAnimation: LastPriceAnimationMode.Continuous,
     priceLineColor: 'rgba(246, 178, 26, 0.45)',
     priceLineWidth: 1,
   });

@@ -17,12 +17,12 @@ const isProfitable = computed<boolean | null>(() => {
 
 const profitString = computed((): string => {
   if (props.profitRatio !== undefined && props.profitAbs !== undefined) {
-    return `(${formatPrice(props.profitAbs, 3)})`;
+    return `(${formatPrice(props.profitAbs, 2)})`;
   } else if (props.profitAbs !== undefined) {
     if (props.stakeCurrency !== undefined) {
-      return `${formatPriceCurrency(props.profitAbs, props.stakeCurrency, 3)}`;
+      return `${formatPriceCurrency(props.profitAbs, props.stakeCurrency, 2)}`;
     } else {
-      return `${formatPrice(props.profitAbs, 3)}`;
+      return `${formatPrice(props.profitAbs, 2)}`;
     }
   }
   return '';

@@ -37,6 +37,10 @@ const botStore = useBotStore();
 const settingsStore = useSettingsStore();
 const colorStore = useColorStore();
 
+function isPresent<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
+}
+
 const selectedBots = computed(() => botStore.selectedBots);
 const closedTrades = computed(() => botStore.allClosedTradesSelectedBots);
 const openTrades = computed(() => botStore.allOpenTradesSelectedBots);
@@ -67,7 +71,7 @@ function metricTone(value: number | undefined | null): MetricTone {
 
 function formatProfit(value: number | undefined | null): string {
   if (!isDefined(value)) return 'N/A';
-  return formatPriceCurrency(value, stakeCurrency.value, stakeCurrencyDecimals.value);
+  return formatPriceCurrency(value, stakeCurrency.value, 2);
 }
 
 function formatProfitPercent(value: number | undefined | null): string | undefined {
@@ -103,7 +107,7 @@ function aggregatePerformance<T extends PerformanceEntry | EntryStats | ExitStat
 }
 
 const selectedProfitStats = computed(() =>
-  selectedBots.value.map((bot) => bot.profit).filter(isDefined),
+  selectedBots.value.map((bot) => bot.profit).filter(isPresent),
 );
 
 const totalProfit = computed(() =>
@@ -111,7 +115,7 @@ const totalProfit = computed(() =>
 );
 
 const totalProfitRatio = computed(() => {
-  const values = selectedProfitStats.value.map((profit) => profit.profit_all_ratio).filter(isDefined);
+  const values = selectedProfitStats.value.map((profit) => profit.profit_all_ratio).filter(isPresent);
   return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : undefined;
 });
 
@@ -139,7 +143,7 @@ const calculatedProfitFactor = computed(() => {
   if (grossLoss > 0) return grossProfit / grossLoss;
   if (grossProfit > 0 && closedTrades.value.length > 0) return Number.POSITIVE_INFINITY;
 
-  const values = selectedProfitStats.value.map((profit) => profit.profit_factor).filter(isDefined);
+  const values = selectedProfitStats.value.map((profit) => profit.profit_factor).filter(isPresent);
   return values.length > 0
     ? values.reduce((sum, value) => sum + value, 0) / values.length
     : undefined;
@@ -324,7 +328,7 @@ const topPairChartOptions = computed<EChartsOption>(() => {
           `<div style="font-weight:800;margin-bottom:6px;color:#fbbf24">${row?.key ?? ''}</div>`,
           `<div>${point?.marker ?? ''}Profit: <b>${formatPrice(
             value,
-            stakeCurrencyDecimals.value,
+            2,
           )} ${stakeCurrency.value}</b></div>`,
           `<div style="color:${chartMutedColor};margin-top:3px">Trades: <b>${row?.count ?? 0}</b></div>`,
         ].join('');
@@ -480,7 +484,7 @@ onMounted(() => {
           <Column field="profitAbs" :header="`Profit ${stakeCurrency}`">
             <template #body="{ data }">
               <span :class="data.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
-                {{ formatPrice(data.profitAbs, stakeCurrencyDecimals) }}
+                {{ formatPrice(data.profitAbs, 2) }}
               </span>
             </template>
           </Column>
@@ -497,7 +501,7 @@ onMounted(() => {
               <span>{{ row.count }} trades</span>
             </div>
             <b :class="row.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
-              {{ formatPrice(row.profitAbs, stakeCurrencyDecimals) }}
+              {{ formatPrice(row.profitAbs, 2) }}
             </b>
           </div>
         </div>
@@ -535,7 +539,7 @@ onMounted(() => {
           <Column field="profitAbs" :header="`Profit ${stakeCurrency}`">
             <template #body="{ data }">
               <span :class="data.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
-                {{ formatPrice(data.profitAbs, stakeCurrencyDecimals) }}
+                {{ formatPrice(data.profitAbs, 2) }}
               </span>
             </template>
           </Column>
@@ -553,7 +557,7 @@ onMounted(() => {
               <span>{{ row.count }} trades</span>
             </div>
             <b :class="row.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
-              {{ formatPrice(row.profitAbs, stakeCurrencyDecimals) }}
+              {{ formatPrice(row.profitAbs, 2) }}
             </b>
           </div>
           <div v-if="!enterTagPerformance.length" class="ft-empty-state">
@@ -573,7 +577,7 @@ onMounted(() => {
           <Column field="profitAbs" :header="`Profit ${stakeCurrency}`">
             <template #body="{ data }">
               <span :class="data.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
-                {{ formatPrice(data.profitAbs, stakeCurrencyDecimals) }}
+                {{ formatPrice(data.profitAbs, 2) }}
               </span>
             </template>
           </Column>
@@ -591,7 +595,7 @@ onMounted(() => {
               <span>{{ row.count }} trades</span>
             </div>
             <b :class="row.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
-              {{ formatPrice(row.profitAbs, stakeCurrencyDecimals) }}
+              {{ formatPrice(row.profitAbs, 2) }}
             </b>
           </div>
           <div v-if="!exitReasonPerformance.length" class="ft-empty-state">

@@ -43,6 +43,11 @@ const forceExitVisible = ref(false);
 const removeTradeVisible = ref(false);
 const confirmExitText = ref('');
 const confirmExitValue = ref<ModalReasons | null>(null);
+const rightAlignedFields = new Set(['amount', 'stake_amount', 'max_stake_amount', 'open_rate', 'current_rate', 'close_rate']);
+
+function getColumnAlignmentClass(field: string) {
+  return rightAlignedFields.has(field) ? 'ft-trade-table-number' : '';
+}
 
 const increasePosition = ref({ visible: false, trade: {} as Trade });
 function formatPriceWithDecimals(price: number) {
@@ -220,6 +225,8 @@ watch(
         :key="column.field"
         :field="column.field"
         :header="column.header"
+        :header-class="getColumnAlignmentClass(column.field)"
+        :body-class="getColumnAlignmentClass(column.field)"
       >
         <template #body="{ data, field, index }">
           <template v-if="field === 'trade_id'">
@@ -335,7 +342,11 @@ watch(
           <b>{{ formatPrice(trade.amount) }}</b>
           <span>{{ activeTrades ? 'Stake' : 'Total stake' }}</span>
           <b>
-            {{ formatPriceWithDecimals(activeTrades ? trade.stake_amount : trade.max_stake_amount) }}
+            {{
+              formatPriceWithDecimals(
+                (activeTrades ? trade.stake_amount : trade.max_stake_amount) ?? 0,
+              )
+            }}
             <span v-if="trade.trading_mode !== 'spot'" class="ft-leverage-chip">
               {{ trade.leverage }}X
             </span>
@@ -343,7 +354,7 @@ watch(
           <span>Open rate</span>
           <b>{{ formatPrice(trade.open_rate) }}</b>
           <span>{{ activeTrades ? 'Current rate' : 'Close rate' }}</span>
-          <b>{{ formatPrice(activeTrades ? trade.current_rate : trade.close_rate) }}</b>
+          <b>{{ formatPrice((activeTrades ? trade.current_rate : trade.close_rate) ?? null) }}</b>
           <span>Open date</span>
           <b><DateTimeTZ :date="trade.open_timestamp" /></b>
           <template v-if="!activeTrades">
