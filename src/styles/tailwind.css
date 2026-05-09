@@ -65,6 +65,8 @@
     --ft-card-radius: 0.5rem;
     --ft-card-padding: 0.75rem;
     --ft-grid-gap: 0.75rem;
+    --ft-mobile-bottom-nav-height: 4.75rem;
+    --ft-mobile-page-bottom-space: calc(var(--ft-mobile-bottom-nav-height) + env(safe-area-inset-bottom));
     --ft-font-sans:
       'Arimo Variable', 'Helvetica Neue', Helvetica, Arial, 'Nimbus Sans', 'Segoe UI Variable Text',
       'Segoe UI', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -303,6 +305,7 @@
     bottom: 0;
     z-index: 40;
     border-top: 1px solid var(--ft-panel-border);
+    min-height: var(--ft-mobile-bottom-nav-height);
     padding: 0.45rem 0.55rem calc(0.45rem + env(safe-area-inset-bottom));
     background: var(--ft-navbar-bg);
     box-shadow: 0 -14px 34px rgba(0, 0, 0, 0.28);
@@ -2118,9 +2121,28 @@
   }
 
   @media (max-width: 768px) {
+    .ft-app-shell {
+      height: 100dvh !important;
+      min-height: 100dvh;
+      overflow: hidden !important;
+    }
+
     .ft-page-surface {
-      height: auto;
-      min-height: 100%;
+      height: 100%;
+      min-height: 0;
+      padding-bottom: var(--ft-mobile-page-bottom-space);
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      overscroll-behavior-y: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-gutter: stable;
+    }
+
+    .ft-mobile-bottom-nav {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
     }
 
     .ft-page-surface > .h-full,
@@ -2140,6 +2162,7 @@
       min-height: 100%;
       align-content: start;
       gap: 0.65rem;
+      touch-action: pan-y;
     }
 
     .ft-dashboard-grid {
@@ -2167,6 +2190,7 @@
       height: auto !important;
       max-width: calc(100vw - 0.9rem);
       transform: none !important;
+      touch-action: pan-y;
     }
 
     .ft-dashboard-grid .vue-grid-item > .ft-dashboard-card,
