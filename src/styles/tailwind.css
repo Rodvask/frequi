@@ -808,6 +808,10 @@
     background: rgba(5, 8, 20, 0.48);
   }
 
+  .ft-dashboard-mobile-footer-spacer {
+    display: none;
+  }
+
   .ft-dashboard-card .p-datatable,
   .ft-dashboard-card .p-datatable-table-container,
   .ft-dashboard-card .p-datatable-table {
@@ -2166,7 +2170,7 @@
     }
 
     .ft-dashboard-grid {
-      padding: 0.45rem;
+      padding: 0.45rem 0.45rem calc(var(--ft-mobile-bottom-nav-height) + 1.5rem);
     }
 
     .ft-trading-layout {
@@ -2191,6 +2195,17 @@
       max-width: calc(100vw - 0.9rem);
       transform: none !important;
       touch-action: pan-y;
+    }
+
+    .ft-dashboard-grid .vue-grid-item:last-child {
+      margin-bottom: calc(var(--ft-mobile-bottom-nav-height) + env(safe-area-inset-bottom) + 1.5rem);
+    }
+
+    .ft-dashboard-mobile-footer-spacer {
+      display: block;
+      width: 100%;
+      height: calc(var(--ft-mobile-bottom-nav-height) + env(safe-area-inset-bottom) + 1.5rem);
+      flex: 0 0 auto;
     }
 
     .ft-dashboard-grid .vue-grid-item > .ft-dashboard-card,

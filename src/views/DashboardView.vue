@@ -196,4 +196,5 @@ onMounted(async () => {
       </GridItem>
     </template>
   </GridLayout>
+  <div class="ft-dashboard-mobile-footer-spacer" aria-hidden="true"></div>
 </template>
