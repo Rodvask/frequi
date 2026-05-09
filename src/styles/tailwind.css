@@ -2491,3 +2491,18 @@ html {
   /*  Fix white corners in vue-grid-item. */
   background-color: unset !important;
 }
+
+@media (max-width: 768px) {
+  .ft-dashboard-grid.vue-grid-layout,
+  .ft-trading-layout.vue-grid-layout,
+  .ft-dashboard-grid .vue-grid-item,
+  .ft-trading-layout .vue-grid-item,
+  .ft-dashboard-grid .vue-grid-item.no-touch,
+  .ft-trading-layout .vue-grid-item.no-touch,
+  .ft-dashboard-grid .ft-dashboard-card,
+  .ft-trading-layout .ft-dashboard-card,
+  .ft-dashboard-grid .ft-dashboard-card-body,
+  .ft-trading-layout .ft-dashboard-card-body {
+    touch-action: pan-y !important;
+  }
+}
