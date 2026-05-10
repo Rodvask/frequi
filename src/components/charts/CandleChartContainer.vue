@@ -142,12 +142,12 @@ const singlePairSelection = computed({
 <template>
   <div class="flex h-full">
     <div class="flex-fill w-full flex-col align-items-stretch flex h-full">
-      <div class="flex me-0 items-center md:gap-2">
-        <span class="md:ms-2 text-nowrap">{{ strategyName }} | {{ timeframe || '' }}</span>
+      <div class="ft-chart-toolbar flex me-0 items-center md:gap-2">
+        <span class="ft-chart-meta md:ms-2 text-nowrap">{{ strategyName }} | {{ timeframe || '' }}</span>
         <MultiSelect
           v-if="settingsStore.multiPairSelection"
           v-model="botStore.activeBot.plotMultiPairs"
-          class="w-80"
+          class="ft-chart-pair-select w-80"
           :options="availablePairs"
           optionlabel=""
           placeholder="Select pairs to plot"
@@ -158,7 +158,7 @@ const singlePairSelection = computed({
         <Select
           v-else
           v-model="singlePairSelection"
-          class="w-80"
+          class="ft-chart-pair-select w-80"
           :options="availablePairs"
           size="small"
           :clearable="false"
@@ -167,6 +167,7 @@ const singlePairSelection = computed({
         </Select>
 
         <Button
+          class="ft-chart-icon-button"
           title="Refresh chart"
           severity="secondary"
           :disabled="botStore.activeBot.plotMultiPairs.length === 0"
@@ -175,15 +176,36 @@ const singlePairSelection = computed({
         >
           <i-mdi-refresh />
         </Button>
-        <BaseCheckbox v-model="settingsStore.multiPairSelection">
-          <span class="text-nowrap">Multi pair</span>
+        <BaseCheckbox
+          v-model="settingsStore.multiPairSelection"
+          class="ft-chart-toggle"
+          title="Show more than one pair in the chart."
+        >
+          <span class="text-nowrap">
+            <span class="hidden md:inline">Multi pair</span>
+            <span class="md:hidden">Multi</span>
+          </span>
         </BaseCheckbox>
-        <div class="ms-auto flex items-center gap-2">
-          <BaseCheckbox v-model="settingsStore.showMarkArea">
-            <span class="text-nowrap">Show Chart Areas</span>
+        <div class="ft-chart-options ms-auto flex items-center gap-2">
+          <BaseCheckbox
+            v-model="settingsStore.showMarkArea"
+            class="ft-chart-toggle"
+            title="Show or hide strategy chart areas and annotations."
+          >
+            <span class="text-nowrap">
+              <span class="hidden md:inline">Chart Areas</span>
+              <span class="md:hidden">Areas</span>
+            </span>
           </BaseCheckbox>
-          <BaseCheckbox v-model="settingsStore.useHeikinAshiCandles">
-            <span class="text-nowrap">Heikin Ashi</span>
+          <BaseCheckbox
+            v-model="settingsStore.useHeikinAshiCandles"
+            class="ft-chart-toggle"
+            title="Use Heikin Ashi candles."
+          >
+            <span class="text-nowrap">
+              <span class="hidden md:inline">Heikin Ashi</span>
+              <span class="md:hidden">Heikin</span>
+            </span>
           </BaseCheckbox>
 
           <PlotConfigSelect></PlotConfigSelect>
@@ -238,3 +260,84 @@ const singlePairSelection = computed({
     </Dialog>
   </div>
 </template>
+
+<style scoped>
+.ft-chart-toolbar {
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.ft-chart-meta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ft-chart-pair-select {
+  min-width: 12rem;
+  max-width: 20rem;
+}
+
+.ft-chart-icon-button {
+  flex: 0 0 auto;
+}
+
+.ft-chart-options {
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .ft-chart-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.3rem;
+    align-items: center;
+    padding: 0.25rem 0.25rem 0.35rem;
+  }
+
+  .ft-chart-meta {
+    grid-column: 1 / -1;
+    max-width: 100%;
+    font-size: 0.72rem;
+    font-weight: 750;
+    line-height: 1.1;
+  }
+
+  .ft-chart-pair-select {
+    grid-column: 1 / 2;
+    width: 100% !important;
+    min-width: 0;
+  }
+
+  .ft-chart-icon-button {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+  }
+
+  .ft-chart-toggle {
+    font-size: 0.72rem;
+    font-weight: 750;
+  }
+
+  .ft-chart-options {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 0.35rem;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .ft-chart-options::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ft-chart-options :deep(.p-select),
+  .ft-chart-options :deep(.p-button) {
+    flex: 0 0 auto;
+  }
+}
+</style>

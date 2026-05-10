@@ -45,6 +45,7 @@ const crosshairInfo = ref<{
   close: string;
   volume?: string;
   signals: string[];
+  trades: string[];
   indicators: { label: string; value: string }[];
 } | null>(null);
 let chart: IChartApi | null = null;
@@ -61,6 +62,21 @@ const grid = 'rgba(148, 163, 184, 0.12)';
 
 const filteredTrades = computed(() => props.trades.filter((trade) => trade.pair === props.dataset.pair));
 let indicatorSeriesRefs: { label: string; series: ISeriesApi<SeriesType, Time> }[] = [];
+
+const indicatorBadgeValues = computed(() => {
+  if (crosshairInfo.value?.indicators.length) return crosshairInfo.value.indicators.slice(0, 4);
+
+  const lastRow = props.dataset.data[props.dataset.data.length - 1];
+  if (!lastRow) return [];
+
+  return indicatorColumns()
+    .map((column) => ({
+      label: column,
+      value: formatChartNumber(rowValue(lastRow, column), 4),
+    }))
+    .filter((item) => item.value !== 'N/A')
+    .slice(0, 4);
+});
 
 function columnIndex(name: string) {
   return props.dataset.columns.findIndex((column) => column === name);
@@ -83,6 +99,14 @@ function formatChartNumber(value: number | null, decimals = 5): string {
 
 function formatMarkerPrice(value: number | null): string {
   return value === null ? '' : ` @ ${formatChartNumber(value)}`;
+}
+
+function formatIndicatorLabel(label: string): string {
+  return label
+    .replace(/^_+|_+$/g, '')
+    .replace(/_/g, ' ')
+    .replace(/\b(rsi|ema|sma|macd|atr|adx|cci|mfi|obv|roc)\b/gi, (match) => match.toUpperCase())
+    .replace(/\b\w/g, (match) => match.toUpperCase());
 }
 
 function hasSignalValue(row: number[], column: number): boolean {
@@ -195,25 +219,26 @@ function signalLabelsForRow(row: unknown[]): string[] {
 }
 
 function tradesForTime(time: UTCTimestamp): string[] {
-  const timestampMs = Number(time) * 1000;
+  const candleStartMs = Number(time) * 1000;
+  const candleEndMs = candleStartMs + props.dataset.timeframe_ms;
+  const isInsideCandle = (timestamp?: number | null) =>
+    isDefined(timestamp) && timestamp >= candleStartMs && timestamp < candleEndMs;
+
   return filteredTrades.value.flatMap((trade) => {
     const labels: string[] = [];
-    if (trade.open_timestamp && Math.floor(trade.open_timestamp / 1000) === Number(time)) {
+    if (isInsideCandle(trade.open_timestamp)) {
       labels.push(
-        `${trade.is_short ? 'Short' : 'Long'} entry #${trade.trade_id}${formatMarkerPrice(trade.open_rate ?? null)}`,
+        `Open ${trade.is_short ? 'Short' : 'Long'} #${trade.trade_id}${formatMarkerPrice(trade.open_rate ?? null)}`,
       );
     }
-    if (trade.close_timestamp && Math.floor(trade.close_timestamp / 1000) === Number(time)) {
+    if (isInsideCandle(trade.close_timestamp)) {
       const profit = isDefined(trade.profit_ratio) ? ` ${formatPercent(trade.profit_ratio, 2)}` : '';
       labels.push(
         `Close #${trade.trade_id}${formatMarkerPrice(trade.close_rate ?? trade.current_rate ?? null)}${profit}`,
       );
     }
 
-    return Math.abs((trade.open_timestamp ?? 0) - timestampMs) < 1 ||
-      Math.abs((trade.close_timestamp ?? 0) - timestampMs) < 1
-      ? labels
-      : labels;
+    return labels;
   });
 }
 
@@ -275,7 +300,8 @@ function updateCrosshairInfo(param: MouseEventParams<Time>) {
     low: formatChartNumber(rowValue(row, colLow)),
     close: formatChartNumber(rowValue(row, colClose)),
     volume: colVolume >= 0 ? formatChartNumber(rowValue(row, colVolume), 2) : undefined,
-    signals: [...signalLabelsForRow(row), ...tradesForTime(time as UTCTimestamp)],
+    signals: signalLabelsForRow(row),
+    trades: tradesForTime(time as UTCTimestamp),
     indicators: indicatorValuesForCrosshair(param, row),
   };
 }
@@ -417,7 +443,7 @@ function addIndicatorSeries(
         color: typedConfig.color || 'rgba(246, 178, 26, 0.48)',
         priceLineVisible: false,
         lastValueVisible: false,
-        title: key,
+        title: '',
       },
       paneIndex,
     );
@@ -436,7 +462,7 @@ function addIndicatorSeries(
       pointMarkersVisible: isScatter,
       priceLineVisible: false,
       lastValueVisible: false,
-      title: key,
+      title: '',
     },
     paneIndex,
   );
@@ -627,19 +653,43 @@ watch(
         <span v-if="crosshairInfo.volume">Vol {{ crosshairInfo.volume }}</span>
       </div>
       <div class="ft-tradingview-crosshair__ohlc">
-        <span>O {{ crosshairInfo.open }}</span>
-        <span>H {{ crosshairInfo.high }}</span>
-        <span>L {{ crosshairInfo.low }}</span>
-        <span>C {{ crosshairInfo.close }}</span>
+        <span><small>Open</small><b>{{ crosshairInfo.open }}</b></span>
+        <span><small>High</small><b>{{ crosshairInfo.high }}</b></span>
+        <span><small>Low</small><b>{{ crosshairInfo.low }}</b></span>
+        <span><small>Close</small><b>{{ crosshairInfo.close }}</b></span>
       </div>
-      <div v-if="crosshairInfo.signals.length" class="ft-tradingview-crosshair__signals">
-        <span v-for="signal in crosshairInfo.signals" :key="signal">{{ signal }}</span>
+      <div v-if="crosshairInfo.trades.length" class="ft-tradingview-crosshair__section">
+        <small>Trades</small>
+        <span
+          v-for="tradeEvent in crosshairInfo.trades"
+          :key="tradeEvent"
+          class="ft-tradingview-crosshair__event"
+        >
+          {{ tradeEvent }}
+        </span>
+      </div>
+      <div v-if="crosshairInfo.signals.length" class="ft-tradingview-crosshair__section">
+        <small>Signals</small>
+        <span
+          v-for="signal in crosshairInfo.signals"
+          :key="signal"
+          class="ft-tradingview-crosshair__event"
+        >
+          {{ signal }}
+        </span>
       </div>
       <div v-if="crosshairInfo.indicators.length" class="ft-tradingview-crosshair__indicators">
         <span v-for="indicator in crosshairInfo.indicators.slice(0, 4)" :key="indicator.label">
-          {{ indicator.label }} <b>{{ indicator.value }}</b>
+          <small>{{ formatIndicatorLabel(indicator.label) }}</small>
+          <b>{{ indicator.value }}</b>
         </span>
       </div>
+    </div>
+    <div v-if="indicatorBadgeValues.length" class="ft-tradingview-indicators">
+      <span v-for="indicator in indicatorBadgeValues" :key="indicator.label">
+        <small>{{ formatIndicatorLabel(indicator.label) }}</small>
+        <b>{{ indicator.value }}</b>
+      </span>
     </div>
     <div ref="chartContainer" class="ft-tradingview-chart__canvas" />
   </div>
@@ -667,11 +717,13 @@ watch(
   top: 0.45rem;
   left: 0.45rem;
   z-index: 3;
-  max-width: min(34rem, calc(100% - 0.9rem));
-  padding: 0.5rem 0.6rem;
+  display: grid;
+  gap: 0.35rem;
+  max-width: min(26rem, calc(100% - 0.9rem));
+  padding: 0.55rem;
   border: 1px solid rgba(251, 191, 36, 0.28);
   border-radius: 0.45rem;
-  background: rgba(5, 8, 20, 0.82);
+  background: rgba(5, 8, 20, 0.88);
   color: v-bind(text);
   box-shadow: 0 12px 26px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(10px);
@@ -680,11 +732,11 @@ watch(
 
 .ft-tradingview-crosshair__head,
 .ft-tradingview-crosshair__ohlc,
-.ft-tradingview-crosshair__signals,
+.ft-tradingview-crosshair__section,
 .ft-tradingview-crosshair__indicators {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 0.6rem;
+  gap: 0.35rem;
   align-items: center;
 }
 
@@ -692,28 +744,100 @@ watch(
   justify-content: space-between;
   color: #fbbf24;
   font-size: 0.78rem;
+  gap: 0.75rem;
 }
 
-.ft-tradingview-crosshair__head span,
-.ft-tradingview-crosshair__ohlc,
-.ft-tradingview-crosshair__indicators {
+.ft-tradingview-crosshair__head span {
   color: v-bind(muted);
 }
 
-.ft-tradingview-crosshair__ohlc,
-.ft-tradingview-crosshair__signals,
+.ft-tradingview-crosshair__ohlc {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(3.6rem, 1fr));
+}
+
+.ft-tradingview-crosshair__ohlc span,
+.ft-tradingview-crosshair__indicators span {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+  padding: 0.28rem 0.38rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.35rem;
+  background: rgba(15, 23, 42, 0.62);
+}
+
+.ft-tradingview-crosshair small {
+  color: v-bind(muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.ft-tradingview-crosshair__ohlc b,
+.ft-tradingview-crosshair__indicators b {
+  color: v-bind(text);
+  font-size: 0.77rem;
+  line-height: 1.1;
+}
+
+.ft-tradingview-crosshair__section,
 .ft-tradingview-crosshair__indicators {
-  margin-top: 0.25rem;
   font-size: 0.76rem;
   font-weight: 750;
 }
 
-.ft-tradingview-crosshair__signals span {
+.ft-tradingview-crosshair__section > small {
+  width: 100%;
+}
+
+.ft-tradingview-crosshair__event {
+  padding: 0.18rem 0.4rem;
+  border: 1px solid rgba(32, 225, 157, 0.22);
+  border-radius: 999px;
+  background: rgba(32, 225, 157, 0.08);
   color: #20e19d;
 }
 
-.ft-tradingview-crosshair__indicators b {
+.ft-tradingview-indicators {
+  position: absolute;
+  right: 3.65rem;
+  bottom: 2.2rem;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  max-width: min(30rem, calc(100% - 5rem));
+  pointer-events: none;
+}
+
+.ft-tradingview-indicators span {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: baseline;
+  min-height: 1.45rem;
+  padding: 0.18rem 0.45rem;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 0.35rem;
+  background: rgba(5, 8, 20, 0.82);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(8px);
+}
+
+.ft-tradingview-indicators small {
+  color: #fbbf24;
+  font-size: 0.65rem;
+  font-weight: 850;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.ft-tradingview-indicators b {
   color: v-bind(text);
+  font-size: 0.74rem;
+  line-height: 1;
 }
 
 @media (max-width: 768px) {
@@ -723,9 +847,58 @@ watch(
   }
 
   .ft-tradingview-crosshair {
+    top: 0.35rem;
+    left: 0.35rem;
     right: 0.45rem;
+    width: auto;
     max-width: none;
-    font-size: 0.74rem;
+    max-height: min(16rem, 44%);
+    overflow: hidden;
+    padding: 0.42rem;
+    gap: 0.28rem;
+    font-size: 0.7rem;
+  }
+
+  .ft-tradingview-crosshair__head {
+    gap: 0.35rem;
+    font-size: 0.68rem;
+  }
+
+  .ft-tradingview-crosshair__ohlc {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ft-tradingview-crosshair__ohlc span,
+  .ft-tradingview-crosshair__indicators span {
+    padding: 0.2rem 0.28rem;
+  }
+
+  .ft-tradingview-crosshair__indicators {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ft-tradingview-crosshair__event {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ft-tradingview-indicators {
+    right: 0.45rem;
+    bottom: 2rem;
+    max-width: calc(100% - 4.6rem);
+  }
+
+  .ft-tradingview-indicators span {
+    min-height: 1.3rem;
+    padding: 0.15rem 0.34rem;
+  }
+
+  .ft-tradingview-indicators small,
+  .ft-tradingview-indicators b {
+    font-size: 0.66rem;
   }
 }
 </style>
