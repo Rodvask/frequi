@@ -11,6 +11,7 @@ const openTrades = computed(() => botStore.activeBot.openTrades);
 const historyProfit = computed(() =>
   closedTrades.value.reduce((sum, trade) => sum + (trade.profit_abs ?? trade.realized_profit ?? 0), 0),
 );
+const historyProfitFormatted = computed(() => historyProfit.value.toFixed(2));
 const winningTrades = computed(
   () => closedTrades.value.filter((trade) => (trade.profit_ratio ?? 0) > 0).length,
 );
@@ -85,7 +86,7 @@ const historyMetricTone = computed(() => {
         <div class="ft-history-metrics">
           <article class="ft-history-metric" :class="`ft-history-metric-${historyMetricTone}`">
             <span>Total profit</span>
-            <strong>{{ formatPrice(historyProfit) }} {{ botStore.activeBot.stakeCurrency }}</strong>
+            <strong>{{ historyProfitFormatted }} {{ botStore.activeBot.stakeCurrency }}</strong>
             <small>{{ closedTrades.length }} closed trades</small>
           </article>
           <article class="ft-history-metric">

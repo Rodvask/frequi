@@ -66,7 +66,7 @@
     --ft-card-padding: 0.75rem;
     --ft-grid-gap: 0.75rem;
     --ft-mobile-bottom-nav-height: 4.75rem;
-    --ft-mobile-page-bottom-space: calc(var(--ft-mobile-bottom-nav-height) + env(safe-area-inset-bottom) + 1rem);
+    --ft-mobile-page-bottom-space: 0px;
     --ft-font-sans:
       'Arimo Variable', 'Helvetica Neue', Helvetica, Arial, 'Nimbus Sans', 'Segoe UI Variable Text',
       'Segoe UI', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -806,10 +806,6 @@
   .ft-dashboard-card-body {
     min-width: 0;
     background: rgba(5, 8, 20, 0.48);
-  }
-
-  .ft-dashboard-mobile-footer-spacer {
-    display: none;
   }
 
   .ft-dashboard-card .p-datatable,
@@ -2143,10 +2139,8 @@
     }
 
     .ft-mobile-bottom-nav {
-      position: fixed;
-      right: 0;
+      position: sticky;
       bottom: 0;
-      left: 0;
     }
 
     .ft-page-surface > .h-full,
@@ -2170,7 +2164,7 @@
     }
 
     .ft-dashboard-grid {
-      padding: 0.45rem 0.45rem calc(var(--ft-mobile-bottom-nav-height) + 1.5rem);
+      padding: 0.45rem;
     }
 
     .ft-trading-layout {
@@ -2197,17 +2191,6 @@
       touch-action: pan-y;
     }
 
-    .ft-dashboard-grid .vue-grid-item:last-child {
-      margin-bottom: calc(var(--ft-mobile-bottom-nav-height) + env(safe-area-inset-bottom) + 1.5rem);
-    }
-
-    .ft-dashboard-mobile-footer-spacer {
-      display: block;
-      width: 100%;
-      height: calc(var(--ft-mobile-bottom-nav-height) + env(safe-area-inset-bottom) + 1.5rem);
-      flex: 0 0 auto;
-    }
-
     .ft-dashboard-grid .vue-grid-item > .ft-dashboard-card,
     .ft-trading-layout .vue-grid-item > .ft-dashboard-card {
       height: auto !important;
@@ -2219,6 +2202,14 @@
       height: auto !important;
       min-height: 0;
       overflow: visible !important;
+    }
+
+    .ft-dashboard-grid .ft-dashboard-cum-profit-body {
+      min-height: 15rem;
+    }
+
+    .ft-dashboard-grid .ft-dashboard-cum-profit-body .echarts {
+      min-height: 15rem;
     }
 
     .ft-trading-layout .ft-trade-multipane,
@@ -2508,6 +2499,29 @@ html {
 }
 
 @media (max-width: 768px) {
+  .ft-dashboard-grid .ft-dashboard-cum-profit-body .echarts {
+    height: 15rem !important;
+    min-height: 15rem !important;
+  }
+
+  .ft-mobile-bottom-nav .router-link-active.p-button,
+  .ft-mobile-bottom-nav .router-link-active.p-button:enabled,
+  .ft-mobile-bottom-nav .router-link-active.p-button:hover,
+  .ft-mobile-bottom-nav .router-link-active.p-button:focus {
+    color: var(--p-primary-color) !important;
+  }
+
+  .ft-mobile-bottom-nav .router-link-active .p-button-icon,
+  .ft-mobile-bottom-nav .router-link-active .p-button-label,
+  .ft-mobile-bottom-nav .router-link-active svg {
+    color: var(--p-primary-color) !important;
+  }
+
+  .ft-mobile-bottom-nav .router-link-active svg {
+    fill: currentColor;
+    stroke: currentColor;
+  }
+
   .ft-dashboard-grid.vue-grid-layout,
   .ft-trading-layout.vue-grid-layout,
   .ft-dashboard-grid .vue-grid-item,

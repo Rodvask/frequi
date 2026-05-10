@@ -186,7 +186,7 @@ onMounted(async () => {
         :min-h="4"
         drag-allow-from=".drag-header"
       >
-        <DraggableContainer header="Cumulative Profit">
+        <DraggableContainer class="ft-dashboard-cum-profit-body" header="Cumulative Profit">
           <CumProfitChart
             :trades="botStore.allTradesSelectedBots"
             :open-trades="botStore.allOpenTradesSelectedBots"
@@ -196,5 +196,4 @@ onMounted(async () => {
       </GridItem>
     </template>
   </GridLayout>
-  <div class="ft-dashboard-mobile-footer-spacer" aria-hidden="true"></div>
 </template>

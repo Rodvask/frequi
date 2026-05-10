@@ -132,23 +132,23 @@ watch(
   >
     <div class="flex me-0 w-full items-center justify-between">
       <div class="ms-1 md:ms-2 flex flex-wrap md:flex-nowrap items-center gap-1">
-        <div class="flex flex-col md:flex-row md:gap-2">
-          <div class="flex flex-row flex-wrap gap-2">
-            <small v-if="dataset" class="text-sm text-nowrap" title="Long entry signals"
-              >Long entries: {{ dataset.enter_long_signals || dataset.buy_signals }}</small
-            >
-            <small v-if="dataset" class="text-sm text-nowrap" title="Long exit signals"
-              >Long exit: {{ dataset.exit_long_signals || dataset.sell_signals }}</small
-            >
-          </div>
-          <div class="flex flex-row flex-wrap gap-2">
-            <small v-if="dataset && dataset.enter_short_signals" class="text-sm text-nowrap"
-              >Short entries: {{ dataset.enter_short_signals }}</small
-            >
-            <small v-if="dataset && dataset.exit_short_signals" class="text-sm text-nowrap"
-              >Short exits: {{ dataset.exit_short_signals }}</small
-            >
-          </div>
+        <div v-if="dataset" class="ft-chart-signal-summary">
+          <span title="Long entry signals">
+            <i-mdi-arrow-up-bold />
+            Long in <b>{{ dataset.enter_long_signals || dataset.buy_signals || 0 }}</b>
+          </span>
+          <span title="Long exit signals">
+            <i-mdi-circle-outline />
+            Long out <b>{{ dataset.exit_long_signals || dataset.sell_signals || 0 }}</b>
+          </span>
+          <span v-if="dataset.enter_short_signals" title="Short entry signals">
+            <i-mdi-arrow-down-bold />
+            Short in <b>{{ dataset.enter_short_signals }}</b>
+          </span>
+          <span v-if="dataset.exit_short_signals" title="Short exit signals">
+            <i-mdi-circle-outline />
+            Short out <b>{{ dataset.exit_short_signals }}</b>
+          </span>
         </div>
       </div>
       <div>
@@ -184,3 +184,38 @@ watch(
     </div>
   </div>
 </template>
+
+<style scoped>
+.ft-chart-signal-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.ft-chart-signal-summary span {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  min-height: 1.45rem;
+  padding: 0.1rem 0.45rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.35rem;
+  background: rgba(8, 13, 26, 0.72);
+  color: var(--ft-text-muted);
+  font-size: 0.74rem;
+  font-weight: 760;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.ft-chart-signal-summary svg {
+  width: 0.82rem;
+  height: 0.82rem;
+  color: var(--p-primary-color);
+}
+
+.ft-chart-signal-summary b {
+  color: var(--ft-text);
+}
+</style>

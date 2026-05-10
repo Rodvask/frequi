@@ -106,6 +106,10 @@ function aggregatePerformance<T extends PerformanceEntry | EntryStats | ExitStat
     .sort((a, b) => b.profitAbs - a.profitAbs);
 }
 
+function formatTradeShare(row: PerformanceRow, totalTrades: number): string {
+  return totalTrades > 0 ? formatPercent(row.count / totalTrades, 2) : 'N/A';
+}
+
 const selectedProfitStats = computed(() =>
   selectedBots.value.map((bot) => bot.profit).filter(isPresent),
 );
@@ -225,11 +229,17 @@ const enterTagPerformance = computed(() =>
     'enter_tag',
   ),
 );
+const enterTagTradeCount = computed(() =>
+  enterTagPerformance.value.reduce((sum, row) => sum + row.count, 0),
+);
 const exitReasonPerformance = computed(() =>
   aggregatePerformance(
     selectedBots.value.flatMap((bot) => bot.exitStats),
     'exit_reason',
   ),
+);
+const exitReasonTradeCount = computed(() =>
+  exitReasonPerformance.value.reduce((sum, row) => sum + row.count, 0),
 );
 
 const riskAlerts = computed<RiskAlert[]>(() => {
@@ -543,6 +553,11 @@ onMounted(() => {
               </span>
             </template>
           </Column>
+          <Column field="count" header="Trades %">
+            <template #body="{ data }">
+              {{ formatTradeShare(data, enterTagTradeCount) }}
+            </template>
+          </Column>
           <Column field="count" header="Trades" />
           <template #empty>No enter tag performance available.</template>
         </DataTable>
@@ -554,7 +569,10 @@ onMounted(() => {
           >
             <div>
               <strong>{{ row.key }}</strong>
-              <span>{{ row.count }} trades</span>
+              <span>
+                {{ row.count }} trades ·
+                <b>{{ formatTradeShare(row, enterTagTradeCount) }}</b>
+              </span>
             </div>
             <b :class="row.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
               {{ formatPrice(row.profitAbs, 2) }}
@@ -581,6 +599,11 @@ onMounted(() => {
               </span>
             </template>
           </Column>
+          <Column field="count" header="Trades %">
+            <template #body="{ data }">
+              {{ formatTradeShare(data, exitReasonTradeCount) }}
+            </template>
+          </Column>
           <Column field="count" header="Trades" />
           <template #empty>No exit reason performance available.</template>
         </DataTable>
@@ -592,7 +615,10 @@ onMounted(() => {
           >
             <div>
               <strong>{{ row.key }}</strong>
-              <span>{{ row.count }} trades</span>
+              <span>
+                {{ row.count }} trades ·
+                <b>{{ formatTradeShare(row, exitReasonTradeCount) }}</b>
+              </span>
             </div>
             <b :class="row.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
               {{ formatPrice(row.profitAbs, 2) }}

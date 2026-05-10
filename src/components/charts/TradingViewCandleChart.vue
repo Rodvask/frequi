@@ -14,9 +14,13 @@ import {
   type CandlestickData,
   type HistogramData,
   type IChartApi,
+  type ISeriesApi,
   type ISeriesMarkersPluginApi,
   type LineData,
+  type LogicalRange,
+  type MouseEventParams,
   type SeriesMarker,
+  type SeriesType,
   type SingleValueData,
   type Time,
   type UTCTimestamp,
@@ -33,9 +37,21 @@ const props = defineProps<{
 }>();
 
 const chartContainer = ref<HTMLElement | null>(null);
+const crosshairInfo = ref<{
+  time: string;
+  open: string;
+  high: string;
+  low: string;
+  close: string;
+  volume?: string;
+  signals: string[];
+  indicators: { label: string; value: string }[];
+} | null>(null);
 let chart: IChartApi | null = null;
 let resizeObserver: ResizeObserver | null = null;
 let markersApi: ISeriesMarkersPluginApi<Time> | null = null;
+let visibleLogicalRange: LogicalRange | null = null;
+let visibleLogicalRangeKey = '';
 
 const amber = '#f6b21a';
 const panel = '#080d17';
@@ -44,6 +60,7 @@ const muted = '#8795a8';
 const grid = 'rgba(148, 163, 184, 0.12)';
 
 const filteredTrades = computed(() => props.trades.filter((trade) => trade.pair === props.dataset.pair));
+let indicatorSeriesRefs: { label: string; series: ISeriesApi<SeriesType, Time> }[] = [];
 
 function columnIndex(name: string) {
   return props.dataset.columns.findIndex((column) => column === name);
@@ -52,6 +69,20 @@ function columnIndex(name: string) {
 function rowValue(row: number[], column: number): number | null {
   const value = Number(row[column]);
   return Number.isFinite(value) ? value : null;
+}
+
+function rowText(row: unknown[], column: number): string {
+  const value = row[column];
+  return value === null || value === undefined ? '' : String(value);
+}
+
+function formatChartNumber(value: number | null, decimals = 5): string {
+  if (value === null) return 'N/A';
+  return formatPrice(value, Math.abs(value) >= 100 ? 2 : decimals);
+}
+
+function formatMarkerPrice(value: number | null): string {
+  return value === null ? '' : ` @ ${formatChartNumber(value)}`;
 }
 
 function hasSignalValue(row: number[], column: number): boolean {
@@ -132,6 +163,123 @@ function buildSeriesData(columnName: string): SingleValueData<Time>[] {
     .filter((point) => point.time && Number.isFinite(point.value));
 }
 
+function indicatorColumns(): string[] {
+  const configured = new Set<string>();
+  Object.keys(props.plotConfig.main_plot ?? {}).forEach((key) => configured.add(key));
+  Object.values(props.plotConfig.subplots ?? {}).forEach((subplot) => {
+    Object.keys(subplot).forEach((key) => configured.add(key));
+  });
+
+  return [...configured].filter((key) => columnIndex(key) >= 0);
+}
+
+function signalLabelsForRow(row: unknown[]): string[] {
+  const signalColumns = [
+    { column: '_buy_signal_close', label: 'Long entry', tagColumn: columnIndex('enter_tag') },
+    { column: '_enter_long_signal_close', label: 'Long entry', tagColumn: columnIndex('enter_tag') },
+    { column: '_sell_signal_close', label: 'Long exit', tagColumn: columnIndex('exit_tag') },
+    { column: '_exit_long_signal_close', label: 'Long exit', tagColumn: columnIndex('exit_tag') },
+    { column: '_enter_short_signal_close', label: 'Short entry', tagColumn: columnIndex('enter_tag') },
+    { column: '_exit_short_signal_close', label: 'Short exit', tagColumn: columnIndex('exit_tag') },
+  ];
+
+  return signalColumns.flatMap((signal) => {
+    const signalColumn = columnIndex(signal.column);
+    if (signalColumn < 0 || !hasSignalValue(row as number[], signalColumn)) return [];
+
+    const price = rowValue(row as number[], signalColumn);
+    const tag = signal.tagColumn >= 0 ? rowText(row, signal.tagColumn) : '';
+    const priceLabel = formatMarkerPrice(price);
+    return tag ? `${signal.label}${priceLabel}: ${tag}` : `${signal.label}${priceLabel}`;
+  });
+}
+
+function tradesForTime(time: UTCTimestamp): string[] {
+  const timestampMs = Number(time) * 1000;
+  return filteredTrades.value.flatMap((trade) => {
+    const labels: string[] = [];
+    if (trade.open_timestamp && Math.floor(trade.open_timestamp / 1000) === Number(time)) {
+      labels.push(
+        `${trade.is_short ? 'Short' : 'Long'} entry #${trade.trade_id}${formatMarkerPrice(trade.open_rate ?? null)}`,
+      );
+    }
+    if (trade.close_timestamp && Math.floor(trade.close_timestamp / 1000) === Number(time)) {
+      const profit = isDefined(trade.profit_ratio) ? ` ${formatPercent(trade.profit_ratio, 2)}` : '';
+      labels.push(
+        `Close #${trade.trade_id}${formatMarkerPrice(trade.close_rate ?? trade.current_rate ?? null)}${profit}`,
+      );
+    }
+
+    return Math.abs((trade.open_timestamp ?? 0) - timestampMs) < 1 ||
+      Math.abs((trade.close_timestamp ?? 0) - timestampMs) < 1
+      ? labels
+      : labels;
+  });
+}
+
+function dataPointValue(point: unknown): number | null {
+  if (!point || typeof point !== 'object' || !('value' in point)) return null;
+
+  const value = Number((point as { value?: unknown }).value);
+  return Number.isFinite(value) ? value : null;
+}
+
+function indicatorValuesForCrosshair(param: MouseEventParams<Time>, row: number[]) {
+  const values = indicatorSeriesRefs
+    .map(({ label, series }) => ({
+      label,
+      value: formatChartNumber(dataPointValue(param.seriesData.get(series)), 4),
+    }))
+    .filter((item) => item.value !== 'N/A');
+
+  if (values.length) return values;
+
+  return indicatorColumns()
+    .map((column) => ({
+      label: column,
+      value: formatChartNumber(rowValue(row, column), 4),
+    }))
+    .filter((item) => item.value !== 'N/A');
+}
+
+function updateCrosshairInfo(param: MouseEventParams<Time>) {
+  const time = param.time;
+  if (!time) {
+    crosshairInfo.value = null;
+    return;
+  }
+
+  const colDate = columnIndex('__date_ts');
+  const colOpen = columnIndex('open');
+  const colHigh = columnIndex('high');
+  const colLow = columnIndex('low');
+  const colClose = columnIndex('close');
+  const colVolume = columnIndex('volume');
+
+  if ([colDate, colOpen, colHigh, colLow, colClose].some((index) => index < 0)) {
+    crosshairInfo.value = null;
+    return;
+  }
+
+  const timestamp = Number(time);
+  const row = props.dataset.data.find((item) => Math.floor(Number(item[colDate]) / 1000) === timestamp);
+  if (!row) {
+    crosshairInfo.value = null;
+    return;
+  }
+
+  crosshairInfo.value = {
+    time: new Date(timestamp * 1000).toLocaleString(),
+    open: formatChartNumber(rowValue(row, colOpen)),
+    high: formatChartNumber(rowValue(row, colHigh)),
+    low: formatChartNumber(rowValue(row, colLow)),
+    close: formatChartNumber(rowValue(row, colClose)),
+    volume: colVolume >= 0 ? formatChartNumber(rowValue(row, colVolume), 2) : undefined,
+    signals: [...signalLabelsForRow(row), ...tradesForTime(time as UTCTimestamp)],
+    indicators: indicatorValuesForCrosshair(param, row),
+  };
+}
+
 function buildSignalMarkers(): SeriesMarker<Time>[] {
   const colDate = columnIndex('__date_ts');
   const colEnterTag = columnIndex('enter_tag');
@@ -196,16 +344,20 @@ function buildSignalMarkers(): SeriesMarker<Time>[] {
     return props.dataset.data
       .filter((row) => hasSignalValue(row, signalColumn))
       .map((row) => {
+        const price = rowValue(row, signalColumn);
         const tag =
           signal.tagColumn >= 0 && row[signal.tagColumn]
             ? String(row[signal.tagColumn]).slice(0, 38)
             : '';
         return {
           time: asTime(row[colDate]) as UTCTimestamp,
-          position: signal.position,
+          position: price === null ? signal.position : 'atPriceMiddle',
+          price: price ?? undefined,
           color: signal.color,
           shape: signal.shape,
-          text: tag ? `${signal.label}: ${tag}` : signal.label,
+          text: tag
+            ? `${signal.label}${formatMarkerPrice(price)}: ${tag}`
+            : `${signal.label}${formatMarkerPrice(price)}`,
         };
       })
       .filter((marker) => marker.time);
@@ -217,24 +369,28 @@ function buildTradeMarkers(): SeriesMarker<Time>[] {
 
   filteredTrades.value.forEach((trade) => {
     const openTime = asTime(trade.open_timestamp);
+    const openPrice = trade.open_rate ?? null;
     if (openTime) {
       markers.push({
         time: openTime,
-        position: trade.is_short ? 'aboveBar' : 'belowBar',
+        position: openPrice === null ? (trade.is_short ? 'aboveBar' : 'belowBar') : 'atPriceMiddle',
+        price: openPrice ?? undefined,
         color: trade.is_short ? props.colorDown : props.colorUp,
         shape: trade.is_short ? 'arrowDown' : 'arrowUp',
-        text: `${trade.is_short ? 'Short' : 'Long'} #${trade.trade_id}`,
+        text: `${trade.is_short ? 'Short' : 'Long'} #${trade.trade_id}${formatMarkerPrice(openPrice)}`,
       });
     }
 
     const closeTime = asTime(trade.close_timestamp);
+    const closePrice = trade.close_rate ?? trade.current_rate ?? null;
     if (closeTime) {
       markers.push({
         time: closeTime,
-        position: trade.is_short ? 'belowBar' : 'aboveBar',
+        position: closePrice === null ? (trade.is_short ? 'belowBar' : 'aboveBar') : 'atPriceMiddle',
+        price: closePrice ?? undefined,
         color: amber,
         shape: 'circle',
-        text: `Close #${trade.trade_id}`,
+        text: `Close #${trade.trade_id}${formatMarkerPrice(closePrice)}`,
       });
     }
   });
@@ -266,6 +422,7 @@ function addIndicatorSeries(
       paneIndex,
     );
     barSeries.setData(data as HistogramData<Time>[]);
+    indicatorSeriesRefs.push({ label: key, series: barSeries });
     return;
   }
 
@@ -285,11 +442,20 @@ function addIndicatorSeries(
   );
 
   lineSeries.setData(data as LineData<Time>[]);
+  indicatorSeriesRefs.push({ label: key, series: lineSeries });
 }
 
-function destroyChart() {
+function datasetRangeKey() {
+  return `${props.dataset.strategy}:${props.dataset.pair}:${props.dataset.timeframe}`;
+}
+
+function destroyChart(preserveRange = true) {
+  if (preserveRange) {
+    visibleLogicalRange = chart?.timeScale().getVisibleLogicalRange() ?? visibleLogicalRange;
+  }
   markersApi?.detach();
   markersApi = null;
+  indicatorSeriesRefs = [];
   chart?.remove();
   chart = null;
 }
@@ -298,7 +464,14 @@ function createTradingChart() {
   const container = chartContainer.value;
   if (!container) return;
 
-  destroyChart();
+  const nextRangeKey = datasetRangeKey();
+  const preserveRange = !visibleLogicalRangeKey || visibleLogicalRangeKey === nextRangeKey;
+  if (!preserveRange) {
+    visibleLogicalRange = null;
+  }
+
+  destroyChart(preserveRange);
+  visibleLogicalRangeKey = nextRangeKey;
 
   chart = createChart(container, {
     width: container.clientWidth,
@@ -363,6 +536,7 @@ function createTradingChart() {
 
   candleSeries.setData(buildCandleData());
   markersApi = createSeriesMarkers(candleSeries, buildTradeMarkers(), { zOrder: 'top' });
+  chart.subscribeCrosshairMove((param) => updateCrosshairInfo(param));
 
   const volumeSeries = chart.addSeries(HistogramSeries, {
     priceFormat: { type: 'volume' },
@@ -388,15 +562,21 @@ function createTradingChart() {
   });
   chart.panes()[0]?.setStretchFactor(1);
 
-  const startIndex = Math.max(buildCandleData().length - props.startCandleCount, 0);
-  if (startIndex > 0) {
+  const candleCount = buildCandleData().length;
+  if (visibleLogicalRange) {
+    chart.timeScale().setVisibleLogicalRange(visibleLogicalRange);
+  } else if (candleCount > props.startCandleCount) {
     chart.timeScale().setVisibleLogicalRange({
-      from: startIndex,
-      to: buildCandleData().length + 4,
+      from: candleCount - props.startCandleCount,
+      to: candleCount + 4,
     });
   } else {
     chart.timeScale().fitContent();
   }
+
+  chart.timeScale().subscribeVisibleLogicalRangeChange((range) => {
+    visibleLogicalRange = range;
+  });
 }
 
 function observeSize() {
@@ -441,12 +621,33 @@ watch(
 
 <template>
   <div class="ft-tradingview-chart">
+    <div v-if="crosshairInfo" class="ft-tradingview-crosshair">
+      <div class="ft-tradingview-crosshair__head">
+        <strong>{{ crosshairInfo.time }}</strong>
+        <span v-if="crosshairInfo.volume">Vol {{ crosshairInfo.volume }}</span>
+      </div>
+      <div class="ft-tradingview-crosshair__ohlc">
+        <span>O {{ crosshairInfo.open }}</span>
+        <span>H {{ crosshairInfo.high }}</span>
+        <span>L {{ crosshairInfo.low }}</span>
+        <span>C {{ crosshairInfo.close }}</span>
+      </div>
+      <div v-if="crosshairInfo.signals.length" class="ft-tradingview-crosshair__signals">
+        <span v-for="signal in crosshairInfo.signals" :key="signal">{{ signal }}</span>
+      </div>
+      <div v-if="crosshairInfo.indicators.length" class="ft-tradingview-crosshair__indicators">
+        <span v-for="indicator in crosshairInfo.indicators.slice(0, 4)" :key="indicator.label">
+          {{ indicator.label }} <b>{{ indicator.value }}</b>
+        </span>
+      </div>
+    </div>
     <div ref="chartContainer" class="ft-tradingview-chart__canvas" />
   </div>
 </template>
 
 <style scoped>
 .ft-tradingview-chart {
+  position: relative;
   min-height: 280px;
   height: 100%;
   width: 100%;
@@ -461,10 +662,70 @@ watch(
   width: 100%;
 }
 
+.ft-tradingview-crosshair {
+  position: absolute;
+  top: 0.45rem;
+  left: 0.45rem;
+  z-index: 3;
+  max-width: min(34rem, calc(100% - 0.9rem));
+  padding: 0.5rem 0.6rem;
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  border-radius: 0.45rem;
+  background: rgba(5, 8, 20, 0.82);
+  color: v-bind(text);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.ft-tradingview-crosshair__head,
+.ft-tradingview-crosshair__ohlc,
+.ft-tradingview-crosshair__signals,
+.ft-tradingview-crosshair__indicators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+  align-items: center;
+}
+
+.ft-tradingview-crosshair__head {
+  justify-content: space-between;
+  color: #fbbf24;
+  font-size: 0.78rem;
+}
+
+.ft-tradingview-crosshair__head span,
+.ft-tradingview-crosshair__ohlc,
+.ft-tradingview-crosshair__indicators {
+  color: v-bind(muted);
+}
+
+.ft-tradingview-crosshair__ohlc,
+.ft-tradingview-crosshair__signals,
+.ft-tradingview-crosshair__indicators {
+  margin-top: 0.25rem;
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.ft-tradingview-crosshair__signals span {
+  color: #20e19d;
+}
+
+.ft-tradingview-crosshair__indicators b {
+  color: v-bind(text);
+}
+
 @media (max-width: 768px) {
   .ft-tradingview-chart,
   .ft-tradingview-chart__canvas {
     min-height: 360px;
+  }
+
+  .ft-tradingview-crosshair {
+    right: 0.45rem;
+    max-width: none;
+    font-size: 0.74rem;
   }
 }
 </style>
