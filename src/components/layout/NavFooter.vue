@@ -19,7 +19,7 @@ const botStore = useBotStore();
         aria-label="Dashboard"
       >
         <template #icon>
-          <i-mdi-view-dashboard-outline height="24" width="24" />
+          <i-mdi-monitor-dashboard height="24" width="24" />
         </template>
       </Button>
       <Button
@@ -34,7 +34,7 @@ const botStore = useBotStore();
         aria-label="Open trades"
       >
         <template #icon>
-          <i-mdi-folder-open height="24" width="24" />
+          <i-mdi-swap-horizontal-circle-outline height="24" width="24" />
         </template>
       </Button>
       <Button
@@ -49,7 +49,7 @@ const botStore = useBotStore();
         aria-label="Trade history"
       >
         <template #icon>
-          <i-mdi-folder-lock height="24" width="24" />
+          <i-mdi-history height="24" width="24" />
         </template>
       </Button>
       <Button
@@ -64,7 +64,7 @@ const botStore = useBotStore();
         aria-label="Analytics"
       >
         <template #icon>
-          <i-mdi-view-dashboard-edit-outline height="24" width="24" />
+          <i-mdi-chart-box-outline height="24" width="24" />
         </template>
       </Button>
       <Button
@@ -79,7 +79,7 @@ const botStore = useBotStore();
         aria-label="Pairlist"
       >
         <template #icon>
-          <i-mdi-view-list height="24" width="24" />
+          <i-mdi-format-list-bulleted-square height="24" width="24" />
         </template>
       </Button>
       <Button
@@ -94,7 +94,7 @@ const botStore = useBotStore();
         aria-label="Balance"
       >
         <template #icon>
-          <i-mdi-bank height="24" width="24" />
+          <i-mdi-wallet-outline height="24" width="24" />
         </template>
       </Button>
     </nav>

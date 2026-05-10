@@ -302,6 +302,11 @@ const riskAlerts = computed<RiskAlert[]>(() => {
 
 const topPairChartOptions = computed<EChartsOption>(() => {
   const topRows = pairPerformance.value.slice(0, 8).reverse();
+  const accentConfig = colorStore.primaryAccentConfig;
+  const accentColor = settingsStore.chartTheme === 'dark' ? accentConfig.dark : accentConfig.light;
+  const accentRgb =
+    settingsStore.chartTheme === 'dark' ? accentConfig.darkRgb : accentConfig.lightRgb;
+  const accentAlpha = (alpha: number) => `rgb(${accentRgb} / ${alpha})`;
   const chartTextColor = settingsStore.chartTheme === 'dark' ? '#b8c5d2' : '#475569';
   const chartMutedColor = settingsStore.chartTheme === 'dark' ? '#7f8ea3' : '#64748b';
   const chartLineColor =
@@ -323,11 +328,11 @@ const topPairChartOptions = computed<EChartsOption>(() => {
       axisPointer: {
         type: 'shadow',
         shadowStyle: {
-          color: 'rgba(251, 191, 36, 0.08)',
+          color: accentAlpha(0.08),
         },
       },
       backgroundColor: tooltipBg,
-      borderColor: 'rgba(251, 191, 36, 0.28)',
+      borderColor: accentAlpha(0.28),
       borderWidth: 1,
       padding: [10, 12],
       textStyle: { color: tooltipText, fontWeight: 650 },
@@ -338,7 +343,7 @@ const topPairChartOptions = computed<EChartsOption>(() => {
         const value = Number(point?.value ?? 0);
         const row = topRows[point?.dataIndex ?? 0];
         return [
-          `<div style="font-weight:800;margin-bottom:6px;color:#fbbf24">${row?.key ?? ''}</div>`,
+          `<div style="font-weight:800;margin-bottom:6px;color:${accentColor}">${row?.key ?? ''}</div>`,
           `<div>${point?.marker ?? ''}Profit: <b>${formatPrice(
             value,
             2,

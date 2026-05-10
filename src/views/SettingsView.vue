@@ -15,6 +15,7 @@ const colorPreferenceOptions = [
   { value: ColorPreferences.GREEN_UP, text: 'Green Up/Red Down' },
   { value: ColorPreferences.RED_UP, text: 'Green Down/Red Up' },
 ];
+const primaryAccentChoices = primaryAccentOptions;
 
 const resetDynamicLayout = () => {
   layoutStore.resetTradingLayout();
@@ -101,6 +102,29 @@ const resetDynamicLayout = () => {
               >Show text on multi pane buttons. If disabled, only shows images.</template
             >
           </BaseCheckbox>
+
+          <div class="space-y-2">
+            <label class="block text-sm">Primary color</label>
+            <div class="ft-primary-accent-grid">
+              <button
+                v-for="option in primaryAccentChoices"
+                :key="option.value"
+                type="button"
+                class="ft-primary-accent-option"
+                :class="{ 'ft-primary-accent-option-active': colorStore.primaryAccent === option.value }"
+                @click="colorStore.primaryAccent = option.value"
+              >
+                <span
+                  class="ft-primary-accent-swatch"
+                  :style="{ '--accent-light': option.light, '--accent-dark': option.dark }"
+                />
+                <span>{{ option.text }}</span>
+              </button>
+            </div>
+            <small class="text-surface-600 dark:text-surface-400">
+              Changes the main accent used by navigation, buttons, table headers, and highlights.
+            </small>
+          </div>
         </div>
 
         <div class="border border-surface-400 rounded-sm p-4 space-y-4">
@@ -236,3 +260,41 @@ const resetDynamicLayout = () => {
     </template>
   </Card>
 </template>
+
+<style scoped>
+.ft-primary-accent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.5rem;
+}
+
+.ft-primary-accent-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.35rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--ft-panel-border);
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--ft-panel-strong) 76%, transparent);
+  color: var(--ft-text);
+  font-weight: 800;
+  text-align: left;
+}
+
+.ft-primary-accent-option-active {
+  border-color: var(--p-primary-color);
+  background: color-mix(in srgb, var(--p-primary-color) 11%, var(--ft-panel-strong));
+  color: var(--p-primary-color);
+}
+
+.ft-primary-accent-swatch {
+  width: 1.3rem;
+  height: 1.3rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--ft-panel-border);
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent-light) 0 50%, var(--accent-dark) 50% 100%);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--ft-panel-strong) 72%, transparent);
+}
+</style>

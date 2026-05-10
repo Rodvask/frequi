@@ -105,25 +105,25 @@ const navItems = ref([
     label: 'Dashboard',
     to: '/dashboard',
     visible: computed(() => !botStore.canRunBacktest),
-    icon: 'i-mdi-view-dashboard',
+    icon: 'i-mdi-monitor-dashboard',
   },
   {
     label: 'Trade',
     to: '/trade',
     visible: computed(() => !botStore.canRunBacktest),
-    icon: 'i-mdi-currency-usd',
+    icon: 'i-mdi-swap-horizontal-circle-outline',
   },
   {
     label: 'History',
     to: '/trade_history',
     visible: computed(() => !botStore.canRunBacktest),
-    icon: 'i-mdi-folder-lock',
+    icon: 'i-mdi-history',
   },
   {
     label: 'Analytics',
     to: '/analytics',
     visible: computed(() => !botStore.canRunBacktest),
-    icon: 'i-mdi-view-dashboard-edit',
+    icon: 'i-mdi-chart-box-outline',
   },
   {
     label: 'Chart',
@@ -133,7 +133,7 @@ const navItems = ref([
   {
     label: 'Logs',
     to: '/logs',
-    icon: 'i-mdi-format-list-bulleted',
+    icon: 'i-mdi-format-list-bulleted-square',
   },
   {
     label: 'Settings',
@@ -223,11 +223,16 @@ const drawerVisible = ref(false);
             active-class="ft-nav-link-active"
           >
             <i-mdi-currency-usd v-if="item.icon === 'i-mdi-currency-usd'" />
-            <i-mdi-folder-lock v-if="item.icon === 'i-mdi-folder-lock'" />
-            <i-mdi-view-dashboard v-if="item.icon === 'i-mdi-view-dashboard'" />
-            <i-mdi-view-dashboard-edit v-if="item.icon === 'i-mdi-view-dashboard-edit'" />
+            <i-mdi-monitor-dashboard v-if="item.icon === 'i-mdi-monitor-dashboard'" />
+            <i-mdi-swap-horizontal-circle-outline
+              v-if="item.icon === 'i-mdi-swap-horizontal-circle-outline'"
+            />
+            <i-mdi-history v-if="item.icon === 'i-mdi-history'" />
+            <i-mdi-chart-box-outline v-if="item.icon === 'i-mdi-chart-box-outline'" />
             <i-mdi-chart-line v-if="item.icon === 'i-mdi-chart-line'" />
-            <i-mdi-format-list-bulleted v-if="item.icon === 'i-mdi-format-list-bulleted'" />
+            <i-mdi-format-list-bulleted-square
+              v-if="item.icon === 'i-mdi-format-list-bulleted-square'"
+            />
             <i-mdi-download v-if="item.icon === 'i-mdi-download'" />
             <i-mdi-format-list-numbered-rtl
               v-if="item.icon === 'i-mdi-format-list-numbered-rtl'"
@@ -238,7 +243,7 @@ const drawerVisible = ref(false);
         </div>
 
         <!-- Right aligned nav items -->
-        <div v-if="!isMobile" class="flex ms-auto">
+        <div v-if="!isMobile" class="ft-navbar-actions flex ms-auto items-center">
           <!-- TODO This should show outside of the dropdown in XS mode -->
           <div
             v-if="!settingsStore.confirmDialog"
@@ -248,7 +253,7 @@ const drawerVisible = ref(false);
             <i-mdi-run-fast />
             <i-mdi-alert />
           </div>
-          <div class="flex justify-between">
+          <div class="ft-navbar-refresh-group flex items-center">
             <Select
               v-if="botStore.botCount > 1"
               :model-value="botStore.selectedBotObj"
@@ -272,7 +277,7 @@ const drawerVisible = ref(false);
             <ReloadControl class="me-3" title="Confirm Dialog deactivated." />
           </div>
           <div
-            class="hidden md:flex md:flex-wrap lg:flex-nowrap items-center nav-item text-surface-300 me-2"
+            class="ft-navbar-bot-status hidden md:flex md:flex-wrap lg:flex-nowrap items-center nav-item text-surface-300 me-2"
           >
             <span class="text-sm me-2">
               {{
@@ -281,16 +286,30 @@ const drawerVisible = ref(false);
               }}
             </span>
             <span v-if="botStore.botCount === 1">
-              {{
-                botStore.activeBotorUndefined && botStore.activeBotorUndefined.isBotOnline
-                  ? 'Online'
-                  : 'Offline'
-              }}
+              <span
+                :class="
+                  botStore.activeBotorUndefined && botStore.activeBotorUndefined.isBotOnline
+                    ? 'ft-navbar-bot-online'
+                    : 'ft-navbar-bot-offline'
+                "
+              >
+                {{
+                  botStore.activeBotorUndefined && botStore.activeBotorUndefined.isBotOnline
+                    ? 'Online'
+                    : 'Offline'
+                }}
+              </span>
             </span>
           </div>
-          <div v-if="botStore.hasBots" class="flex items-center">
+          <div v-if="botStore.hasBots" class="ft-navbar-account flex items-center">
             <!-- Hide dropdown on xs, instead show below  -->
-            <Button severity="contrast" variant="text" size="small" @click="toggleMenu">
+            <Button
+              class="ft-navbar-account-button"
+              severity="contrast"
+              variant="text"
+              size="small"
+              @click="toggleMenu"
+            >
               <div class="flex items-center">
                 <Avatar shape="circle" severity="contrast">
                   <!-- <Avatar label="FT" shape="circle"></Avatar> -->

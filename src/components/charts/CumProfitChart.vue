@@ -142,7 +142,8 @@ const cumulativeData = computed<CumProfitChartData[]>(() => {
 
 function generateChart(initial = false) {
   const { colorProfit, colorLoss } = colorStore;
-  const profitColor = settingsStore.chartTheme === 'dark' ? '#d6dde6' : '#1f2937';
+  const accentConfig = colorStore.primaryAccentConfig;
+  const profitColor = settingsStore.chartTheme === 'dark' ? accentConfig.dark : accentConfig.light;
   const zeroLineColor =
     settingsStore.chartTheme === 'dark' ? 'rgba(237, 243, 248, 0.52)' : 'rgba(15, 23, 42, 0.42)';
   const chartOptionsLoc: EChartsOption = {
@@ -247,6 +248,12 @@ const cumProfitChartOptions: ComputedRefWithControl<EChartsOption> = computedWit
       settingsStore.chartTheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#e2e8f0';
     const tooltipBg = settingsStore.chartTheme === 'dark' ? 'rgba(5, 8, 20, 0.96)' : '#ffffff';
     const tooltipText = settingsStore.chartTheme === 'dark' ? '#edf3f8' : '#10202a';
+    const accentConfig = colorStore.primaryAccentConfig;
+    const accentColor =
+      settingsStore.chartTheme === 'dark' ? accentConfig.dark : accentConfig.light;
+    const accentRgb =
+      settingsStore.chartTheme === 'dark' ? accentConfig.darkRgb : accentConfig.lightRgb;
+    const accentAlpha = (alpha: number) => `rgb(${accentRgb} / ${alpha})`;
 
     const chartOptionsLoc: EChartsOption = {
       title: {
@@ -266,7 +273,7 @@ const cumProfitChartOptions: ComputedRefWithControl<EChartsOption> = computedWit
       tooltip: {
         trigger: 'axis',
         backgroundColor: tooltipBg,
-        borderColor: 'rgba(251, 191, 36, 0.28)',
+        borderColor: accentAlpha(0.28),
         borderWidth: 1,
         padding: [10, 12],
         textStyle: {
@@ -297,20 +304,20 @@ const cumProfitChartOptions: ComputedRefWithControl<EChartsOption> = computedWit
               )}</b>`;
 
           return [
-            `<div style="font-weight:800;margin-bottom:6px;color:#fbbf24">${date}</div>`,
+            `<div style="font-weight:800;margin-bottom:6px;color:${accentColor}">${date}</div>`,
             `<div>${profitLine}</div>`,
           ].join('');
         },
         axisPointer: {
           type: 'line',
           lineStyle: {
-            color: 'rgba(251, 191, 36, 0.42)',
+            color: accentAlpha(0.42),
             width: 1,
             type: 'dashed',
           },
           label: {
             backgroundColor: 'rgba(15, 23, 42, 0.94)',
-            color: '#fbbf24',
+            color: accentColor,
           },
         },
       },
@@ -389,20 +396,20 @@ const cumProfitChartOptions: ComputedRefWithControl<EChartsOption> = computedWit
           end: 100,
           ...dataZoomPartial,
           borderColor: 'rgba(148, 163, 184, 0.16)',
-          fillerColor: 'rgba(251, 191, 36, 0.1)',
+          fillerColor: accentAlpha(0.1),
           handleStyle: {
-            color: '#fbbf24',
-            borderColor: '#fbbf24',
+            color: accentColor,
+            borderColor: accentColor,
           },
           moveHandleStyle: {
-            color: 'rgba(251, 191, 36, 0.35)',
+            color: accentAlpha(0.35),
           },
           selectedDataBackground: {
             lineStyle: {
-              color: '#fbbf24',
+              color: accentColor,
             },
             areaStyle: {
-              color: 'rgba(251, 191, 36, 0.12)',
+              color: accentAlpha(0.12),
             },
           },
         },
@@ -431,6 +438,12 @@ watchThrottled(
 );
 watch(
   () => settingsStore.chartTheme,
+  () => {
+    cumProfitChartOptions.trigger();
+  },
+);
+watch(
+  () => colorStore.primaryAccent,
   () => {
     cumProfitChartOptions.trigger();
   },

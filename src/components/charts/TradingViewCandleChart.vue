@@ -36,6 +36,7 @@ const props = defineProps<{
   startCandleCount: number;
 }>();
 
+const settingsStore = useSettingsStore();
 const chartContainer = ref<HTMLElement | null>(null);
 const crosshairInfo = ref<{
   time: string;
@@ -55,10 +56,6 @@ let visibleLogicalRange: LogicalRange | null = null;
 let visibleLogicalRangeKey = '';
 
 const amber = '#f6b21a';
-const panel = '#080d17';
-const text = '#d8e0ea';
-const muted = '#8795a8';
-const grid = 'rgba(148, 163, 184, 0.12)';
 
 const filteredTrades = computed(() => props.trades.filter((trade) => trade.pair === props.dataset.pair));
 let indicatorSeriesRefs: { label: string; series: ISeriesApi<SeriesType, Time> }[] = [];
@@ -80,6 +77,14 @@ const indicatorBadgeValues = computed(() => {
 
 function columnIndex(name: string) {
   return props.dataset.columns.findIndex((column) => column === name);
+}
+
+function chartTextColor() {
+  return settingsStore.chartTheme === 'dark' ? '#d8e0ea' : '#334155';
+}
+
+function chartGridColor() {
+  return settingsStore.chartTheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#d7dee8';
 }
 
 function rowValue(row: number[], column: number): number | null {
@@ -508,11 +513,11 @@ function createTradingChart() {
       background: { type: ColorType.Solid, color: 'transparent' },
       fontFamily:
         '"Arimo Variable", "Helvetica Neue", Helvetica, Arial, "Nimbus Sans", "Segoe UI", ui-sans-serif, system-ui, sans-serif',
-      textColor: text,
+      textColor: chartTextColor(),
     },
     grid: {
-      vertLines: { color: grid },
-      horzLines: { color: grid },
+      vertLines: { color: chartGridColor() },
+      horzLines: { color: chartGridColor() },
     },
     crosshair: {
       mode: CrosshairMode.Normal,
@@ -639,6 +644,7 @@ watch(
     props.colorUp,
     props.colorDown,
     props.startCandleCount,
+    settingsStore.chartTheme,
   ],
   () => nextTick(createTradingChart),
   { deep: true },
@@ -703,7 +709,7 @@ watch(
   width: 100%;
   overflow: hidden;
   border-radius: 0;
-  background: v-bind(panel);
+  background: var(--ft-bg-muted);
 }
 
 .ft-tradingview-chart__canvas {
@@ -721,10 +727,10 @@ watch(
   gap: 0.35rem;
   max-width: min(26rem, calc(100% - 0.9rem));
   padding: 0.55rem;
-  border: 1px solid rgba(251, 191, 36, 0.28);
+  border: 1px solid rgb(var(--ft-accent-rgb) / 0.28);
   border-radius: 0.45rem;
-  background: rgba(5, 8, 20, 0.88);
-  color: v-bind(text);
+  background: color-mix(in srgb, var(--ft-panel-strong) 88%, transparent);
+  color: var(--ft-text);
   box-shadow: 0 12px 26px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(10px);
   pointer-events: none;
@@ -742,13 +748,13 @@ watch(
 
 .ft-tradingview-crosshair__head {
   justify-content: space-between;
-  color: #fbbf24;
+  color: var(--p-primary-color);
   font-size: 0.78rem;
   gap: 0.75rem;
 }
 
 .ft-tradingview-crosshair__head span {
-  color: v-bind(muted);
+  color: var(--ft-text-muted);
 }
 
 .ft-tradingview-crosshair__ohlc {
@@ -764,11 +770,11 @@ watch(
   padding: 0.28rem 0.38rem;
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 0.35rem;
-  background: rgba(15, 23, 42, 0.62);
+  background: color-mix(in srgb, var(--ft-panel) 72%, transparent);
 }
 
 .ft-tradingview-crosshair small {
-  color: v-bind(muted);
+  color: var(--ft-text-muted);
   font-size: 0.62rem;
   font-weight: 800;
   line-height: 1;
@@ -777,7 +783,7 @@ watch(
 
 .ft-tradingview-crosshair__ohlc b,
 .ft-tradingview-crosshair__indicators b {
-  color: v-bind(text);
+  color: var(--ft-text);
   font-size: 0.77rem;
   line-height: 1.1;
 }
@@ -819,15 +825,15 @@ watch(
   align-items: baseline;
   min-height: 1.45rem;
   padding: 0.18rem 0.45rem;
-  border: 1px solid rgba(251, 191, 36, 0.2);
+  border: 1px solid rgb(var(--ft-accent-rgb) / 0.2);
   border-radius: 0.35rem;
-  background: rgba(5, 8, 20, 0.82);
+  background: color-mix(in srgb, var(--ft-panel-strong) 84%, transparent);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
   backdrop-filter: blur(8px);
 }
 
 .ft-tradingview-indicators small {
-  color: #fbbf24;
+  color: var(--p-primary-color);
   font-size: 0.65rem;
   font-weight: 850;
   line-height: 1;
@@ -835,7 +841,7 @@ watch(
 }
 
 .ft-tradingview-indicators b {
-  color: v-bind(text);
+  color: var(--ft-text);
   font-size: 0.74rem;
   line-height: 1;
 }

@@ -44,7 +44,7 @@ const tradeClick = (trade) => {
       <div
         v-for="trade in filteredTrades"
         :key="trade.trade_id"
-        class="border border-surface-500 rounded-sm my-0.5 px-1 py-2"
+        class="ft-custom-trade-card"
         @click="tradeClick(trade)"
       >
         <CustomTradeListEntry :trade="trade" :stake-currency-decimals="stakeCurrencyDecimals" />

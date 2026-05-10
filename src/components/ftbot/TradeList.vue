@@ -309,8 +309,10 @@ watch(
         @click="onMobileTradeClicked(trade)"
       >
         <header>
-          <div>
-            <strong>{{ trade.pair }}{{ trade.open_order_id || trade.has_open_orders ? '*' : '' }}</strong>
+          <div class="ft-trade-mobile-identity">
+            <strong>
+              {{ trade.pair }}{{ trade.open_order_id || trade.has_open_orders ? '*' : '' }}
+            </strong>
             <span>
               <template v-if="multiBotView">{{ trade.botName }} · </template>
               #{{ trade.trade_id }}

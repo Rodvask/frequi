@@ -129,6 +129,7 @@ declare global {
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
   const pausableWatch: typeof import('@vueuse/core').pausableWatch
   const plotConfigColumns: typeof import('./utils/charts/plotConfigColumns').plotConfigColumns
+  const primaryAccentOptions: typeof import('./stores/colors').primaryAccentOptions
   const provide: typeof import('vue').provide
   const provideLocal: typeof import('@vueuse/core').provideLocal
   const randomColor: typeof import('./utils/randomColor').randomColor
@@ -397,7 +398,7 @@ declare global {
   export type { Component, Slot, Slots, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, ShallowRef, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef } from 'vue'
   import('vue')
   // @ts-ignore
-  export type { ColorPreferences } from './stores/colors'
+  export type { ColorPreferences, PrimaryAccent } from './stores/colors'
   import('./stores/colors')
   // @ts-ignore
   export type { BotSubStore, SubStores } from './stores/ftbotwrapper'
@@ -538,6 +539,7 @@ declare module 'vue' {
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
     readonly plotConfigColumns: UnwrapRef<typeof import('./utils/charts/plotConfigColumns')['plotConfigColumns']>
+    readonly primaryAccentOptions: UnwrapRef<typeof import('./stores/colors')['primaryAccentOptions']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly provideLocal: UnwrapRef<typeof import('@vueuse/core')['provideLocal']>
     readonly randomColor: UnwrapRef<typeof import('./utils/randomColor')['randomColor']>

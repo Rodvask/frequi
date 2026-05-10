@@ -75,6 +75,11 @@ const chartOptions = computed((): EChartsOption => {
   // const { chartData } = this;
   // Show a maximum of 50 trades by default - allowing to zoom out further.
   const datazoomStart = chartData.value.length > 0 ? (1 - 50 / chartData.value.length) * 100 : 100;
+  const accentConfig = colorStore.primaryAccentConfig;
+  const accentColor = settingsStore.chartTheme === 'dark' ? accentConfig.dark : accentConfig.light;
+  const accentRgb =
+    settingsStore.chartTheme === 'dark' ? accentConfig.darkRgb : accentConfig.lightRgb;
+  const accentAlpha = (alpha: number) => `rgb(${accentRgb} / ${alpha})`;
   const axisColor = settingsStore.chartTheme === 'dark' ? '#b8c5d2' : '#475569';
   const gridColor = settingsStore.chartTheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#e2e8f0';
   const tooltipBg = settingsStore.chartTheme === 'dark' ? 'rgba(5, 8, 20, 0.96)' : '#ffffff';
@@ -101,7 +106,7 @@ const chartOptions = computed((): EChartsOption => {
     tooltip: {
       trigger: 'axis',
       backgroundColor: tooltipBg,
-      borderColor: 'rgba(251, 191, 36, 0.28)',
+      borderColor: accentAlpha(0.28),
       borderWidth: 1,
       padding: [10, 12],
       textStyle: {
@@ -114,7 +119,7 @@ const chartOptions = computed((): EChartsOption => {
         const point = Array.isArray(params) ? params[0] : params;
         const botName = point.data[3] ? ` · ${point.data[3]}` : '';
         return [
-          `<div style="font-weight:800;margin-bottom:6px;color:#fbbf24">${point.data[2]}</div>`,
+          `<div style="font-weight:800;margin-bottom:6px;color:${accentColor}">${point.data[2]}</div>`,
           `<div>${point.marker}${point.data[5]}${botName}</div>`,
           `<div style="color:#9aa9b8;margin-top:3px">${point.data[4]}</div>`,
           `<div style="margin-top:6px">Profit: <b>${point.data[1]}%</b></div>`,
@@ -123,13 +128,13 @@ const chartOptions = computed((): EChartsOption => {
       axisPointer: {
         type: 'line',
         lineStyle: {
-          color: 'rgba(251, 191, 36, 0.42)',
+          color: accentAlpha(0.42),
           width: 1,
           type: 'dashed',
         },
         label: {
           backgroundColor: 'rgba(15, 23, 42, 0.94)',
-          color: '#fbbf24',
+          color: accentColor,
         },
       },
     },
@@ -184,10 +189,10 @@ const chartOptions = computed((): EChartsOption => {
         end: 100,
         ...dataZoomPartial,
         borderColor: 'rgba(148, 163, 184, 0.16)',
-        fillerColor: 'rgba(251, 191, 36, 0.1)',
+        fillerColor: accentAlpha(0.1),
         handleStyle: {
-          color: '#fbbf24',
-          borderColor: '#fbbf24',
+          color: accentColor,
+          borderColor: accentColor,
         },
       },
     ],

@@ -79,6 +79,11 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
     .filter((botId) => legendSelection.value[botId] ?? true);
   const useProfitLossVisualMap = selectedBotIds.length === 1;
   const selectedBotId = selectedBotIds[0];
+  const accentConfig = colorStore.primaryAccentConfig;
+  const accentColor = settingsStore.chartTheme === 'dark' ? accentConfig.dark : accentConfig.light;
+  const accentRgb =
+    settingsStore.chartTheme === 'dark' ? accentConfig.darkRgb : accentConfig.lightRgb;
+  const accentAlpha = (alpha: number) => `rgb(${accentRgb} / ${alpha})`;
   const axisColor = settingsStore.chartTheme === 'dark' ? '#b8c5d2' : '#475569';
   const gridColor = settingsStore.chartTheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#e2e8f0';
   const tooltipBg = settingsStore.chartTheme === 'dark' ? 'rgba(5, 8, 20, 0.96)' : '#ffffff';
@@ -264,7 +269,7 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
     tooltip: {
       trigger: 'axis',
       backgroundColor: tooltipBg,
-      borderColor: 'rgba(251, 191, 36, 0.28)',
+      borderColor: accentAlpha(0.28),
       borderWidth: 1,
       padding: [10, 12],
       textStyle: {
@@ -276,13 +281,13 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
       axisPointer: {
         type: 'line',
         lineStyle: {
-          color: 'rgba(251, 191, 36, 0.42)',
+          color: accentAlpha(0.42),
           width: 1,
           type: 'dashed',
         },
         label: {
           backgroundColor: 'rgba(15, 23, 42, 0.94)',
-          color: '#fbbf24',
+          color: accentColor,
         },
       },
       formatter: (params) => {
@@ -306,7 +311,7 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
           return `${typedPoint.marker}${typedPoint.seriesName}: ${formatPrice(walletHistory, 3)}`;
         });
 
-        return `<div style="font-weight:800;margin-bottom:6px;color:#fbbf24">${label}</div>${lines.join(
+        return `<div style="font-weight:800;margin-bottom:6px;color:${accentColor}">${label}</div>${lines.join(
           '<br />',
         )}`;
       },
@@ -375,10 +380,10 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
         end: 100,
         ...dataZoomPartial,
         borderColor: 'rgba(148, 163, 184, 0.16)',
-        fillerColor: 'rgba(251, 191, 36, 0.1)',
+        fillerColor: accentAlpha(0.1),
         handleStyle: {
-          color: '#fbbf24',
-          borderColor: '#fbbf24',
+          color: accentColor,
+          borderColor: accentColor,
         },
       },
     ],

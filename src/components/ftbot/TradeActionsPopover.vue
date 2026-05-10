@@ -55,21 +55,28 @@ const popover = ref<InstanceType<typeof Popover> | null>(null);
   <div>
     <Button
       :id="`btn-actions-${id}`"
-      class="btn-xs"
+      class="ft-trade-actions-trigger"
       size="small"
       severity="secondary"
-      title="Actions"
+      title="Trade actions"
+      aria-label="Trade actions"
       @click="popover?.toggle"
     >
       <i-mdi-gesture-tap />
     </Button>
     <Popover
       ref="popover"
+      class="ft-trade-actions-popover"
       :target="`btn-actions-${id}`"
       :title="`Actions for ${trade.pair}`"
       triggers="manual"
       placement="left"
     >
+      <header class="ft-trade-actions-header">
+        <span>Trade actions</span>
+        <strong>{{ trade.pair }}</strong>
+        <small>#{{ trade.trade_id }}</small>
+      </header>
       <TradeActions
         :trade="trade"
         :bot-features="botFeatures"
@@ -82,10 +89,10 @@ const popover = ref<InstanceType<typeof Popover> | null>(null);
         @force-entry="handleForceEntry"
       />
       <Button
-        class="mt-1 w-full text-start"
+        class="ft-trade-action-item ft-trade-action-muted mt-1 w-full"
         size="small"
         severity="secondary"
-        label="Close Actions menu"
+        label="Close menu"
         @click="popover?.hide"
       >
         <template #icon><i-mdi-cancel class="me-1" /></template>

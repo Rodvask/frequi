@@ -40,6 +40,7 @@ const props = withDefaults(
   },
 );
 const settingsStore = useSettingsStore();
+const colorStore = useColorStore();
 // registerTransform(ecStat.transform.histogram);
 // console.log(profits);
 // const data = [[]];
@@ -59,6 +60,11 @@ const data = computed(() => {
 });
 
 const chartOptions = computed((): EChartsOption => {
+  const accentConfig = colorStore.primaryAccentConfig;
+  const accentColor = settingsStore.chartTheme === 'dark' ? accentConfig.dark : accentConfig.light;
+  const accentRgb =
+    settingsStore.chartTheme === 'dark' ? accentConfig.darkRgb : accentConfig.lightRgb;
+  const accentAlpha = (alpha: number) => `rgb(${accentRgb} / ${alpha})`;
   const axisColor = settingsStore.chartTheme === 'dark' ? '#b8c5d2' : '#475569';
   const gridColor = settingsStore.chartTheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#e2e8f0';
   const tooltipBg = settingsStore.chartTheme === 'dark' ? 'rgba(5, 8, 20, 0.96)' : '#ffffff';
@@ -74,7 +80,7 @@ const chartOptions = computed((): EChartsOption => {
       },
     },
     backgroundColor: 'rgba(0, 0, 0, 0)',
-    color: ['#fbbf24'],
+    color: [accentColor],
     animationDuration: 500,
     animationEasing: 'cubicOut',
     animationDurationUpdate: 350,
@@ -85,7 +91,7 @@ const chartOptions = computed((): EChartsOption => {
     tooltip: {
       trigger: 'axis',
       backgroundColor: tooltipBg,
-      borderColor: 'rgba(251, 191, 36, 0.28)',
+      borderColor: accentAlpha(0.28),
       borderWidth: 1,
       padding: [10, 12],
       textStyle: {
@@ -97,11 +103,11 @@ const chartOptions = computed((): EChartsOption => {
       axisPointer: {
         type: 'shadow',
         shadowStyle: {
-          color: 'rgba(251, 191, 36, 0.08)',
+          color: accentAlpha(0.08),
         },
         label: {
           backgroundColor: 'rgba(15, 23, 42, 0.94)',
-          color: '#fbbf24',
+          color: accentColor,
         },
       },
     },
@@ -184,7 +190,7 @@ const chartOptions = computed((): EChartsOption => {
         },
         barMaxWidth: 18,
         itemStyle: {
-          color: '#fbbf24',
+          color: accentColor,
           borderRadius: [4, 4, 0, 0],
         },
         emphasis: {

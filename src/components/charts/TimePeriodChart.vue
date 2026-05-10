@@ -77,6 +77,11 @@ const absoluteMax = computed(
 registerTransform(ftEchartsTransforms.multiple);
 
 const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
+  const accentConfig = colorStore.primaryAccentConfig;
+  const accentColor = settingsStore.chartTheme === 'dark' ? accentConfig.dark : accentConfig.light;
+  const accentRgb =
+    settingsStore.chartTheme === 'dark' ? accentConfig.darkRgb : accentConfig.lightRgb;
+  const accentAlpha = (alpha: number) => `rgb(${accentRgb} / ${alpha})`;
   const axisColor = settingsStore.chartTheme === 'dark' ? '#9aa9b8' : '#475569';
   const gridColor = settingsStore.chartTheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#e2e8f0';
   const tooltipBg = settingsStore.chartTheme === 'dark' ? 'rgba(5, 8, 20, 0.96)' : '#ffffff';
@@ -114,7 +119,7 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
     tooltip: {
       trigger: 'axis',
       backgroundColor: tooltipBg,
-      borderColor: 'rgba(251, 191, 36, 0.28)',
+      borderColor: accentAlpha(0.28),
       borderWidth: 1,
       padding: [10, 12],
       textStyle: {
@@ -138,7 +143,7 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
             : formatPrice(profitValue, 3);
 
         return [
-          `<div style="font-weight:800;margin-bottom:6px;color:#fbbf24">${date}</div>`,
+          `<div style="font-weight:800;margin-bottom:6px;color:${accentColor}">${date}</div>`,
           `<div>${profitPoint?.marker ?? ''}${CHART_PROFIT.value}: <b>${profitLabel}</b></div>`,
           `<div>${tradePoint?.marker ?? ''}${CHART_TRADE_COUNT}: <b>${tradeData?.trade_count ?? 0}</b></div>`,
         ].join('');
@@ -148,17 +153,17 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
       axisPointer: {
         type: 'cross',
         lineStyle: {
-          color: 'rgba(251, 191, 36, 0.42)',
+          color: accentAlpha(0.42),
           width: 1,
           type: 'dashed',
         },
         crossStyle: {
-          color: 'rgba(251, 191, 36, 0.36)',
+          color: accentAlpha(0.36),
           type: 'dashed',
         },
         label: {
           backgroundColor: 'rgba(15, 23, 42, 0.94)',
-          color: '#fbbf24',
+          color: accentColor,
         },
       },
     },
@@ -305,6 +310,10 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
         lineStyle: {
           width: 2.5,
           cap: 'round',
+        },
+        areaStyle: {
+          opacity: 0.14,
+          origin: 0,
         },
         itemStyle: {
           borderWidth: 2,

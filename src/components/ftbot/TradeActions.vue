@@ -22,14 +22,15 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="flex flex-col gap-1">
+  <div class="ft-trade-actions-list">
+    <span class="ft-trade-actions-section">Exit</span>
     <Button
       v-if="!botFeatures.forceExitParams"
-      class="justify-start!"
+      class="ft-trade-action-item ft-trade-action-danger"
       size="small"
       severity="secondary"
-      title="Forceexit"
-      label="Forceexit"
+      title="Force exit"
+      label="Force exit"
       @click="$emit('forceExit', trade)"
     >
       <template #icon>
@@ -39,10 +40,10 @@ defineEmits<{
     <Button
       v-if="botFeatures.forceExitParams"
       size="small"
-      class="justify-start!"
+      class="ft-trade-action-item ft-trade-action-danger"
       severity="secondary"
-      title="Forceexit limit"
-      label="Forceexit limit"
+      title="Force exit limit"
+      label="Force exit limit"
       @click="$emit('forceExit', trade, 'limit')"
     >
       <template #icon>
@@ -51,11 +52,11 @@ defineEmits<{
     </Button>
     <Button
       v-if="botFeatures.forceExitParams"
-      class="justify-start!"
+      class="ft-trade-action-item ft-trade-action-danger"
       size="small"
       severity="secondary"
-      title="Forceexit market"
-      label="Forceexit market"
+      title="Force exit market"
+      label="Force exit market"
       @click="$emit('forceExit', trade, 'market')"
     >
       <template #icon>
@@ -64,20 +65,28 @@ defineEmits<{
     </Button>
     <Button
       v-if="botFeatures.forceEntryTag"
-      class="justify-start!"
+      class="ft-trade-action-item ft-trade-action-warning"
       size="small"
       severity="secondary"
-      title="Forceexit partial"
-      label="Forceexit partial"
+      title="Force exit partial"
+      label="Force exit partial"
       @click="$emit('forceExitPartial', trade)"
     >
       <template #icon>
         <i-mdi-close-box-multiple />
       </template>
     </Button>
+    <span
+      v-if="
+        (botFeatures.cancelOpenOrders && (trade.open_order_id || trade.has_open_orders)) ||
+        enableForceEntry
+      "
+      class="ft-trade-actions-section"
+      >Position</span
+    >
     <Button
       v-if="botFeatures.cancelOpenOrders && (trade.open_order_id || trade.has_open_orders)"
-      class="justify-start!"
+      class="ft-trade-action-item ft-trade-action-warning"
       size="small"
       severity="secondary"
       title="Cancel open orders"
@@ -90,7 +99,7 @@ defineEmits<{
     </Button>
     <Button
       v-if="enableForceEntry"
-      class="justify-start!"
+      class="ft-trade-action-item ft-trade-action-accent"
       size="small"
       severity="secondary"
       title="Increase position"
@@ -101,19 +110,21 @@ defineEmits<{
         <i-mdi-plus-box-multiple-outline />
       </template>
     </Button>
+    <span v-if="botFeatures.reloadTrade" class="ft-trade-actions-section">Maintenance</span>
     <Button
       v-if="botFeatures.reloadTrade"
-      class="justify-start!"
+      class="ft-trade-action-item"
       size="small"
       severity="secondary"
       title="Reload"
       label="Reload"
       @click="$emit('reloadTrade', trade)"
     >
-      <template #icon><i-mdi-reload-alert /> </template>
+        <template #icon><i-mdi-reload-alert /> </template>
     </Button>
+    <span class="ft-trade-actions-section">Danger zone</span>
     <Button
-      class="justify-start!"
+      class="ft-trade-action-item ft-trade-action-danger"
       size="small"
       severity="secondary"
       title="Delete trade"

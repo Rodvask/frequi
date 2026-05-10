@@ -1,9 +1,16 @@
 <script setup lang="ts">
 const settingsStore = useSettingsStore();
 const colorStore = useColorStore();
+const applyColorVars = () => {
+  Object.entries(colorStore.cssVars).forEach(([name, value]) => {
+    document.documentElement.style.setProperty(name, value);
+  });
+};
+
 onMounted(() => {
   setTimezone(settingsStore.timezone);
   colorStore.updateProfitLossColor();
+  applyColorVars();
 });
 watch(
   () => settingsStore.timezone,
@@ -12,6 +19,7 @@ watch(
     setTimezone(tz);
   },
 );
+watch(() => colorStore.cssVars, applyColorVars, { deep: true });
 </script>
 
 <template>

@@ -162,12 +162,20 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
     <Column header="Open Profit">
       <template #body="{ data }">
         <ProfitPill
-          v-if="data.profitOpen && data.botId !== 'Summary'"
-          :profit-ratio="(data as unknown as ComparisonTableItems).profitOpenAccountRatio"
+          v-if="data.profitOpen"
+          :profit-ratio="
+            (data as unknown as ComparisonTableItems).botId
+              ? (data as unknown as ComparisonTableItems).profitOpenAccountRatio
+              : undefined
+          "
           :profit-abs="(data as unknown as ComparisonTableItems).profitOpen"
-          :profit-desc="`Open profit vs account balance ${formatPercent(
-            (data as ComparisonTableItems).profitOpenAccountRatio ?? 0.0,
-          )}`"
+          :profit-desc="
+            (data as unknown as ComparisonTableItems).botId
+              ? `Open profit vs account balance ${formatPercent(
+                  (data as ComparisonTableItems).profitOpenAccountRatio ?? 0.0,
+                )}`
+              : undefined
+          "
           :stake-currency="(data as ComparisonTableItems).stakeCurrency"
         />
       </template>
@@ -296,11 +304,15 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
           <span>Open profit</span>
           <ProfitPill
             v-if="item.profitOpen"
-            :profit-ratio="item.profitOpenAccountRatio"
+            :profit-ratio="item.botId ? item.profitOpenAccountRatio : undefined"
             :profit-abs="item.profitOpen"
-            :profit-desc="`Open profit vs account balance ${formatPercent(
-              item.profitOpenAccountRatio ?? 0.0,
-            )}`"
+            :profit-desc="
+              item.botId
+                ? `Open profit vs account balance ${formatPercent(
+                    item.profitOpenAccountRatio ?? 0.0,
+                  )}`
+                : undefined
+            "
             :stake-currency="item.stakeCurrency"
           />
           <b v-else>-</b>

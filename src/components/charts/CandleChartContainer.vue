@@ -286,6 +286,50 @@ const singlePairSelection = computed({
   min-width: 0;
 }
 
+.ft-chart-toggle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.22rem 0.55rem 0.22rem 0.4rem;
+  border: 1px solid var(--ft-panel-border);
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--ft-panel-strong) 78%, transparent);
+  color: var(--ft-text);
+  box-shadow: var(--ft-shadow-soft);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.ft-chart-toggle :deep(.flex.items-center) {
+  gap: 0.35rem;
+}
+
+.ft-chart-toggle :deep(label) {
+  margin-left: 0;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: 1;
+}
+
+.ft-chart-toggle :deep(.p-checkbox) {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.ft-chart-toggle :deep(.p-checkbox-box) {
+  width: 0.95rem;
+  height: 0.95rem;
+  border-color: color-mix(in srgb, var(--ft-text-muted) 42%, transparent);
+  background: color-mix(in srgb, var(--ft-panel) 72%, transparent);
+}
+
+.ft-chart-toggle :deep(.p-checkbox-checked .p-checkbox-box) {
+  border-color: var(--p-primary-color);
+  background: var(--p-primary-color);
+  color: var(--p-primary-contrast-color);
+}
+
 @media (max-width: 768px) {
   .ft-chart-toolbar {
     display: grid;

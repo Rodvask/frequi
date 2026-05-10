@@ -11,10 +11,24 @@ const autoRefreshLoc = computed({
 </script>
 
 <template>
-  <div class="flex items-center ms-2">
-    <BaseCheckbox v-model="autoRefreshLoc" size="small" title="Auto Refresh" />
+  <div class="ft-reload-control flex items-center ms-2">
     <Button
-      class="m-1"
+      class="ft-navbar-auto-toggle"
+      :class="{ 'ft-navbar-auto-toggle-active': autoRefreshLoc }"
+      severity="contrast"
+      variant="outlined"
+      size="small"
+      title="Auto Refresh"
+      :aria-pressed="autoRefreshLoc"
+      @click="autoRefreshLoc = !autoRefreshLoc"
+    >
+      <template #icon>
+        <i-mdi-check-bold v-if="autoRefreshLoc" />
+        <i-mdi-refresh v-else />
+      </template>
+    </Button>
+    <Button
+      class="ft-navbar-refresh-button m-1"
       severity="contrast"
       variant="outlined"
       size="small"

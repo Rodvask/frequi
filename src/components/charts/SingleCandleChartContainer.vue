@@ -199,10 +199,11 @@ watch(
   align-items: center;
   min-height: 1.45rem;
   padding: 0.1rem 0.45rem;
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  border: 1px solid var(--ft-panel-border);
   border-radius: 0.35rem;
-  background: rgba(8, 13, 26, 0.72);
+  background: color-mix(in srgb, var(--ft-panel-strong) 78%, transparent);
   color: var(--ft-text-muted);
+  box-shadow: var(--ft-shadow-soft);
   font-size: 0.74rem;
   font-weight: 760;
   line-height: 1;

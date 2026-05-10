@@ -192,7 +192,7 @@ defineProps<{
   padding: 0.95rem;
   border: 1px solid var(--ft-panel-border);
   border-radius: var(--ft-card-radius);
-  background: rgba(5, 8, 20, 0.56);
+  background: color-mix(in srgb, var(--ft-panel-strong) 58%, transparent);
   box-shadow: var(--ft-shadow-soft);
 }
 
@@ -271,7 +271,7 @@ summary {
   padding: 0.72rem 0.8rem;
   border: 1px solid rgba(148, 163, 184, 0.14);
   border-radius: 0.45rem;
-  background: rgba(5, 8, 20, 0.38);
+  background: color-mix(in srgb, var(--ft-panel-strong) 46%, transparent);
 }
 
 .ft-order-card header {
@@ -297,7 +297,7 @@ summary {
   padding: 0.2rem 0.45rem;
   border: 1px solid currentColor;
   border-radius: 0.35rem;
-  background: rgba(15, 23, 42, 0.68);
+  background: color-mix(in srgb, var(--ft-panel) 68%, transparent);
   font-size: 0.72rem;
   font-weight: 900;
   text-transform: uppercase;
