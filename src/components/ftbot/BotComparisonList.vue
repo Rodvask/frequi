@@ -34,15 +34,18 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
     const allOpenTrades = botStore.allOpenTrades[k];
     if (!allOpenTrades) return;
     const allStakes = allOpenTrades.reduce((a, b) => a + b.stake_amount, 0);
-    const profitOpenRatio =
-      allOpenTrades.reduce(
-        (a, b) => a + (b.total_profit_ratio ?? b.profit_ratio ?? 0) * b.stake_amount,
-        0,
-      ) / allStakes;
+    const profitOpenRatio = allStakes
+      ? allOpenTrades.reduce(
+          (a, b) => a + (b.total_profit_ratio ?? b.profit_ratio ?? 0) * b.stake_amount,
+          0,
+        ) / allStakes
+      : 0;
     const profitOpen = allOpenTrades.reduce(
       (a, b) => a + (b.total_profit_abs ?? b.profit_abs ?? 0),
       0,
     );
+    const balance = botStore.allBalance[k]?.total_bot ?? botStore.allBalance[k]?.total ?? 0;
+    const profitOpenAccountRatio = balance ? profitOpen / balance : profitOpenRatio;
 
     // TODO: handle one inactive bot ...
     val.push({
@@ -58,10 +61,11 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
       profitClosedRatio: v?.profit_closed_ratio || 0,
       stakeCurrency: botStore.allBotState[k]?.stake_currency || '',
       profitOpenRatio,
+      profitOpenAccountRatio,
       profitOpen,
       wins: v?.winning_trades ?? 0,
       losses: v?.losing_trades ?? 0,
-      balance: botStore.allBalance[k]?.total_bot ?? botStore.allBalance[k]?.total ?? 0,
+      balance,
       stakeCurrencyDecimals: botStore.allBotState[k]?.stake_currency_decimals || 3,
       isDryRun: botStore.allBotState[k]?.dry_run,
       isOnline: botStore.botStores[k]?.isBotOnline,
@@ -91,6 +95,7 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
       }
     }
   });
+  summary.profitOpenAccountRatio = summary.balance ? summary.profitOpen / summary.balance : undefined;
   val.push(summary);
   return val;
 });
@@ -158,10 +163,10 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
       <template #body="{ data }">
         <ProfitPill
           v-if="data.profitOpen && data.botId !== 'Summary'"
-          :profit-ratio="(data as unknown as ComparisonTableItems).profitOpenRatio"
+          :profit-ratio="(data as unknown as ComparisonTableItems).profitOpenAccountRatio"
           :profit-abs="(data as unknown as ComparisonTableItems).profitOpen"
-          :profit-desc="`Total Profit (Open and realized) ${formatPercent(
-            (data as ComparisonTableItems).profitOpenRatio ?? 0.0,
+          :profit-desc="`Open profit vs account balance ${formatPercent(
+            (data as ComparisonTableItems).profitOpenAccountRatio ?? 0.0,
           )}`"
           :stake-currency="(data as ComparisonTableItems).stakeCurrency"
         />
@@ -291,10 +296,10 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
           <span>Open profit</span>
           <ProfitPill
             v-if="item.profitOpen"
-            :profit-ratio="item.profitOpenRatio"
+            :profit-ratio="item.profitOpenAccountRatio"
             :profit-abs="item.profitOpen"
-            :profit-desc="`Total Profit (Open and realized) ${formatPercent(
-              item.profitOpenRatio ?? 0.0,
+            :profit-desc="`Open profit vs account balance ${formatPercent(
+              item.profitOpenAccountRatio ?? 0.0,
             )}`"
             :stake-currency="item.stakeCurrency"
           />

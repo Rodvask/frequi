@@ -6,6 +6,7 @@ export interface ComparisonTableItems {
   profitClosedRatio?: number;
   profitOpen: number;
   profitOpenRatio?: number;
+  profitOpenAccountRatio?: number;
   stakeCurrency: string;
   wins: number;
   losses: number;

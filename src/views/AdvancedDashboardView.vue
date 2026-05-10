@@ -315,7 +315,11 @@ const topPairChartOptions = computed<EChartsOption>(() => {
     animationDurationUpdate: 350,
     animationEasingUpdate: 'cubicOut',
     tooltip: {
-      trigger: 'axis',
+      trigger: 'item',
+      triggerOn: 'mousemove|click',
+      alwaysShowContent: true,
+      confine: true,
+      appendToBody: true,
       axisPointer: {
         type: 'shadow',
         shadowStyle: {
@@ -330,8 +334,7 @@ const topPairChartOptions = computed<EChartsOption>(() => {
       extraCssText:
         'box-shadow: 0 14px 34px rgba(0,0,0,.28); border-radius: 8px; backdrop-filter: blur(10px);',
       formatter: (params) => {
-        const points = Array.isArray(params) ? params : [params];
-        const point = points[0];
+        const point = Array.isArray(params) ? params[0] : params;
         const value = Number(point?.value ?? 0);
         const row = topRows[point?.dataIndex ?? 0];
         return [
@@ -370,6 +373,13 @@ const topPairChartOptions = computed<EChartsOption>(() => {
         data: topRows.map((row) => row.profitAbs),
         barMaxWidth: 18,
         barCategoryGap: '40%',
+        label: {
+          show: true,
+          position: 'right',
+          color: chartTextColor,
+          fontWeight: 750,
+          formatter: (params) => formatPrice(Number(params.value ?? 0), 2),
+        },
         itemStyle: {
           color: (params) =>
             Number(params.value) >= 0 ? colorStore.colorProfit : colorStore.colorLoss,
