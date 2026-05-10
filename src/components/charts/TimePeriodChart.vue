@@ -130,8 +130,8 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
         const tradePoint = points.find((point) => point.seriesName === CHART_TRADE_COUNT);
         const profitData = profitPoint?.data as Record<string, number> | undefined;
         const tradeData = tradePoint?.data as Record<string, number> | undefined;
-        const rawProfit = profitData?.[props.profitCol] ?? 0;
-        const profitValue = props.profitCol === 'rel_profit' ? rawProfit * 100 : rawProfit;
+        // The chart series uses datasetIndex 1, where rel_profit is already multiplied by 100.
+        const profitValue = profitData?.[props.profitCol] ?? 0;
         const profitLabel =
           props.profitCol === 'rel_profit'
             ? `${formatPrice(profitValue, 2)}%`

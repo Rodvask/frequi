@@ -6,7 +6,7 @@ import { BarChart } from 'echarts/charts';
 import { CanvasRenderer } from 'echarts/renderers';
 import { GridComponent, TooltipComponent } from 'echarts/components';
 import type { EntryStats, ExitStats, PerformanceEntry, TimeSummaryRecord, Trade } from '@/types';
-import { TimeSummaryCols, TimeSummaryOptions } from '@/types';
+import { TimeSummaryOptions } from '@/types';
 
 use([BarChart, CanvasRenderer, GridComponent, TooltipComponent]);
 
@@ -447,16 +447,8 @@ onMounted(() => {
 
     <section class="ft-advanced-grid">
       <article class="ft-dashboard-card ft-advanced-panel ft-analytics-daily-panel">
-        <header>Daily profit chart</header>
-        <div class="ft-advanced-chart-scroll">
-          <div class="ft-advanced-chart">
-            <TimePeriodChart
-              :daily-stats="dailyStats"
-              :profit-col="TimeSummaryCols.abs_profit"
-              :show-title="false"
-            />
-          </div>
-        </div>
+        <header>Profit over time</header>
+        <PeriodBreakdown multi-bot-view />
       </article>
 
       <article class="ft-dashboard-card ft-advanced-panel ft-analytics-risk-panel">
@@ -543,7 +535,10 @@ onMounted(() => {
         <DataTable
           class="ft-metric-table ft-advanced-desktop-table"
           size="small"
-          :value="enterTagPerformance.slice(0, 12)"
+          :value="enterTagPerformance"
+          :paginator="enterTagPerformance.length > 8"
+          :rows="8"
+          :rows-per-page-options="[8, 12, 20]"
         >
           <Column field="key" header="Enter tag" />
           <Column field="profitAbs" :header="`Profit ${stakeCurrency}`">
@@ -589,7 +584,10 @@ onMounted(() => {
         <DataTable
           class="ft-metric-table ft-advanced-desktop-table"
           size="small"
-          :value="exitReasonPerformance.slice(0, 12)"
+          :value="exitReasonPerformance"
+          :paginator="exitReasonPerformance.length > 8"
+          :rows="8"
+          :rows-per-page-options="[8, 12, 20]"
         >
           <Column field="key" header="Exit reason" />
           <Column field="profitAbs" :header="`Profit ${stakeCurrency}`">
