@@ -234,9 +234,7 @@ const drawerVisible = ref(false);
               v-if="item.icon === 'i-mdi-format-list-bulleted-square'"
             />
             <i-mdi-download v-if="item.icon === 'i-mdi-download'" />
-            <i-mdi-format-list-numbered-rtl
-              v-if="item.icon === 'i-mdi-format-list-numbered-rtl'"
-            />
+            <i-mdi-format-list-numbered-rtl v-if="item.icon === 'i-mdi-format-list-numbered-rtl'" />
             {{ item.label }}
           </RouterLink>
           <ThemeSelect />

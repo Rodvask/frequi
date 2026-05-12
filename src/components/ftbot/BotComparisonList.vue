@@ -95,7 +95,9 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
       }
     }
   });
-  summary.profitOpenAccountRatio = summary.balance ? summary.profitOpen / summary.balance : undefined;
+  summary.profitOpenAccountRatio = summary.balance
+    ? summary.profitOpen / summary.balance
+    : undefined;
   val.push(summary);
   return val;
 });
@@ -194,12 +196,7 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
       <template #body="{ data }">
         <div v-if="data.balance">
           <span :title="(data as ComparisonTableItems).stakeCurrency"
-            >{{
-              formatPrice(
-                (data as ComparisonTableItems).balance ?? 0,
-                2,
-              )
-            }}
+            >{{ formatPrice((data as ComparisonTableItems).balance ?? 0, 2) }}
           </span>
           <span class="text-sm">{{ ` ${data.stakeCurrency}${data.balanceAppendix}` }}</span>
         </div>
@@ -291,14 +288,11 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
         >
           <span>Balance</span>
           <b class="ft-bot-balance-value">
-            {{
-              formatPrice(
-                item.balance ?? 0,
-                2,
-              )
-            }}
+            {{ formatPrice(item.balance ?? 0, 2) }}
           </b>
-          <small class="ft-bot-balance-currency">{{ item.stakeCurrency }}{{ item.balanceAppendix }}</small>
+          <small class="ft-bot-balance-currency"
+            >{{ item.stakeCurrency }}{{ item.balanceAppendix }}</small
+          >
         </div>
         <div class="ft-bot-comparison-profit">
           <span>Open profit</span>

@@ -9,7 +9,10 @@ const botStore = useBotStore();
 const closedTrades = computed(() => botStore.activeBot.closedTrades);
 const openTrades = computed(() => botStore.activeBot.openTrades);
 const historyProfit = computed(() =>
-  closedTrades.value.reduce((sum, trade) => sum + (trade.profit_abs ?? trade.realized_profit ?? 0), 0),
+  closedTrades.value.reduce(
+    (sum, trade) => sum + (trade.profit_abs ?? trade.realized_profit ?? 0),
+    0,
+  ),
 );
 const historyProfitFormatted = computed(() => historyProfit.value.toFixed(2));
 const winningTrades = computed(

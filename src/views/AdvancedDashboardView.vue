@@ -50,8 +50,6 @@ const monthlyStats = computed(() => botStore.allMonthlyStatsSelectedBots);
 const stakeCurrency = computed(
   () => selectedBots.value[0]?.stakeCurrency || dailyStats.value.stake_currency || '',
 );
-const stakeCurrencyDecimals = computed(() => selectedBots.value[0]?.stakeCurrencyDecimals ?? 3);
-
 function latestProfit(records: TimeSummaryRecord[] | undefined): number | undefined {
   return records?.at(-1)?.abs_profit;
 }
@@ -119,7 +117,9 @@ const totalProfit = computed(() =>
 );
 
 const totalProfitRatio = computed(() => {
-  const values = selectedProfitStats.value.map((profit) => profit.profit_all_ratio).filter(isPresent);
+  const values = selectedProfitStats.value
+    .map((profit) => profit.profit_all_ratio)
+    .filter(isPresent);
   return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : undefined;
 });
 

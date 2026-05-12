@@ -120,7 +120,7 @@ defineEmits<{
       label="Reload"
       @click="$emit('reloadTrade', trade)"
     >
-        <template #icon><i-mdi-reload-alert /> </template>
+      <template #icon><i-mdi-reload-alert /> </template>
     </Button>
     <span class="ft-trade-actions-section">Danger zone</span>
     <Button

@@ -1,3 +1,4 @@
+import { onBeforeUnmount } from 'vue';
 import type { ElementEvent } from 'echarts';
 import humanizeDuration from 'humanize-duration';
 import type ECharts from 'vue-echarts';
@@ -163,7 +164,16 @@ export function usePercentageTool(
     () => {
       if (inputListener.value && !active.value) {
         chartRef.value?.chart?.getZr().on('mousedown', mouseDown);
+      } else if (!inputListener.value) {
+        chartRef.value?.chart?.getZr().off('mousedown', mouseDown);
+        chartRef.value?.chart?.getZr().off('mousemove', mouseMove);
+        if (active.value) drawEnd();
       }
     },
   );
+
+  onBeforeUnmount(() => {
+    chartRef.value?.chart?.getZr().off('mousedown', mouseDown);
+    chartRef.value?.chart?.getZr().off('mousemove', mouseMove);
+  });
 }

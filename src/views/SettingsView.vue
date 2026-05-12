@@ -111,7 +111,9 @@ const resetDynamicLayout = () => {
                 :key="option.value"
                 type="button"
                 class="ft-primary-accent-option"
-                :class="{ 'ft-primary-accent-option-active': colorStore.primaryAccent === option.value }"
+                :class="{
+                  'ft-primary-accent-option-active': colorStore.primaryAccent === option.value,
+                }"
                 @click="colorStore.primaryAccent = option.value"
               >
                 <span

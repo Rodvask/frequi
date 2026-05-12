@@ -22,8 +22,6 @@ import type {
   CumProfitDataPerDate,
   Trade,
 } from '@/types';
-import type { ComputedRefWithControl } from '@vueuse/core';
-
 use([
   BarChart,
   LineChart,
@@ -240,104 +238,129 @@ function generateChart(initial = false) {
   return chartOptionsLoc;
 }
 
-const cumProfitChartOptions: ComputedRefWithControl<EChartsOption> = computedWithControl(
-  () => props.trades,
-  () => {
-    const axisColor = settingsStore.chartTheme === 'dark' ? '#9aa9b8' : '#475569';
-    const gridColor =
-      settingsStore.chartTheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#e2e8f0';
-    const tooltipBg = settingsStore.chartTheme === 'dark' ? 'rgba(5, 8, 20, 0.96)' : '#ffffff';
-    const tooltipText = settingsStore.chartTheme === 'dark' ? '#edf3f8' : '#10202a';
-    const accentConfig = colorStore.primaryAccentConfig;
-    const accentColor =
-      settingsStore.chartTheme === 'dark' ? accentConfig.dark : accentConfig.light;
-    const accentRgb =
-      settingsStore.chartTheme === 'dark' ? accentConfig.darkRgb : accentConfig.lightRgb;
-    const accentAlpha = (alpha: number) => `rgb(${accentRgb} / ${alpha})`;
+const cumProfitChartOptions = computed<EChartsOption>(() => {
+  const axisColor = settingsStore.chartTheme === 'dark' ? '#9aa9b8' : '#475569';
+  const gridColor = settingsStore.chartTheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#e2e8f0';
+  const tooltipBg = settingsStore.chartTheme === 'dark' ? 'rgba(5, 8, 20, 0.96)' : '#ffffff';
+  const tooltipText = settingsStore.chartTheme === 'dark' ? '#edf3f8' : '#10202a';
+  const accentConfig = colorStore.primaryAccentConfig;
+  const accentColor = settingsStore.chartTheme === 'dark' ? accentConfig.dark : accentConfig.light;
+  const accentRgb =
+    settingsStore.chartTheme === 'dark' ? accentConfig.darkRgb : accentConfig.lightRgb;
+  const accentAlpha = (alpha: number) => `rgb(${accentRgb} / ${alpha})`;
 
-    const chartOptionsLoc: EChartsOption = {
-      title: {
-        text: 'Cumulative Profit',
-        left: 'center',
-        show: props.showTitle,
-        textStyle: {
-          color: tooltipText,
-          fontWeight: 800,
-        },
+  const chartOptionsLoc: EChartsOption = {
+    title: {
+      text: 'Cumulative Profit',
+      left: 'center',
+      show: props.showTitle,
+      textStyle: {
+        color: tooltipText,
+        fontWeight: 800,
       },
-      backgroundColor: 'rgba(0, 0, 0, 0)',
-      animationDuration: 500,
-      animationEasing: 'cubicOut',
-      animationDurationUpdate: 350,
-      animationEasingUpdate: 'cubicOut',
-      tooltip: {
-        trigger: 'axis',
-        backgroundColor: tooltipBg,
-        borderColor: accentAlpha(0.28),
-        borderWidth: 1,
-        padding: [10, 12],
-        textStyle: {
-          color: tooltipText,
-          fontWeight: 650,
-        },
-        extraCssText:
-          'box-shadow: 0 14px 34px rgba(0,0,0,.28); border-radius: 8px; backdrop-filter: blur(10px);',
-        formatter: (params) => {
-          const points = Array.isArray(params) ? params : [params];
-          const pointWithData = points.find((point) => point?.data?.date) ?? points[0];
-          const rawData = pointWithData?.data as CumProfitChartData | undefined;
-          const date = rawData?.date ? timestampToDateString(rawData.date) : '';
-          const projectedPoint = points.find((point) => point.seriesName === 'currentProfit');
-          const profitPoint = points.find((point) => point.seriesName === CHART_PROFIT);
-          const projectedData = projectedPoint?.data as CumProfitChartData | undefined;
-          const profitData = profitPoint?.data as CumProfitChartData | undefined;
-          const projectedProfit = projectedData?.currentProfit;
-          const realizedProfit = profitData?.profit ?? rawData?.profit;
-          const profitLine = isDefined(projectedProfit)
-            ? `${projectedPoint?.marker ?? ''}Projected profit: <b>${formatPrice(
-                projectedProfit,
-                3,
-              )}</b>`
-            : `${profitPoint?.marker ?? ''}${CHART_PROFIT}: <b>${formatPrice(
-                realizedProfit ?? 0,
-                3,
-              )}</b>`;
+    },
+    backgroundColor: 'rgba(0, 0, 0, 0)',
+    animationDuration: 500,
+    animationEasing: 'cubicOut',
+    animationDurationUpdate: 350,
+    animationEasingUpdate: 'cubicOut',
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: tooltipBg,
+      borderColor: accentAlpha(0.28),
+      borderWidth: 1,
+      padding: [10, 12],
+      textStyle: {
+        color: tooltipText,
+        fontWeight: 650,
+      },
+      extraCssText:
+        'box-shadow: 0 14px 34px rgba(0,0,0,.28); border-radius: 8px; backdrop-filter: blur(10px);',
+      formatter: (params) => {
+        const points = Array.isArray(params) ? params : [params];
+        const pointWithData = points.find((point) => point?.data?.date) ?? points[0];
+        const rawData = pointWithData?.data as CumProfitChartData | undefined;
+        const date = rawData?.date ? timestampToDateString(rawData.date) : '';
+        const projectedPoint = points.find((point) => point.seriesName === 'currentProfit');
+        const profitPoint = points.find((point) => point.seriesName === CHART_PROFIT);
+        const projectedData = projectedPoint?.data as CumProfitChartData | undefined;
+        const profitData = profitPoint?.data as CumProfitChartData | undefined;
+        const projectedProfit = projectedData?.currentProfit;
+        const realizedProfit = profitData?.profit ?? rawData?.profit;
+        const profitLine = isDefined(projectedProfit)
+          ? `${projectedPoint?.marker ?? ''}Projected profit: <b>${formatPrice(
+              projectedProfit,
+              3,
+            )}</b>`
+          : `${profitPoint?.marker ?? ''}${CHART_PROFIT}: <b>${formatPrice(
+              realizedProfit ?? 0,
+              3,
+            )}</b>`;
 
-          return [
-            `<div style="font-weight:800;margin-bottom:6px;color:${accentColor}">${date}</div>`,
-            `<div>${profitLine}</div>`,
-          ].join('');
+        return [
+          `<div style="font-weight:800;margin-bottom:6px;color:${accentColor}">${date}</div>`,
+          `<div>${profitLine}</div>`,
+        ].join('');
+      },
+      axisPointer: {
+        type: 'line',
+        lineStyle: {
+          color: accentAlpha(0.42),
+          width: 1,
+          type: 'dashed',
         },
-        axisPointer: {
-          type: 'line',
-          lineStyle: {
-            color: accentAlpha(0.42),
-            width: 1,
-            type: 'dashed',
-          },
-          label: {
-            backgroundColor: 'rgba(15, 23, 42, 0.94)',
-            color: accentColor,
-          },
+        label: {
+          backgroundColor: 'rgba(15, 23, 42, 0.94)',
+          color: accentColor,
         },
       },
-      legend: {
-        data: [CHART_PROFIT],
-        right: '5%',
-        top: 0,
-        selectedMode: false,
-        textStyle: {
-          color: axisColor,
-          fontWeight: 650,
+    },
+    legend: {
+      data: [CHART_PROFIT],
+      right: '5%',
+      top: 0,
+      selectedMode: false,
+      textStyle: {
+        color: axisColor,
+        fontWeight: 650,
+      },
+    },
+    useUTC: false,
+    xAxis: {
+      type: 'time',
+      axisLine: {
+        lineStyle: {
+          color: gridColor,
         },
       },
-      useUTC: false,
-      xAxis: {
-        type: 'time',
-        axisLine: {
+      axisTick: {
+        show: false,
+      },
+      axisLabel: {
+        color: axisColor,
+        fontWeight: 600,
+      },
+    },
+    yAxis: [
+      {
+        type: 'value',
+        name: CHART_PROFIT,
+        splitLine: {
+          show: true,
           lineStyle: {
             color: gridColor,
+            type: 'dashed',
           },
+        },
+        nameRotate: 90,
+        nameLocation: 'middle',
+        nameGap: 40,
+        nameTextStyle: {
+          color: axisColor,
+          fontWeight: 700,
+        },
+        axisLine: {
+          show: false,
         },
         axisTick: {
           show: false,
@@ -347,107 +370,51 @@ const cumProfitChartOptions: ComputedRefWithControl<EChartsOption> = computedWit
           fontWeight: 600,
         },
       },
-      yAxis: [
-        {
-          type: 'value',
-          name: CHART_PROFIT,
-          splitLine: {
-            show: true,
-            lineStyle: {
-              color: gridColor,
-              type: 'dashed',
-            },
-          },
-          nameRotate: 90,
-          nameLocation: 'middle',
-          nameGap: 40,
-          nameTextStyle: {
-            color: axisColor,
-            fontWeight: 700,
-          },
-          axisLine: {
-            show: false,
-          },
-          axisTick: {
-            show: false,
-          },
-          axisLabel: {
-            color: axisColor,
-            fontWeight: 600,
-          },
-        },
-      ],
-      grid: {
-        ...echartsGridDefault,
-        top: props.showTitle ? 52 : 28,
-        bottom: 48,
+    ],
+    grid: {
+      ...echartsGridDefault,
+      top: props.showTitle ? 52 : 28,
+      bottom: 48,
+    },
+    dataZoom: [
+      {
+        type: 'inside',
+        // xAxisIndex: [0],
+        start: 0,
+        end: 100,
       },
-      dataZoom: [
-        {
-          type: 'inside',
-          // xAxisIndex: [0],
-          start: 0,
-          end: 100,
+      {
+        // xAxisIndex: [0],
+        bottom: 10,
+        start: 0,
+        end: 100,
+        ...dataZoomPartial,
+        borderColor: 'rgba(148, 163, 184, 0.16)',
+        fillerColor: accentAlpha(0.1),
+        handleStyle: {
+          color: accentColor,
+          borderColor: accentColor,
         },
-        {
-          // xAxisIndex: [0],
-          bottom: 10,
-          start: 0,
-          end: 100,
-          ...dataZoomPartial,
-          borderColor: 'rgba(148, 163, 184, 0.16)',
-          fillerColor: accentAlpha(0.1),
-          handleStyle: {
+        moveHandleStyle: {
+          color: accentAlpha(0.35),
+        },
+        selectedDataBackground: {
+          lineStyle: {
             color: accentColor,
-            borderColor: accentColor,
           },
-          moveHandleStyle: {
-            color: accentAlpha(0.35),
-          },
-          selectedDataBackground: {
-            lineStyle: {
-              color: accentColor,
-            },
-            areaStyle: {
-              color: accentAlpha(0.12),
-            },
+          areaStyle: {
+            color: accentAlpha(0.12),
           },
         },
-      ],
-    };
+      },
+    ],
+  };
 
-    const chartOptionsLoc1 = generateChart(false);
-    // Merge the series and dataset, but not the rest
-    chartOptionsLoc.series = chartOptionsLoc1.series;
-    chartOptionsLoc.dataset = chartOptionsLoc1.dataset;
-    // console.log('computed chartOptionsLoc', chartOptionsLoc);
-    return chartOptionsLoc;
-  },
-);
-
-onMounted(() => {
-  // initializeChart();
+  const chartOptionsLoc1 = generateChart(false);
+  chartOptionsLoc.series = chartOptionsLoc1.series;
+  chartOptionsLoc.dataset = chartOptionsLoc1.dataset;
+  return chartOptionsLoc;
 });
-
-watchThrottled(
-  () => props.openTrades,
-  () => {
-    cumProfitChartOptions.trigger();
-  },
-  { throttle: 60 * 1000 },
-);
-watch(
-  () => settingsStore.chartTheme,
-  () => {
-    cumProfitChartOptions.trigger();
-  },
-);
-watch(
-  () => colorStore.primaryAccent,
-  () => {
-    cumProfitChartOptions.trigger();
-  },
-);
 </script>
 
 <template>

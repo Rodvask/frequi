@@ -57,7 +57,9 @@ let visibleLogicalRangeKey = '';
 
 const amber = '#f6b21a';
 
-const filteredTrades = computed(() => props.trades.filter((trade) => trade.pair === props.dataset.pair));
+const filteredTrades = computed(() =>
+  props.trades.filter((trade) => trade.pair === props.dataset.pair),
+);
 let indicatorSeriesRefs: { label: string; series: ISeriesApi<SeriesType, Time> }[] = [];
 
 const indicatorBadgeValues = computed(() => {
@@ -205,10 +207,18 @@ function indicatorColumns(): string[] {
 function signalLabelsForRow(row: unknown[]): string[] {
   const signalColumns = [
     { column: '_buy_signal_close', label: 'Long entry', tagColumn: columnIndex('enter_tag') },
-    { column: '_enter_long_signal_close', label: 'Long entry', tagColumn: columnIndex('enter_tag') },
+    {
+      column: '_enter_long_signal_close',
+      label: 'Long entry',
+      tagColumn: columnIndex('enter_tag'),
+    },
     { column: '_sell_signal_close', label: 'Long exit', tagColumn: columnIndex('exit_tag') },
     { column: '_exit_long_signal_close', label: 'Long exit', tagColumn: columnIndex('exit_tag') },
-    { column: '_enter_short_signal_close', label: 'Short entry', tagColumn: columnIndex('enter_tag') },
+    {
+      column: '_enter_short_signal_close',
+      label: 'Short entry',
+      tagColumn: columnIndex('enter_tag'),
+    },
     { column: '_exit_short_signal_close', label: 'Short exit', tagColumn: columnIndex('exit_tag') },
   ];
 
@@ -237,7 +247,9 @@ function tradesForTime(time: UTCTimestamp): string[] {
       );
     }
     if (isInsideCandle(trade.close_timestamp)) {
-      const profit = isDefined(trade.profit_ratio) ? ` ${formatPercent(trade.profit_ratio, 2)}` : '';
+      const profit = isDefined(trade.profit_ratio)
+        ? ` ${formatPercent(trade.profit_ratio, 2)}`
+        : '';
       labels.push(
         `Close #${trade.trade_id}${formatMarkerPrice(trade.close_rate ?? trade.current_rate ?? null)}${profit}`,
       );
@@ -292,7 +304,9 @@ function updateCrosshairInfo(param: MouseEventParams<Time>) {
   }
 
   const timestamp = Number(time);
-  const row = props.dataset.data.find((item) => Math.floor(Number(item[colDate]) / 1000) === timestamp);
+  const row = props.dataset.data.find(
+    (item) => Math.floor(Number(item[colDate]) / 1000) === timestamp,
+  );
   if (!row) {
     crosshairInfo.value = null;
     return;
@@ -417,7 +431,8 @@ function buildTradeMarkers(): SeriesMarker<Time>[] {
     if (closeTime) {
       markers.push({
         time: closeTime,
-        position: closePrice === null ? (trade.is_short ? 'belowBar' : 'aboveBar') : 'atPriceMiddle',
+        position:
+          closePrice === null ? (trade.is_short ? 'belowBar' : 'aboveBar') : 'atPriceMiddle',
         price: closePrice ?? undefined,
         color: amber,
         shape: 'circle',
@@ -426,14 +441,12 @@ function buildTradeMarkers(): SeriesMarker<Time>[] {
     }
   });
 
-  return [...buildSignalMarkers(), ...markers].sort((left, right) => Number(left.time) - Number(right.time));
+  return [...buildSignalMarkers(), ...markers].sort(
+    (left, right) => Number(left.time) - Number(right.time),
+  );
 }
 
-function addIndicatorSeries(
-  key: string,
-  config = {},
-  paneIndex = 0,
-) {
+function addIndicatorSeries(key: string, config = {}, paneIndex = 0) {
   if (!chart) return;
 
   const typedConfig = config as { color?: string; type?: ChartType | keyof typeof ChartType };
@@ -659,10 +672,18 @@ watch(
         <span v-if="crosshairInfo.volume">Vol {{ crosshairInfo.volume }}</span>
       </div>
       <div class="ft-tradingview-crosshair__ohlc">
-        <span><small>Open</small><b>{{ crosshairInfo.open }}</b></span>
-        <span><small>High</small><b>{{ crosshairInfo.high }}</b></span>
-        <span><small>Low</small><b>{{ crosshairInfo.low }}</b></span>
-        <span><small>Close</small><b>{{ crosshairInfo.close }}</b></span>
+        <span
+          ><small>Open</small><b>{{ crosshairInfo.open }}</b></span
+        >
+        <span
+          ><small>High</small><b>{{ crosshairInfo.high }}</b></span
+        >
+        <span
+          ><small>Low</small><b>{{ crosshairInfo.low }}</b></span
+        >
+        <span
+          ><small>Close</small><b>{{ crosshairInfo.close }}</b></span
+        >
       </div>
       <div v-if="crosshairInfo.trades.length" class="ft-tradingview-crosshair__section">
         <small>Trades</small>

@@ -43,7 +43,14 @@ const forceExitVisible = ref(false);
 const removeTradeVisible = ref(false);
 const confirmExitText = ref('');
 const confirmExitValue = ref<ModalReasons | null>(null);
-const rightAlignedFields = new Set(['amount', 'stake_amount', 'max_stake_amount', 'open_rate', 'current_rate', 'close_rate']);
+const rightAlignedFields = new Set([
+  'amount',
+  'stake_amount',
+  'max_stake_amount',
+  'open_rate',
+  'current_rate',
+  'close_rate',
+]);
 
 function getColumnAlignmentClass(field: string) {
   return rightAlignedFields.has(field) ? 'ft-trade-table-number' : '';
@@ -69,7 +76,9 @@ const filteredTrades = computed(() =>
       t.pair.toLowerCase().includes(filterText.value.toLowerCase()) ||
       t.exit_reason?.toLowerCase().includes(filterText.value.toLowerCase()) ||
       t.enter_tag?.toLowerCase().includes(filterText.value.toLowerCase()) ||
-      (props.multiBotView ? t.botName?.toLowerCase().includes(filterText.value.toLowerCase()) : false),
+      (props.multiBotView
+        ? t.botName?.toLowerCase().includes(filterText.value.toLowerCase())
+        : false),
   ),
 );
 
@@ -243,7 +252,9 @@ watch(
             <span
               v-if="botStore.activeBot.botFeatures.futures && data.trading_mode !== 'spot'"
               class="ft-trade-table-direction"
-              :class="data.is_short ? 'ft-trade-table-direction-short' : 'ft-trade-table-direction-long'"
+              :class="
+                data.is_short ? 'ft-trade-table-direction-short' : 'ft-trade-table-direction-long'
+              "
             >
               {{ `${data.trade_id ? '| ' : ''}${data.is_short ? 'Short' : 'Long'}` }}
             </span>
@@ -353,9 +364,7 @@ watch(
           <b>{{ formatPrice(trade.amount) }}</b>
           <span>{{ activeTrades ? 'Stake' : 'Total stake' }}</span>
           <b>
-            {{
-              formatStakeAmount(activeTrades ? trade.stake_amount : trade.max_stake_amount)
-            }}
+            {{ formatStakeAmount(activeTrades ? trade.stake_amount : trade.max_stake_amount) }}
             <span v-if="trade.trading_mode !== 'spot'" class="ft-leverage-chip">
               {{ trade.leverage }}X
             </span>

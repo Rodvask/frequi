@@ -116,12 +116,13 @@ function isSameGridItem(a: GridItemData, b: GridItemData): boolean {
 }
 
 function isLegacyDefaultDashboardLayout(layout: GridItemData[]): boolean {
-  return [LEGACY_DEFAULT_DASHBOARD_LAYOUT, PREVIOUS_ANALYTICS_DASHBOARD_LAYOUT].some((legacyLayout) =>
-    legacyLayout.every((legacyItem) => {
-    const currentItem = layout.find((item) => item.i === legacyItem.i);
+  return [LEGACY_DEFAULT_DASHBOARD_LAYOUT, PREVIOUS_ANALYTICS_DASHBOARD_LAYOUT].some(
+    (legacyLayout) =>
+      legacyLayout.every((legacyItem) => {
+        const currentItem = layout.find((item) => item.i === legacyItem.i);
 
-    return currentItem ? isSameGridItem(currentItem, legacyItem) : false;
-    }),
+        return currentItem ? isSameGridItem(currentItem, legacyItem) : false;
+      }),
   );
 }
 

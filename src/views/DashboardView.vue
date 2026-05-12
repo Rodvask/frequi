@@ -51,7 +51,8 @@ function operationalDashboardLayout(layout: GridItemData[]): GridItemData[] {
 
   return visibleLayout.map((item) => {
     const shouldMoveUp =
-      item.y >= closedTradesPanel.y + closedTradesPanel.h && overlapsColumn(item, closedTradesPanel);
+      item.y >= closedTradesPanel.y + closedTradesPanel.h &&
+      overlapsColumn(item, closedTradesPanel);
 
     return shouldMoveUp ? { ...item, y: item.y - closedTradesPanel.h } : item;
   });

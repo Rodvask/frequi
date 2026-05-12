@@ -143,7 +143,9 @@ const singlePairSelection = computed({
   <div class="flex h-full">
     <div class="flex-fill w-full flex-col align-items-stretch flex h-full">
       <div class="ft-chart-toolbar flex me-0 items-center md:gap-2">
-        <span class="ft-chart-meta md:ms-2 text-nowrap">{{ strategyName }} | {{ timeframe || '' }}</span>
+        <span class="ft-chart-meta md:ms-2 text-nowrap"
+          >{{ strategyName }} | {{ timeframe || '' }}</span
+        >
         <MultiSelect
           v-if="settingsStore.multiPairSelection"
           v-model="botStore.activeBot.plotMultiPairs"
