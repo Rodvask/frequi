@@ -1186,10 +1186,10 @@
   .ft-trading-table .ft-leverage-chip {
     min-width: 1.75rem;
     margin-left: 0;
-    padding: 0.08rem 0.36rem;
+    padding: 0.08rem 0.4rem;
     border-color: rgb(var(--ft-accent-rgb) / 0.48);
     background: color-mix(in srgb, var(--ft-panel-strong) 70%, var(--p-primary-color) 14%);
-    font-size: 0.68rem;
+    font-size: 0.7rem;
     line-height: 1;
     transform: translateY(-0.02rem);
   }
@@ -1686,10 +1686,9 @@
     border: 1px solid rgb(var(--ft-accent-light-rgb) / 0.4);
     border-radius: 0.35rem;
     background: color-mix(in srgb, var(--ft-panel-strong) 78%, var(--p-primary-color) 10%);
-    color: var(--p-primary-color);
-    font-size: 0.68em;
+    color: var(--p-primary-color) !important;
+    font-size: 0.7em;
     font-weight: 900;
-    line-height: 1.15;
     text-shadow: none;
     vertical-align: 0.08em;
     white-space: nowrap;
