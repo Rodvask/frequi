@@ -431,7 +431,13 @@ onMounted(() => {
         <h1>Analytics</h1>
         <p>Trading analytics, performance breakdowns and risk signals for selected bots</p>
       </div>
-      <Button severity="secondary" size="small" @click="refreshAdvancedDashboard">
+      <Button
+        class="ft-page-refresh-button"
+        severity="secondary"
+        size="small"
+        aria-label="Refresh analytics"
+        @click="refreshAdvancedDashboard"
+      >
         <template #icon>
           <i-mdi-refresh />
         </template>

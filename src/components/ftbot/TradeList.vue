@@ -277,9 +277,11 @@ watch(
             />
           </template>
           <template v-else-if="field === 'stake_amount' || field === 'max_stake_amount'">
-            {{ formatStakeAmount(data[field]) }}
-            <span v-if="data.trading_mode !== 'spot'" class="ft-leverage-chip">
-              {{ data.leverage }}X
+            <span class="ft-stake-with-leverage">
+              <span>{{ formatStakeAmount(data[field]) }}</span>
+              <span v-if="data.trading_mode !== 'spot'" class="ft-leverage-chip">
+                {{ data.leverage }}X
+              </span>
             </span>
           </template>
           <template

@@ -74,9 +74,9 @@ const historyMetricTone = computed(() => {
             <p>Review completed positions, outcomes and exit reasons for the selected bot.</p>
           </div>
           <Button
+            class="ft-page-refresh-button"
             severity="secondary"
             size="small"
-            rounded
             aria-label="Refresh"
             @click="botStore.activeBot.getTrades()"
           >
