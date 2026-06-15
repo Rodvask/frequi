@@ -11,33 +11,25 @@ const autoRefreshLoc = computed({
 </script>
 
 <template>
-  <div class="ft-reload-control flex items-center ms-2">
+  <div class="flex items-center gap-1">
     <Button
-      class="ft-navbar-auto-toggle"
-      :class="{ 'ft-navbar-auto-toggle-active': autoRefreshLoc }"
+      class="ft-navbar-refresh-button"
       severity="contrast"
       variant="outlined"
       size="small"
-      title="Auto Refresh"
-      :aria-pressed="autoRefreshLoc"
-      @click="autoRefreshLoc = !autoRefreshLoc"
-    >
-      <template #icon>
-        <i-mdi-check-bold v-if="autoRefreshLoc" />
-        <i-mdi-refresh v-else />
-      </template>
-    </Button>
-    <Button
-      class="ft-navbar-refresh-button m-1"
-      severity="contrast"
-      variant="outlined"
-      size="small"
-      title="Auto Refresh all bots now"
+      title="Refresh all bots now"
       @click="botStore.allRefreshFull"
     >
       <template #icon>
-        <i-mdi-refresh />
+        <i-mdi-refresh class="text-sm" />
       </template>
     </Button>
+    <ToggleSwitch
+      v-model="autoRefreshLoc"
+      :pt="{
+        root: { class: 'h-[1.1rem] w-[1.9rem]' },
+        slider: { class: 'h-[1.1rem] w-[1.9rem]' },
+      }"
+    />
   </div>
 </template>

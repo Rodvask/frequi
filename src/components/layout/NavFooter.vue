@@ -1,102 +1,53 @@
 <script setup lang="ts">
+import { useRoute } from 'vue-router';
+import { ref, computed } from 'vue';
+import IconViewList from '~icons/mdi/view-list';
+import IconCompareHorizontal from '~icons/mdi/compare-horizontal';
+import IconChartTimelineVariantShimmer from '~icons/mdi/chart-timeline-variant-shimmer';
+import IconChartLine from '~icons/mdi/chart-line';
+import IconFormatListGroup from '~icons/mdi/format-list-group';
+
+const iconMap: Record<string, any> = {
+  'i-mdi-monitor-dashboard': IconViewList,
+  'i-mdi-swap-horizontal-circle-outline': IconCompareHorizontal,
+  'i-mdi-chart-box-outline': IconChartTimelineVariantShimmer,
+  'i-mdi-chart-line': IconChartLine,
+  'i-mdi-format-list-bulleted-square': IconFormatListGroup,
+};
+
 const botStore = useBotStore();
+const route = useRoute();
+
+const isActive = (to: string) =>
+  to === '/' ? route.path === to : route.path.startsWith(to) && (route.path.length === to.length || route.path[to.length] === '/');
+
+function iconComp(name: string) {
+  return iconMap[name] || null;
+}
+
+const tabs = ref([
+  { label: 'Dashboard', to: '/dashboard', icon: 'i-mdi-monitor-dashboard', visible: computed(() => !botStore.canRunBacktest) },
+  { label: 'Trades', to: '/open_trades', icon: 'i-mdi-swap-horizontal-circle-outline', visible: computed(() => !botStore.canRunBacktest) },
+  { label: 'Analytics', to: '/analytics', icon: 'i-mdi-chart-box-outline', visible: computed(() => !botStore.canRunBacktest) },
+  { label: 'Chart', to: '/graph', icon: 'i-mdi-chart-line', visible: true },
+  { label: 'Logs', to: '/logs', icon: 'i-mdi-format-list-bulleted-square', visible: true },
+]);
 </script>
 
 <template>
-  <footer class="ft-navbar ft-mobile-bottom-nav md:hidden">
-    <!-- Only visible on xs (phone) viewport! -->
-    <hr class="my-0" />
-    <nav class="ft-mobile-bottom-nav-list" aria-label="Mobile primary navigation">
-      <Button
-        v-if="!botStore.canRunBacktest"
-        icon-pos="top"
-        variant="link"
-        size="small"
-        as="router-link"
-        class="ft-mobile-nav-action align-items-center"
-        to="/dashboard"
-        label="Dashboard"
-        aria-label="Dashboard"
+  <footer class="ft-mobile-bottom-nav md:hidden">
+    <nav class="ft-mobile-bottom-nav-list">
+      <RouterLink
+        v-for="tab in tabs.filter((t) => t.visible)"
+        :key="tab.to"
+        :to="tab.to"
+        class="ft-mobile-nav-item"
+        :class="{ 'ft-mobile-nav-item-active': isActive(tab.to) }"
       >
-        <template #icon>
-          <i-mdi-monitor-dashboard height="24" width="24" />
-        </template>
-      </Button>
-      <Button
-        v-if="!botStore.canRunBacktest"
-        icon-pos="top"
-        variant="link"
-        size="small"
-        as="router-link"
-        class="ft-mobile-nav-action align-items-center"
-        to="/open_trades"
-        label="Trades"
-        aria-label="Open trades"
-      >
-        <template #icon>
-          <i-mdi-swap-horizontal-circle-outline height="24" width="24" />
-        </template>
-      </Button>
-      <Button
-        v-if="!botStore.canRunBacktest"
-        icon-pos="top"
-        variant="link"
-        size="small"
-        as="router-link"
-        class="ft-mobile-nav-action align-items-center"
-        to="/trade_history"
-        label="History"
-        aria-label="Trade history"
-      >
-        <template #icon>
-          <i-mdi-history height="24" width="24" />
-        </template>
-      </Button>
-      <Button
-        v-if="!botStore.canRunBacktest"
-        icon-pos="top"
-        variant="link"
-        size="small"
-        as="router-link"
-        class="ft-mobile-nav-action align-items-center"
-        to="/analytics"
-        label="Analytics"
-        aria-label="Analytics"
-      >
-        <template #icon>
-          <i-mdi-chart-box-outline height="24" width="24" />
-        </template>
-      </Button>
-      <Button
-        v-if="!botStore.canRunBacktest"
-        icon-pos="top"
-        variant="link"
-        size="small"
-        as="router-link"
-        class="ft-mobile-nav-action align-items-center"
-        to="/pairlist"
-        label="Pairlist"
-        aria-label="Pairlist"
-      >
-        <template #icon>
-          <i-mdi-format-list-bulleted-square height="24" width="24" />
-        </template>
-      </Button>
-      <Button
-        v-if="!botStore.canRunBacktest"
-        icon-pos="top"
-        variant="link"
-        size="small"
-        as="router-link"
-        class="ft-mobile-nav-action align-items-center"
-        to="/balance"
-        label="Balance"
-        aria-label="Balance"
-      >
-        <template #icon>
-          <i-mdi-wallet-outline height="24" width="24" />
-        </template>
-      </Button>
+        <component :is="iconComp(tab.icon)" class="ft-mobile-nav-icon" />
+        <span class="ft-mobile-nav-label">{{ tab.label }}</span>
+        <span class="ft-mobile-nav-indicator" />
+      </RouterLink>
     </nav>
   </footer>
 </template>

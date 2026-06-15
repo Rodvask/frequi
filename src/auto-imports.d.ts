@@ -13,13 +13,20 @@ declare global {
   const ROUND_CLOSER: typeof import('./utils/roundTimeframe').ROUND_CLOSER
   const ROUND_DOWN: typeof import('./utils/roundTimeframe').ROUND_DOWN
   const ROUND_UP: typeof import('./utils/roundTimeframe').ROUND_UP
+  const SIGNAL_COLUMNS: typeof import('./utils/charts/signalConfigs').SIGNAL_COLUMNS
   const TradeLayout: typeof import('./stores/layout').TradeLayout
+  const TradeMarkersPrimitive: typeof import('./utils/charts/tradeMarkersPrimitive').TradeMarkersPrimitive
   const acceptHMRUpdate: typeof import('pinia').acceptHMRUpdate
+  const apiCall: typeof import('./utils/apiCall').apiCall
+  const apiDelete: typeof import('./utils/apiCall').apiDelete
+  const apiGet: typeof import('./utils/apiCall').apiGet
+  const apiPost: typeof import('./utils/apiCall').apiPost
   const asyncComputed: typeof import('@vueuse/core').asyncComputed
   const autoResetRef: typeof import('@vueuse/core').autoResetRef
   const availableBacktestMetrics: typeof import('./utils/backtestMetrics').availableBacktestMetrics
   const availableBots: typeof import('./composables/loginInfo').availableBots
   const binData: typeof import('./utils/charts/binCount').binData
+  const buildTradeMarkers: typeof import('./utils/charts/buildTradeMarkers').buildTradeMarkers
   const calculateDiff: typeof import('./utils/charts/areaPlotDataset').calculateDiff
   const computed: typeof import('vue').computed
   const computedAsync: typeof import('@vueuse/core').computedAsync
@@ -413,8 +420,11 @@ declare global {
   export type { ShowAlertType } from './utils/alerts'
   import('./utils/alerts')
   // @ts-ignore
-  export type { SupportedSeriesTypes } from './utils/charts/candleChartSeries'
-  import('./utils/charts/candleChartSeries')
+  export type { SignalColConfig } from './utils/charts/signalConfigs'
+  import('./utils/charts/signalConfigs')
+  // @ts-ignore
+  export type { TradeMarkersPrimitive, TradeMarkerPoint } from './utils/charts/tradeMarkersPrimitive'
+  import('./utils/charts/tradeMarkersPrimitive')
 }
 
 // for vue template auto import
@@ -429,13 +439,19 @@ declare module 'vue' {
     readonly ROUND_CLOSER: UnwrapRef<typeof import('./utils/roundTimeframe')['ROUND_CLOSER']>
     readonly ROUND_DOWN: UnwrapRef<typeof import('./utils/roundTimeframe')['ROUND_DOWN']>
     readonly ROUND_UP: UnwrapRef<typeof import('./utils/roundTimeframe')['ROUND_UP']>
+    readonly SIGNAL_COLUMNS: UnwrapRef<typeof import('./utils/charts/signalConfigs')['SIGNAL_COLUMNS']>
     readonly TradeLayout: UnwrapRef<typeof import('./stores/layout')['TradeLayout']>
+    readonly TradeMarkersPrimitive: UnwrapRef<typeof import('./utils/charts/tradeMarkersPrimitive')['TradeMarkersPrimitive']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
+    readonly apiCall: UnwrapRef<typeof import('./utils/apiCall')['apiCall']>
+    readonly apiDelete: UnwrapRef<typeof import('./utils/apiCall')['apiDelete']>
+    readonly apiGet: UnwrapRef<typeof import('./utils/apiCall')['apiGet']>
+    readonly apiPost: UnwrapRef<typeof import('./utils/apiCall')['apiPost']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
     readonly availableBacktestMetrics: UnwrapRef<typeof import('./utils/backtestMetrics')['availableBacktestMetrics']>
     readonly binData: UnwrapRef<typeof import('./utils/charts/binCount')['binData']>
-    readonly calculateDiff: UnwrapRef<typeof import('./utils/charts/areaPlotDataset')['calculateDiff']>
+    readonly buildTradeMarkers: UnwrapRef<typeof import('./utils/charts/buildTradeMarkers')['buildTradeMarkers']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly computedAsync: UnwrapRef<typeof import('@vueuse/core')['computedAsync']>
     readonly computedEager: UnwrapRef<typeof import('@vueuse/core')['computedEager']>
@@ -480,18 +496,12 @@ declare module 'vue' {
     readonly formatPrice: UnwrapRef<typeof import('./utils/formatters/numberformat')['formatPrice']>
     readonly formatPriceCurrency: UnwrapRef<typeof import('./utils/formatters/numberformat')['formatPriceCurrency']>
     readonly ftEchartsTransforms: UnwrapRef<typeof import('./utils/charts/ftEchartsTransforms')['ftEchartsTransforms']>
-    readonly generateAreaCandleSeries: UnwrapRef<typeof import('./utils/charts/candleChartSeries')['generateAreaCandleSeries']>
     readonly generateBacktestMetricRows: UnwrapRef<typeof import('./utils/backtestMetrics')['generateBacktestMetricRows']>
     readonly generateBacktestSettingRows: UnwrapRef<typeof import('./utils/backtestMetrics')['generateBacktestSettingRows']>
-    readonly generateCandleSeries: UnwrapRef<typeof import('./utils/charts/candleChartSeries')['generateCandleSeries']>
-    readonly generateMarkArea: UnwrapRef<typeof import('./utils/charts/tradeChartData')['generateMarkArea']>
-    readonly generateMarkAreaSeries: UnwrapRef<typeof import('./utils/charts/tradeChartData')['generateMarkAreaSeries']>
-    readonly generateTradeSeries: UnwrapRef<typeof import('./utils/charts/tradeChartData')['generateTradeSeries']>
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getCurrentWatcher: UnwrapRef<typeof import('vue')['getCurrentWatcher']>
-    readonly getDiffColumnsFromPlotConfig: UnwrapRef<typeof import('./utils/charts/areaPlotDataset')['getDiffColumnsFromPlotConfig']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly hasFeature: UnwrapRef<typeof import('./utils/features')['hasFeature']>
     readonly heikinAshiDataset: UnwrapRef<typeof import('./utils/charts/heikinAshiDataset')['heikinAshiDataset']>

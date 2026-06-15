@@ -1,31 +1,11 @@
 <script setup lang="ts">
+import '@/utils/charts/echartsSetup';
 import ECharts from 'vue-echarts';
 import type { EChartsOption } from 'echarts';
 
-import { use } from 'echarts/core';
-import { CanvasRenderer } from 'echarts/renderers';
-import { BarChart } from 'echarts/charts';
-import {
-  DatasetComponent,
-  DataZoomComponent,
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-} from 'echarts/components';
-
 import type { ClosedTrade } from '@/types';
 
-use([
-  BarChart,
 
-  CanvasRenderer,
-
-  DatasetComponent,
-  DataZoomComponent,
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-]);
 
 // Define Column labels here to avoid typos
 const CHART_PROFIT = 'Trade count';

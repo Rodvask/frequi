@@ -1,0 +1,164 @@
+/**
+ * Accent color themes for FreqUI.
+ * Each class overrides the primary/accent CSS variables for both light and dark modes.
+ * Apply via: document.documentElement.classList.add('ft-accent-blue')
+ */
+
+/* ════════════════════════════════════════════
+   Blue — clean, professional, standard finance
+   ════════════════════════════════════════════ */
+.ft-accent-blue {
+  --p-primary-50: #eff6ff;
+  --p-primary-100: #dbeafe;
+  --p-primary-200: #bfdbfe;
+  --p-primary-300: #93c5fd;
+  --p-primary-400: #60a5fa;
+  --p-primary-500: #3b82f6;
+  --p-primary-600: #2563eb;
+  --p-primary-700: #1d4ed8;
+  --p-primary-800: #1e40af;
+  --p-primary-900: #1e3a8a;
+  --p-primary-950: #172554;
+
+  --ft-accent-light: #2563eb;
+  --ft-accent-light-hover: #1d4ed8;
+  --ft-accent-light-active: #1e40af;
+  --ft-accent-light-rgb: 37 99 235;
+
+  --ft-accent-dark: #60a5fa;
+  --ft-accent-dark-hover: #93c5fd;
+  --ft-accent-dark-active: #3b82f6;
+  --ft-accent-dark-rgb: 96 165 250;
+
+  --p-primary-color: var(--ft-accent-light);
+  --p-primary-hover-color: var(--ft-accent-light-hover);
+  --p-primary-active-color: var(--ft-accent-light-active);
+}
+
+.ft-accent-blue.ft-dark-theme,
+.ft-dark-theme .ft-accent-blue,
+.dark .ft-accent-blue {
+  --p-primary-color: var(--ft-accent-dark);
+  --p-primary-hover-color: var(--ft-accent-dark-hover);
+  --p-primary-active-color: var(--ft-accent-dark-active);
+  --ft-accent-rgb: var(--ft-accent-dark-rgb);
+  --ft-navbar-active: var(--ft-accent-dark);
+  --ft-navbar-active-bg: rgb(var(--ft-accent-dark-rgb) / 0.13);
+  --ft-navbar-active-border: rgb(var(--ft-accent-dark-rgb) / 0.36);
+  --ft-panel-highlight: rgb(var(--ft-accent-dark-rgb) / 0.08);
+}
+
+.ft-accent-blue:not(.ft-dark-theme):not(.dark),
+:root:not(.dark):not(.ft-dark-theme) .ft-accent-blue {
+  --ft-accent-rgb: var(--ft-accent-light-rgb);
+  --ft-navbar-active: var(--ft-accent-light);
+  --ft-navbar-active-bg: rgb(var(--ft-accent-light-rgb) / 0.1);
+  --ft-navbar-active-border: rgb(var(--ft-accent-light-rgb) / 0.28);
+  --ft-panel-highlight: rgb(var(--ft-accent-light-rgb) / 0.12);
+}
+
+/* ════════════════════════════════════════════
+   Teal — fresh, modern, natural
+   ════════════════════════════════════════════ */
+.ft-accent-teal {
+  --p-primary-50: #f0fdfa;
+  --p-primary-100: #ccfbf1;
+  --p-primary-200: #99f6e4;
+  --p-primary-300: #5eead4;
+  --p-primary-400: #2dd4bf;
+  --p-primary-500: #14b8a6;
+  --p-primary-600: #0d9488;
+  --p-primary-700: #0f766e;
+  --p-primary-800: #115e59;
+  --p-primary-900: #134e4a;
+  --p-primary-950: #042f2e;
+
+  --ft-accent-light: #0d9488;
+  --ft-accent-light-hover: #0f766e;
+  --ft-accent-light-active: #115e59;
+  --ft-accent-light-rgb: 13 148 136;
+
+  --ft-accent-dark: #2dd4bf;
+  --ft-accent-dark-hover: #5eead4;
+  --ft-accent-dark-active: #14b8a6;
+  --ft-accent-dark-rgb: 45 212 191;
+
+  --p-primary-color: var(--ft-accent-light);
+  --p-primary-hover-color: var(--ft-accent-light-hover);
+  --p-primary-active-color: var(--ft-accent-light-active);
+}
+
+.ft-accent-teal.ft-dark-theme,
+.ft-dark-theme .ft-accent-teal,
+.dark .ft-accent-teal {
+  --p-primary-color: var(--ft-accent-dark);
+  --p-primary-hover-color: var(--ft-accent-dark-hover);
+  --p-primary-active-color: var(--ft-accent-dark-active);
+  --ft-accent-rgb: var(--ft-accent-dark-rgb);
+  --ft-navbar-active: var(--ft-accent-dark);
+  --ft-navbar-active-bg: rgb(var(--ft-accent-dark-rgb) / 0.13);
+  --ft-navbar-active-border: rgb(var(--ft-accent-dark-rgb) / 0.36);
+  --ft-panel-highlight: rgb(var(--ft-accent-dark-rgb) / 0.08);
+}
+
+.ft-accent-teal:not(.ft-dark-theme):not(.dark),
+:root:not(.dark):not(.ft-dark-theme) .ft-accent-teal {
+  --ft-accent-rgb: var(--ft-accent-light-rgb);
+  --ft-navbar-active: var(--ft-accent-light);
+  --ft-navbar-active-bg: rgb(var(--ft-accent-light-rgb) / 0.1);
+  --ft-navbar-active-border: rgb(var(--ft-accent-light-rgb) / 0.28);
+  --ft-panel-highlight: rgb(var(--ft-accent-light-rgb) / 0.12);
+}
+
+/* ════════════════════════════════════════════
+   Indigo — elegant, sophisticated, premium
+   ════════════════════════════════════════════ */
+.ft-accent-indigo {
+  --p-primary-50: #eef2ff;
+  --p-primary-100: #e0e7ff;
+  --p-primary-200: #c7d2fe;
+  --p-primary-300: #a5b4fc;
+  --p-primary-400: #818cf8;
+  --p-primary-500: #6366f1;
+  --p-primary-600: #4f46e5;
+  --p-primary-700: #4338ca;
+  --p-primary-800: #3730a3;
+  --p-primary-900: #312e81;
+  --p-primary-950: #1e1b4b;
+
+  --ft-accent-light: #4f46e5;
+  --ft-accent-light-hover: #4338ca;
+  --ft-accent-light-active: #3730a3;
+  --ft-accent-light-rgb: 79 70 229;
+
+  --ft-accent-dark: #818cf8;
+  --ft-accent-dark-hover: #a5b4fc;
+  --ft-accent-dark-active: #6366f1;
+  --ft-accent-dark-rgb: 129 140 248;
+
+  --p-primary-color: var(--ft-accent-light);
+  --p-primary-hover-color: var(--ft-accent-light-hover);
+  --p-primary-active-color: var(--ft-accent-light-active);
+}
+
+.ft-accent-indigo.ft-dark-theme,
+.ft-dark-theme .ft-accent-indigo,
+.dark .ft-accent-indigo {
+  --p-primary-color: var(--ft-accent-dark);
+  --p-primary-hover-color: var(--ft-accent-dark-hover);
+  --p-primary-active-color: var(--ft-accent-dark-active);
+  --ft-accent-rgb: var(--ft-accent-dark-rgb);
+  --ft-navbar-active: var(--ft-accent-dark);
+  --ft-navbar-active-bg: rgb(var(--ft-accent-dark-rgb) / 0.13);
+  --ft-navbar-active-border: rgb(var(--ft-accent-dark-rgb) / 0.36);
+  --ft-panel-highlight: rgb(var(--ft-accent-dark-rgb) / 0.08);
+}
+
+.ft-accent-indigo:not(.ft-dark-theme):not(.dark),
+:root:not(.dark):not(.ft-dark-theme) .ft-accent-indigo {
+  --ft-accent-rgb: var(--ft-accent-light-rgb);
+  --ft-navbar-active: var(--ft-accent-light);
+  --ft-navbar-active-bg: rgb(var(--ft-accent-light-rgb) / 0.1);
+  --ft-navbar-active-border: rgb(var(--ft-accent-light-rgb) / 0.28);
+  --ft-panel-highlight: rgb(var(--ft-accent-light-rgb) / 0.12);
+}

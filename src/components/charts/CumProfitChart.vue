@@ -1,19 +1,7 @@
 <script setup lang="ts">
+import '@/utils/charts/echartsSetup';
 import type { EChartsOption } from 'echarts';
 import ECharts from 'vue-echarts';
-
-import { BarChart, LineChart } from 'echarts/charts';
-import {
-  DataZoomComponent,
-  DatasetComponent,
-  GridComponent,
-  LegendComponent,
-  MarkLineComponent,
-  TitleComponent,
-  TooltipComponent,
-} from 'echarts/components';
-import { use } from 'echarts/core';
-import { CanvasRenderer } from 'echarts/renderers';
 
 import type {
   ClosedTrade,
@@ -22,21 +10,6 @@ import type {
   CumProfitDataPerDate,
   Trade,
 } from '@/types';
-use([
-  BarChart,
-  LineChart,
-
-  CanvasRenderer,
-
-  DatasetComponent,
-  DataZoomComponent,
-  GridComponent,
-  LegendComponent,
-  MarkLineComponent,
-  TitleComponent,
-  TooltipComponent,
-]);
-
 // Define Column labels here to avoid typos
 const CHART_PROFIT = 'Profit';
 

@@ -3,19 +3,7 @@ import ECharts from 'vue-echarts';
 import type { ClosedTrade } from '@/types';
 import type { EChartsOption } from 'echarts';
 
-import { use } from 'echarts/core';
-import { CanvasRenderer } from 'echarts/renderers';
-import { BoxplotChart, ScatterChart } from 'echarts/charts';
-import {
-  DatasetComponent,
-  DataZoomComponent,
-  GridComponent,
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-  TransformComponent,
-  VisualMapComponent,
-} from 'echarts/components';
+import '@/utils/charts/echartsSetup';
 
 const props = withDefaults(
   defineProps<{
@@ -28,20 +16,6 @@ const props = withDefaults(
 );
 
 const settingsStore = useSettingsStore();
-
-use([
-  DatasetComponent,
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  LegendComponent,
-  DataZoomComponent,
-  TransformComponent,
-  BoxplotChart,
-  CanvasRenderer,
-  VisualMapComponent,
-  ScatterChart,
-]);
 
 const allTrades = computed(() => {
   return props.trades.map((trade) => {

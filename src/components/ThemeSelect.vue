@@ -3,6 +3,7 @@ import type { ThemeName } from '@/types';
 
 const activeTheme = ref('');
 const settingsStore = useSettingsStore();
+const colorStore = useColorStore();
 
 withDefaults(defineProps<{ showText?: boolean }>(), { showText: false });
 

@@ -12,5 +12,6 @@ export const dataZoomPartial = {
 export const echartsGridDefault = {
   left: '55',
   right: '30',
+  top: 16,
   bottom: 80,
 };

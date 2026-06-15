@@ -165,7 +165,7 @@ onMounted(async () => {
       >
         <DraggableContainer>
           <template #header>
-            <div class="flex justify-content-center">
+            <div class="flex justify-center">
               Open Trades
               <InfoBox
                 class="ms-2"

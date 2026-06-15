@@ -5,30 +5,7 @@ import ECharts from 'vue-echarts';
 import type { Trade } from '@/types';
 import type { EChartsOption } from 'echarts';
 
-import { use } from 'echarts/core';
-import { CanvasRenderer } from 'echarts/renderers';
-import { LineChart, BarChart } from 'echarts/charts';
-import {
-  DatasetComponent,
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-  VisualMapComponent,
-  VisualMapPiecewiseComponent,
-} from 'echarts/components';
-
-use([
-  BarChart,
-  LineChart,
-  CanvasRenderer,
-
-  DatasetComponent,
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-  VisualMapComponent,
-  VisualMapPiecewiseComponent,
-]);
+import '@/utils/charts/echartsSetup';
 
 // Define Column labels here to avoid typos
 const CHART_PROFIT = 'Profit %';

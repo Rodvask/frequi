@@ -10,21 +10,21 @@ import {
   HistogramSeries,
   LineSeries,
   createChart,
-  createSeriesMarkers,
   type CandlestickData,
   type HistogramData,
   type IChartApi,
   type ISeriesApi,
-  type ISeriesMarkersPluginApi,
   type LineData,
   type LogicalRange,
   type MouseEventParams,
-  type SeriesMarker,
   type SeriesType,
   type SingleValueData,
   type Time,
   type UTCTimestamp,
 } from 'lightweight-charts';
+import { buildTradeMarkers } from '@/utils/charts/buildTradeMarkers';
+import { TradeMarkersPrimitive } from '@/utils/charts/tradeMarkersPrimitive';
+import type { TradeMarkerPoint } from '@/utils/charts/tradeMarkersPrimitive';
 
 const props = defineProps<{
   trades: Trade[];
@@ -36,6 +36,7 @@ const props = defineProps<{
   startCandleCount: number;
 }>();
 
+const colorStore = useColorStore();
 const settingsStore = useSettingsStore();
 const chartContainer = ref<HTMLElement | null>(null);
 const crosshairInfo = ref<{
@@ -51,11 +52,18 @@ const crosshairInfo = ref<{
 } | null>(null);
 let chart: IChartApi | null = null;
 let resizeObserver: ResizeObserver | null = null;
-let markersApi: ISeriesMarkersPluginApi<Time> | null = null;
 let visibleLogicalRange: LogicalRange | null = null;
 let visibleLogicalRangeKey = '';
 
-const amber = '#f6b21a';
+function accentHex(): string {
+  const accent = colorStore.primaryAccentConfig;
+  return settingsStore.isDarkTheme ? accent.dark : accent.light;
+}
+
+function accentRgbStr(): string {
+  const accent = colorStore.primaryAccentConfig;
+  return settingsStore.isDarkTheme ? accent.darkRgb : accent.lightRgb;
+}
 
 const filteredTrades = computed(() =>
   props.trades.filter((trade) => trade.pair === props.dataset.pair),
@@ -239,20 +247,69 @@ function tradesForTime(time: UTCTimestamp): string[] {
   const isInsideCandle = (timestamp?: number | null) =>
     isDefined(timestamp) && timestamp >= candleStartMs && timestamp < candleEndMs;
 
+  // Count DCAs per trade for labelling
+  const dcaCounts: Record<number, number> = {};
+  filteredTrades.value.forEach((trade) => {
+    const opens = [trade.open_timestamp];
+    if (trade.orders?.length) {
+      trade.orders
+        .filter((o) => o.ft_order_side === 'buy' && o.status === 'closed')
+        .forEach((o) => opens.push(o.order_timestamp));
+    }
+    dcaCounts[trade.trade_id] = opens.filter((t) => t).length - 1;
+  });
+
   return filteredTrades.value.flatMap((trade) => {
     const labels: string[] = [];
+
+    // Entry
     if (isInsideCandle(trade.open_timestamp)) {
-      labels.push(
-        `Open ${trade.is_short ? 'Short' : 'Long'} #${trade.trade_id}${formatMarkerPrice(trade.open_rate ?? null)}`,
-      );
+      const entryTag = trade.enter_tag ? ` ${trade.enter_tag}` : '';
+      const direction = trade.is_short ? 'Short' : 'Long';
+      const dcaLabel =
+        (dcaCounts[trade.trade_id] ?? 0) > 0 ? ` +${dcaCounts[trade.trade_id]}` : '';
+      labels.push(`${direction} #${trade.trade_id}${entryTag}${dcaLabel}`);
     }
+
+    // DCA orders (additional entries)
+    if (trade.orders?.length) {
+      let dcaIndex = 1;
+      for (const order of trade.orders) {
+        if (
+          order.ft_order_side === 'buy' &&
+          order.status === 'closed' &&
+          isInsideCandle(order.order_timestamp)
+        ) {
+          const tag = order.ft_order_tag ? ` ${order.ft_order_tag}` : ` +${dcaIndex}`;
+          labels.push(`DCA #${trade.trade_id}${tag}`);
+          dcaIndex++;
+        }
+      }
+    }
+
+    // Partial DCA exits (sell orders that are not the final close)
+    if (trade.orders?.length) {
+      for (const order of trade.orders) {
+        if (
+          order.ft_order_side === 'sell' &&
+          order.status === 'closed' &&
+          order.safe_price !== trade.close_rate &&
+          isInsideCandle(order.order_timestamp)
+        ) {
+          const tag = order.ft_order_tag ? ` ${order.ft_order_tag}` : '';
+          const amount = order.filled ? ` ${formatPrice(order.filled)}` : '';
+          labels.push(`Partial exit #${trade.trade_id}${tag}${amount}`);
+        }
+      }
+    }
+
+    // Close / Exit
     if (isInsideCandle(trade.close_timestamp)) {
       const profit = isDefined(trade.profit_ratio)
         ? ` ${formatPercent(trade.profit_ratio, 2)}`
         : '';
-      labels.push(
-        `Close #${trade.trade_id}${formatMarkerPrice(trade.close_rate ?? trade.current_rate ?? null)}${profit}`,
-      );
+      const exitReason = trade.exit_reason ? ` ${trade.exit_reason}` : '';
+      labels.push(`✕ #${trade.trade_id}${exitReason}${profit}`);
     }
 
     return labels;
@@ -325,124 +382,15 @@ function updateCrosshairInfo(param: MouseEventParams<Time>) {
   };
 }
 
-function buildSignalMarkers(): SeriesMarker<Time>[] {
-  const colDate = columnIndex('__date_ts');
-  const colEnterTag = columnIndex('enter_tag');
-  const colExitTag = columnIndex('exit_tag');
-  const signalColumns = [
-    {
-      column: '_buy_signal_close',
-      label: 'Long entry',
-      position: 'belowBar' as const,
-      shape: 'arrowUp' as const,
-      color: props.colorUp,
-      tagColumn: colEnterTag,
-    },
-    {
-      column: '_enter_long_signal_close',
-      label: 'Long entry',
-      position: 'belowBar' as const,
-      shape: 'arrowUp' as const,
-      color: props.colorUp,
-      tagColumn: colEnterTag,
-    },
-    {
-      column: '_sell_signal_close',
-      label: 'Long exit',
-      position: 'aboveBar' as const,
-      shape: 'circle' as const,
-      color: amber,
-      tagColumn: colExitTag,
-    },
-    {
-      column: '_exit_long_signal_close',
-      label: 'Long exit',
-      position: 'aboveBar' as const,
-      shape: 'circle' as const,
-      color: amber,
-      tagColumn: colExitTag,
-    },
-    {
-      column: '_enter_short_signal_close',
-      label: 'Short entry',
-      position: 'aboveBar' as const,
-      shape: 'arrowDown' as const,
-      color: props.colorDown,
-      tagColumn: colEnterTag,
-    },
-    {
-      column: '_exit_short_signal_close',
-      label: 'Short exit',
-      position: 'belowBar' as const,
-      shape: 'circle' as const,
-      color: amber,
-      tagColumn: colExitTag,
-    },
-  ];
-
-  if (colDate < 0) return [];
-
-  return signalColumns.flatMap((signal) => {
-    const signalColumn = columnIndex(signal.column);
-    if (signalColumn < 0) return [];
-
-    return props.dataset.data
-      .filter((row) => hasSignalValue(row, signalColumn))
-      .map((row) => {
-        const price = rowValue(row, signalColumn);
-        const tag =
-          signal.tagColumn >= 0 && row[signal.tagColumn]
-            ? String(row[signal.tagColumn]).slice(0, 38)
-            : '';
-        return {
-          time: asTime(row[colDate]) as UTCTimestamp,
-          position: price === null ? signal.position : 'atPriceMiddle',
-          price: price ?? undefined,
-          color: signal.color,
-          shape: signal.shape,
-          text: tag
-            ? `${signal.label}${formatMarkerPrice(price)}: ${tag}`
-            : `${signal.label}${formatMarkerPrice(price)}`,
-        };
-      })
-      .filter((marker) => marker.time);
-  });
-}
-
-function buildTradeMarkers(): SeriesMarker<Time>[] {
-  const markers: SeriesMarker<Time>[] = [];
-
-  filteredTrades.value.forEach((trade) => {
-    const openTime = asTime(trade.open_timestamp);
-    const openPrice = trade.open_rate ?? null;
-    if (openTime) {
-      markers.push({
-        time: openTime,
-        position: openPrice === null ? (trade.is_short ? 'aboveBar' : 'belowBar') : 'atPriceMiddle',
-        price: openPrice ?? undefined,
-        color: trade.is_short ? props.colorDown : props.colorUp,
-        shape: trade.is_short ? 'arrowDown' : 'arrowUp',
-        text: `${trade.is_short ? 'Short' : 'Long'} #${trade.trade_id}${formatMarkerPrice(openPrice)}`,
-      });
-    }
-
-    const closeTime = asTime(trade.close_timestamp);
-    const closePrice = trade.close_rate ?? trade.current_rate ?? null;
-    if (closeTime) {
-      markers.push({
-        time: closeTime,
-        position:
-          closePrice === null ? (trade.is_short ? 'belowBar' : 'aboveBar') : 'atPriceMiddle',
-        price: closePrice ?? undefined,
-        color: amber,
-        shape: 'circle',
-        text: `Close #${trade.trade_id}${formatMarkerPrice(closePrice)}`,
-      });
-    }
-  });
-
-  return [...buildSignalMarkers(), ...markers].sort(
-    (left, right) => Number(left.time) - Number(right.time),
+function buildTradeMarkersData(): TradeMarkerPoint[] {
+  return buildTradeMarkers(
+    props.dataset,
+    props.trades,
+    props.colorUp,
+    props.colorDown,
+    '#3B82F6', // long entry (vibrant blue)
+    '#FF0044', // short entry (vibrant red)
+    '#f6b21a', // exit / amber signals (yellow)
   );
 }
 
@@ -474,7 +422,7 @@ function addIndicatorSeries(key: string, config = {}, paneIndex = 0) {
   const lineSeries = chart.addSeries(
     LineSeries,
     {
-      color: typedConfig.color || amber,
+      color: typedConfig.color || accentHex(),
       lineVisible: !isScatter,
       lineWidth: 2,
       pointMarkersVisible: isScatter,
@@ -497,8 +445,6 @@ function destroyChart(preserveRange = true) {
   if (preserveRange) {
     visibleLogicalRange = chart?.timeScale().getVisibleLogicalRange() ?? visibleLogicalRange;
   }
-  markersApi?.detach();
-  markersApi = null;
   indicatorSeriesRefs = [];
   chart?.remove();
   chart = null;
@@ -534,8 +480,8 @@ function createTradingChart() {
     },
     crosshair: {
       mode: CrosshairMode.Normal,
-      vertLine: { color: 'rgba(246, 178, 26, 0.45)', labelBackgroundColor: amber },
-      horzLine: { color: 'rgba(246, 178, 26, 0.35)', labelBackgroundColor: amber },
+      vertLine: { color: `${accentHex()}55`, labelBackgroundColor: accentHex() },
+      horzLine: { color: `${accentHex()}44`, labelBackgroundColor: accentHex() },
     },
     localization: {
       priceFormatter: (price: number) =>
@@ -579,7 +525,8 @@ function createTradingChart() {
   });
 
   candleSeries.setData(buildCandleData());
-  markersApi = createSeriesMarkers(candleSeries, buildTradeMarkers(), { zOrder: 'top' });
+  const tradeMarkersPrimitive = new TradeMarkersPrimitive(buildTradeMarkersData());
+  candleSeries.attachPrimitive(tradeMarkersPrimitive);
   chart.subscribeCrosshairMove((param) => updateCrosshairInfo(param));
 
   const volumeSeries = chart.addSeries(HistogramSeries, {
@@ -821,10 +768,10 @@ watch(
 
 .ft-tradingview-crosshair__event {
   padding: 0.18rem 0.4rem;
-  border: 1px solid rgba(32, 225, 157, 0.22);
+  border: 1px solid rgb(var(--ft-accent-rgb) / 0.22);
   border-radius: 999px;
-  background: rgba(32, 225, 157, 0.08);
-  color: #20e19d;
+  background: rgb(var(--ft-accent-rgb) / 0.08);
+  color: rgb(var(--ft-accent-rgb));
 }
 
 .ft-tradingview-indicators {

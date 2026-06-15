@@ -1,14 +1,6 @@
 <script setup lang="ts">
-import ECharts from 'vue-echarts';
-import type { EChartsOption } from 'echarts';
-import { use } from 'echarts/core';
-import { BarChart } from 'echarts/charts';
-import { CanvasRenderer } from 'echarts/renderers';
-import { GridComponent, TooltipComponent } from 'echarts/components';
 import type { EntryStats, ExitStats, PerformanceEntry, TimeSummaryRecord, Trade } from '@/types';
 import { TimeSummaryOptions } from '@/types';
-
-use([BarChart, CanvasRenderer, GridComponent, TooltipComponent]);
 
 type MetricTone = 'profit' | 'loss' | 'neutral' | 'warning';
 
@@ -223,6 +215,9 @@ const pairPerformance = computed(() =>
     'pair',
   ),
 );
+const pairPerformanceTradeCount = computed(() =>
+  pairPerformance.value.reduce((sum, row) => sum + row.count, 0),
+);
 const enterTagPerformance = computed(() =>
   aggregatePerformance(
     selectedBots.value.flatMap((bot) => bot.entryStats),
@@ -300,109 +295,6 @@ const riskAlerts = computed<RiskAlert[]>(() => {
       ];
 });
 
-const topPairChartOptions = computed<EChartsOption>(() => {
-  const topRows = pairPerformance.value.slice(0, 8).reverse();
-  const accentConfig = colorStore.primaryAccentConfig;
-  const accentColor = settingsStore.chartTheme === 'dark' ? accentConfig.dark : accentConfig.light;
-  const accentRgb =
-    settingsStore.chartTheme === 'dark' ? accentConfig.darkRgb : accentConfig.lightRgb;
-  const accentAlpha = (alpha: number) => `rgb(${accentRgb} / ${alpha})`;
-  const chartTextColor = settingsStore.chartTheme === 'dark' ? '#b8c5d2' : '#475569';
-  const chartMutedColor = settingsStore.chartTheme === 'dark' ? '#7f8ea3' : '#64748b';
-  const chartLineColor =
-    settingsStore.chartTheme === 'dark' ? 'rgba(148, 163, 184, 0.13)' : '#e2e8f0';
-  const tooltipBg = settingsStore.chartTheme === 'dark' ? 'rgba(5, 8, 20, 0.96)' : '#ffffff';
-  const tooltipText = settingsStore.chartTheme === 'dark' ? '#edf3f8' : '#10202a';
-  return {
-    backgroundColor: 'rgba(0, 0, 0, 0)',
-    animationDuration: 500,
-    animationEasing: 'cubicOut',
-    animationDurationUpdate: 350,
-    animationEasingUpdate: 'cubicOut',
-    tooltip: {
-      trigger: 'item',
-      triggerOn: 'mousemove|click',
-      alwaysShowContent: true,
-      confine: true,
-      appendToBody: true,
-      axisPointer: {
-        type: 'shadow',
-        shadowStyle: {
-          color: accentAlpha(0.08),
-        },
-      },
-      backgroundColor: tooltipBg,
-      borderColor: accentAlpha(0.28),
-      borderWidth: 1,
-      padding: [10, 12],
-      textStyle: { color: tooltipText, fontWeight: 650 },
-      extraCssText:
-        'box-shadow: 0 14px 34px rgba(0,0,0,.28); border-radius: 8px; backdrop-filter: blur(10px);',
-      formatter: (params) => {
-        const point = Array.isArray(params) ? params[0] : params;
-        const value = Number(point?.value ?? 0);
-        const row = topRows[point?.dataIndex ?? 0];
-        return [
-          `<div style="font-weight:800;margin-bottom:6px;color:${accentColor}">${row?.key ?? ''}</div>`,
-          `<div>${point?.marker ?? ''}Profit: <b>${formatPrice(
-            value,
-            2,
-          )} ${stakeCurrency.value}</b></div>`,
-          `<div style="color:${chartMutedColor};margin-top:3px">Trades: <b>${row?.count ?? 0}</b></div>`,
-        ].join('');
-      },
-    },
-    grid: {
-      left: 106,
-      right: 20,
-      top: 16,
-      bottom: 28,
-    },
-    xAxis: {
-      type: 'value',
-      axisLabel: { color: chartTextColor, fontWeight: 600 },
-      axisLine: { show: false },
-      axisTick: { show: false },
-      splitLine: { lineStyle: { color: chartLineColor, type: 'dashed' } },
-    },
-    yAxis: {
-      type: 'category',
-      data: topRows.map((row) => row.key),
-      axisLabel: { color: chartTextColor, fontWeight: 650 },
-      axisLine: { show: false },
-      axisTick: { show: false },
-    },
-    series: [
-      {
-        type: 'bar',
-        data: topRows.map((row) => row.profitAbs),
-        barMaxWidth: 18,
-        barCategoryGap: '40%',
-        label: {
-          show: true,
-          position: 'right',
-          color: chartTextColor,
-          fontWeight: 750,
-          formatter: (params) => formatPrice(Number(params.value ?? 0), 2),
-        },
-        itemStyle: {
-          color: (params) =>
-            Number(params.value) >= 0 ? colorStore.colorProfit : colorStore.colorLoss,
-          borderRadius: [4, 4, 4, 4],
-        },
-        emphasis: {
-          focus: 'series',
-          itemStyle: {
-            opacity: 0.92,
-            shadowBlur: 10,
-            shadowColor: 'rgba(0,0,0,0.22)',
-          },
-        },
-      },
-    ],
-  };
-});
-
 async function refreshAdvancedDashboard() {
   const jobs = selectedBots.value.flatMap((bot) => [
     bot.getProfit(),
@@ -468,13 +360,16 @@ onMounted(() => {
 
     <section class="ft-advanced-grid">
       <article class="ft-dashboard-card ft-advanced-panel ft-analytics-daily-panel">
-        <header>Profit over time</header>
-        <PeriodBreakdown multi-bot-view />
+        <div class="ft-dashboard-card-header"><span>Profit over time</span></div>
+        <div class="ft-dashboard-card-body">
+          <PeriodBreakdown multi-bot-view />
+        </div>
       </article>
 
       <article class="ft-dashboard-card ft-advanced-panel ft-analytics-risk-panel">
-        <header>Risk alerts</header>
-        <div class="ft-risk-list">
+        <div class="ft-dashboard-card-header"><span>Risk alerts</span></div>
+        <div class="ft-dashboard-card-body">
+          <div class="ft-risk-list">
           <div
             v-for="alert in riskAlerts"
             :key="alert.title"
@@ -485,23 +380,19 @@ onMounted(() => {
             <span>{{ alert.detail }}</span>
           </div>
         </div>
+        </div>
       </article>
 
       <article class="ft-dashboard-card ft-advanced-panel ft-analytics-pair-panel">
-        <header>Pair performance</header>
-        <div class="ft-advanced-chart-scroll">
-          <ECharts
-            v-if="pairPerformance.length"
-            class="ft-advanced-chart"
-            :option="topPairChartOptions"
-            :theme="settingsStore.chartTheme"
-            autoresize
-          />
-        </div>
+        <div class="ft-dashboard-card-header"><span>Pair performance</span></div>
+        <div class="ft-dashboard-card-body">
         <DataTable
-          class="ft-metric-table ft-advanced-desktop-table"
+          class="ft-metric-table"
           size="small"
-          :value="pairPerformance.slice(0, 10)"
+          :value="pairPerformance"
+          :paginator="pairPerformance.length > 10"
+          :rows="10"
+          :rows-per-page-options="[10, 20, 30]"
         >
           <Column field="key" header="Pair" />
           <Column field="profitAbs" :header="`Profit ${stakeCurrency}`">
@@ -511,7 +402,13 @@ onMounted(() => {
               </span>
             </template>
           </Column>
+          <Column field="count" header="Trades %">
+            <template #body="{ data }">
+              {{ formatTradeShare(data, pairPerformanceTradeCount) }}
+            </template>
+          </Column>
           <Column field="count" header="Trades" />
+          <template #empty>No pair performance available.</template>
         </DataTable>
         <div class="ft-advanced-mobile-list">
           <div
@@ -528,33 +425,41 @@ onMounted(() => {
             </b>
           </div>
         </div>
+        </div>
       </article>
 
       <article class="ft-dashboard-card ft-advanced-panel ft-analytics-trades-panel">
-        <header>Trades log</header>
-        <div class="ft-analytics-chart-frame">
+        <div class="ft-dashboard-card-header"><span>Trades log</span></div>
+        <div class="ft-dashboard-card-body">
+          <div class="ft-analytics-chart-frame">
           <TradesLogChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
+        </div>
         </div>
       </article>
 
       <article class="ft-dashboard-card ft-advanced-panel ft-analytics-wallet-panel">
-        <header>Wallet history</header>
-        <div class="ft-analytics-chart-frame">
+        <div class="ft-dashboard-card-header"><span>Wallet history</span></div>
+        <div class="ft-dashboard-card-body">
+          <div class="ft-analytics-chart-frame">
           <WalletHistoryChart :wallet-data="botStore.allBalanceHistory" :show-title="false" />
+        </div>
         </div>
       </article>
 
       <article class="ft-dashboard-card ft-advanced-panel ft-analytics-distribution-panel">
-        <header>Profit distribution</header>
-        <div class="ft-analytics-chart-frame">
+        <div class="ft-dashboard-card-header"><span>Profit distribution</span></div>
+        <div class="ft-dashboard-card-body">
+          <div class="ft-analytics-chart-frame">
           <ProfitDistributionChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
+        </div>
         </div>
       </article>
 
       <article class="ft-dashboard-card ft-advanced-panel ft-analytics-enter-panel">
-        <header>Enter tag performance</header>
+        <div class="ft-dashboard-card-header"><span>Enter tag performance</span></div>
+        <div class="ft-dashboard-card-body">
         <DataTable
-          class="ft-metric-table ft-advanced-desktop-table"
+          class="ft-metric-table"
           size="small"
           :value="enterTagPerformance"
           :paginator="enterTagPerformance.length > 8"
@@ -598,12 +503,14 @@ onMounted(() => {
             No enter tag performance available.
           </div>
         </div>
+        </div>
       </article>
 
       <article class="ft-dashboard-card ft-advanced-panel ft-analytics-exit-panel">
-        <header>Exit reason performance</header>
+        <div class="ft-dashboard-card-header"><span>Exit reason performance</span></div>
+        <div class="ft-dashboard-card-body">
         <DataTable
-          class="ft-metric-table ft-advanced-desktop-table"
+          class="ft-metric-table"
           size="small"
           :value="exitReasonPerformance"
           :paginator="exitReasonPerformance.length > 8"
@@ -646,6 +553,7 @@ onMounted(() => {
           <div v-if="!exitReasonPerformance.length" class="ft-empty-state">
             No exit reason performance available.
           </div>
+        </div>
         </div>
       </article>
     </section>

@@ -1,37 +1,8 @@
 <script setup lang="ts">
+import '@/utils/charts/echartsSetup';
 import ECharts from 'vue-echarts';
-
-import { use } from 'echarts/core';
-import { CanvasRenderer } from 'echarts/renderers';
-import { LineChart } from 'echarts/charts';
-import {
-  DataZoomComponent,
-  DatasetComponent,
-  GridComponent,
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-  VisualMapComponent,
-  MarkLineComponent,
-  TransformComponent,
-} from 'echarts/components';
-
-import type { WalletHistoryPerBot } from '@/types';
 import type { EChartsOption, MarkLineComponentOption } from 'echarts';
-
-use([
-  LineChart,
-  CanvasRenderer,
-  DatasetComponent,
-  DataZoomComponent,
-  GridComponent,
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-  VisualMapComponent,
-  MarkLineComponent,
-  TransformComponent,
-]);
+import type { WalletHistoryPerBot } from '@/types';
 
 const colorStore = useColorStore();
 // Define Column labels here to avoid typos

@@ -2,40 +2,12 @@
 import ECharts from 'vue-echarts';
 // import { EChartsOption } from 'echarts';
 
-import { use } from 'echarts/core';
-import { CanvasRenderer } from 'echarts/renderers';
-import { LineChart, BarChart } from 'echarts/charts';
-import {
-  DataZoomComponent,
-  DatasetComponent,
-  GridComponent,
-  LegendComponent,
-  MarkLineComponent,
-  TitleComponent,
-  TooltipComponent,
-  TransformComponent,
-  VisualMapComponent,
-} from 'echarts/components';
+import '@/utils/charts/echartsSetup';
 
 import { registerTransform } from 'echarts';
 
 import type { TimeSummaryCols, TimeSummaryReturnValue } from '@/types';
 import type { EChartsOption } from 'echarts';
-
-use([
-  BarChart,
-  LineChart,
-  CanvasRenderer,
-  GridComponent,
-  DataZoomComponent,
-  DatasetComponent,
-  LegendComponent,
-  MarkLineComponent,
-  TitleComponent,
-  TooltipComponent,
-  VisualMapComponent,
-  TransformComponent,
-]);
 
 const props = withDefaults(
   defineProps<{
@@ -284,7 +256,7 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
     grid: {
       left: 52,
       right: 48,
-      top: 58,
+      top: props.showTitle ? 58 : 16,
       bottom: 32,
       containLabel: false,
     },

@@ -1,29 +1,9 @@
 <script setup lang="ts">
-import type { EChartsOption } from 'echarts';
+import '@/utils/charts/echartsSetup';
 import ECharts from 'vue-echarts';
-
-import { PieChart } from 'echarts/charts';
-import {
-  DatasetComponent,
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-} from 'echarts/components';
-import { use } from 'echarts/core';
-import { LabelLayout } from 'echarts/features';
-import { CanvasRenderer } from 'echarts/renderers';
+import type { EChartsOption } from 'echarts';
 
 import type { BalanceValues } from '@/types';
-
-use([
-  PieChart,
-  CanvasRenderer,
-  DatasetComponent,
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-  LabelLayout,
-]);
 
 const balanceChart = ref(null);
 const { width } = useElementSize(balanceChart);

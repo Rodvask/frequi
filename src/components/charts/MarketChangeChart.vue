@@ -1,39 +1,12 @@
 <script setup lang="ts">
+import '@/utils/charts/echartsSetup';
 import ECharts from 'vue-echarts';
-// import { EChartsOption } from 'echarts';
-
-import { use } from 'echarts/core';
-import { CanvasRenderer } from 'echarts/renderers';
-import { LineChart } from 'echarts/charts';
-import {
-  DataZoomComponent,
-  DatasetComponent,
-  GridComponent,
-  LegendComponent,
-  CalendarComponent,
-  TitleComponent,
-  TooltipComponent,
-  VisualMapComponent,
-  TransformComponent,
-} from 'echarts/components';
 import { registerTransform } from 'echarts';
 
 import type { BacktestMarketChange } from '@/types';
 import type { EChartsOption } from 'echarts';
 
-use([
-  LineChart,
-  CalendarComponent,
-  CanvasRenderer,
-  GridComponent,
-  DatasetComponent,
-  DataZoomComponent,
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-  VisualMapComponent,
-  TransformComponent,
-]);
+
 
 // Define Column labels here to avoid typos
 const CHART_MARKET_CHANGE = 'Market change %';

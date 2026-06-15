@@ -264,13 +264,13 @@ summary {
 
 .ft-order-card {
   display: grid;
-  grid-template-columns: minmax(6rem, 0.55fr) minmax(12rem, 1.25fr) minmax(12rem, 1fr);
+  grid-template-columns: minmax(6rem, 0.55fr) minmax(8rem, 1.25fr) minmax(8rem, 1fr);
   align-items: center;
   gap: 0.75rem;
   min-width: 0;
   padding: 0.72rem 0.8rem;
   border: 1px solid rgba(148, 163, 184, 0.14);
-  border-radius: 0.45rem;
+  border-radius: var(--ft-card-radius);
   background: color-mix(in srgb, var(--ft-panel-strong) 46%, transparent);
 }
 
