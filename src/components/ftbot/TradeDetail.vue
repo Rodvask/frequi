@@ -1,12 +1,186 @@
 <script setup lang="ts">
 import type { Trade } from '@/types';
+import { timestampmsWithTimezone } from '@/utils/formatters/timeformat';
 
-const colorStore = useColorStore();
+const settingsStore = useSettingsStore();
+const orderSearch = ref('');
 
-defineProps<{
+const props = defineProps<{
   trade: Trade;
   stakeCurrency: string;
 }>();
+
+const filteredOrders = computed(() => {
+  const q = orderSearch.value.toLowerCase().trim();
+  if (!q) return undefined;
+  return (props.trade.orders || []).filter((o) =>
+    [o.ft_order_side, o.order_type, o.ft_order_tag, String(o.safe_price), String(o.filled)]
+      .some((v) => v?.toLowerCase().includes(q)),
+  );
+});
+
+function pad(s: string, w: number) {
+  s = s || '—';
+  return s.length >= w ? s : s + ' '.repeat(w - s.length);
+}
+
+function copyOrders(trade: Trade) {
+  if (!trade.orders?.length) return;
+  const tz = settingsStore.timezone;
+  // Column widths for alignment
+  const cw = [3, 6, 8, 12, 14, 20, 24];
+  const header = ['#', 'Side', 'Type', 'Price', 'Filled', 'Tag', 'Date']
+    .map((h, i) => pad(h, cw[i])).join(' ');
+  const sep = cw.map((w) => '-'.repeat(w)).join(' ');
+  const rows = trade.orders.map((o, i) => {
+    const side = o.ft_order_side === 'buy' ? 'BUY' : 'SELL';
+    const date = o.order_timestamp ? timestampmsWithTimezone(o.order_timestamp, tz) : '—';
+    const vals = [
+      String(i + 1), side, o.order_type,
+      formatPrice(o.safe_price), formatPrice(o.filled ?? 0),
+      o.ft_order_tag || '—', date,
+    ];
+    return vals.map((v, vi) => pad(v, cw[vi])).join(' ');
+  });
+  const text = [header, sep, ...rows].join('\n');
+
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text: string) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch {}
+  document.body.removeChild(ta);
+}
+
+async function screenshotOrders(trade: Trade) {
+  if (!trade.orders?.length) return;
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const tz = settingsStore.timezone;
+  const font = '12px monospace';
+  const boldFont = 'bold 12px monospace';
+  ctx.font = font;
+
+  const padX = 16;
+  const padY = 16;
+  const rowH = 24;
+  const headerH = 30;
+
+  // Build rows data
+  const headers = ['#', 'Side', 'Type', 'Price', 'Filled', 'Tag', 'Date'];
+  const rows = trade.orders.map((o, i) => [
+    String(i + 1),
+    o.ft_order_side === 'buy' ? 'BUY' : 'SELL',
+    o.order_type,
+    formatPrice(o.safe_price),
+    formatPrice(o.filled ?? 0),
+    o.ft_order_tag || '—',
+    o.order_timestamp ? timestampmsWithTimezone(o.order_timestamp, tz) : '—',
+  ]);
+
+  // Fixed column widths (px) generous for any content
+  const colWidths = [32, 56, 64, 96, 96, 160, 200];
+  const totalW = colWidths.reduce((a, b) => a + b, 0) + padX * 2;
+  const totalH = padY * 2 + headerH + rows.length * rowH;
+
+  canvas.width = totalW * 2;
+  canvas.height = totalH * 2;
+  ctx.scale(2, 2);
+
+  const bg = '#1a1b26';
+  const textColor = '#c0caf5';
+  const mutedColor = '#565f89';
+  const borderColor = '#3b414d';
+  const green = '#3fb950';
+  const red = '#f85149';
+
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, totalW, totalH);
+
+  // Header
+  const headerY = padY + headerH / 2;
+  let x = padX;
+  headers.forEach((h, i) => {
+    ctx.font = 'bold 12px monospace';
+    ctx.fillStyle = mutedColor;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.fillText(h, x, headerY);
+    x += colWidths[i];
+  });
+
+  // Divider
+  ctx.strokeStyle = borderColor;
+  ctx.beginPath();
+  ctx.moveTo(padX, padY + headerH);
+  ctx.lineTo(totalW - padX, padY + headerH);
+  ctx.stroke();
+
+  // Rows
+  rows.forEach((vals, ri) => {
+    const rowY = padY + headerH + 6 + (ri + 1) * rowH;
+    let dx = padX;
+
+    // # (left, muted)
+    ctx.font = '12px monospace';
+    ctx.fillStyle = mutedColor;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(vals[0], dx, rowY);
+    dx += colWidths[0];
+
+    // Side (left, colored)
+    ctx.fillStyle = trade.orders[ri].ft_order_side === 'buy' ? green : red;
+    ctx.fillText(vals[1], dx, rowY);
+    dx += colWidths[1];
+
+    // Type (left)
+    ctx.fillStyle = textColor;
+    ctx.fillText(vals[2], dx, rowY);
+    dx += colWidths[2];
+
+    // Price (left)
+    ctx.fillText(vals[3], dx, rowY);
+    dx += colWidths[3];
+
+    // Filled (left)
+    ctx.fillText(vals[4], dx, rowY);
+    dx += colWidths[4];
+
+    // Tag (left)
+    ctx.fillText(vals[5], dx, rowY);
+    dx += colWidths[5];
+
+    // Date (left)
+    ctx.fillText(vals[6], dx, rowY);
+    // no need to advance after last
+  });
+
+  // Download
+  canvas.toBlob((blob) => {
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders-${trade.pair || 'trade'}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+}
 </script>
 
 <template>
@@ -129,50 +303,57 @@ defineProps<{
           {{ formatPrice(trade.liquidation_price) }}
         </ValuePair>
       </div>
-      <details v-if="trade.orders">
-        <summary>Orders {{ trade.orders.length > 1 ? `[${trade.orders.length}]` : '' }}</summary>
-        <div class="ft-order-list">
-          <article
-            v-for="(order, key) in trade.orders"
-            :key="key"
-            class="ft-order-card"
-            :title="`${order.ft_order_side} ${order.order_type} order for ${formatPriceCurrency(
-              order.amount,
-              trade.base_currency ?? '',
-            )} at ${formatPriceCurrency(
-              order.safe_price,
-              trade.quote_currency ?? '',
-            )}, filled ${formatPrice(order.filled)}`"
+      <details v-if="trade.orders?.length">
+        <summary>
+          Orders <span class="text-xs opacity-60">[{{ trade.orders.length }}]</span>
+        </summary>
+        <div class="flex items-center gap-2 px-2 pt-2 pb-1">
+          <button
+            class="text-xs flex items-center gap-1 px-2 py-0.5 rounded transition-all cursor-pointer hover:brightness-125"
+            :style="{ color: 'var(--p-primary-color)', border: '1px solid var(--p-primary-color)', background: 'color-mix(in srgb, var(--p-primary-color) 10%, transparent)' }"
+            title="Copy orders table"
+            @click="copyOrders(trade)"
           >
-            <header>
-              <span class="ft-order-index">#{{ key + 1 }}</span>
-              <span
-                class="ft-order-side"
-                :class="order.ft_order_side === 'buy' ? 'color-up' : 'color-down'"
-              >
-                <i-mdi-triangle v-if="order.ft_order_side === 'buy'" />
-                <i-mdi-triangle-down v-else />
-                {{ order.ft_order_side }}
-              </span>
-            </header>
-            <div class="ft-order-meta">
-              <span v-if="order.order_timestamp">
-                <DateTimeTZ :date="order.order_timestamp" show-timezone />
-              </span>
-              <span v-if="order.ft_order_tag">{{ order.ft_order_tag }}</span>
-            </div>
-            <div class="ft-order-grid">
-              <span>Rate</span>
-              <b>{{ formatPrice(order.safe_price) }}</b>
-              <span>Filled</span>
-              <b>{{ formatPrice(order.filled ?? 0, 8) }}</b>
-              <template v-if="order.remaining && order.remaining !== 0">
-                <span>Remaining</span>
-                <b>{{ formatPrice(order.remaining, 8) }}</b>
-              </template>
-            </div>
-          </article>
+            <i-mdi-content-copy class="text-sm" /> Copy
+          </button>
+          <button
+            class="text-xs flex items-center gap-1 px-2 py-0.5 rounded transition-all cursor-pointer hover:brightness-125"
+            :style="{ color: 'var(--p-primary-color)', border: '1px solid var(--p-primary-color)', background: 'color-mix(in srgb, var(--p-primary-color) 10%, transparent)' }"
+            title="Screenshot orders table"
+            @click="screenshotOrders(trade)"
+          >
+            <i-mdi-download-box-outline class="text-sm" /> Screenshot
+          </button>
+          <span class="flex-1" />
+          <InputText
+            v-model="orderSearch"
+            size="small"
+            placeholder="Search orders…"
+            class="max-w-[14rem]"
+            :pt="{ root: { class: 'text-xs py-1 px-2' } }"
+          />
         </div>
+        <DataTable :value="filteredOrders ?? trade.orders" size="small" class="ft-metric-table" striped-rows>
+          <Column field="idx" header="#">
+            <template #body="{ data, index }">{{ index + 1 }}</template>
+          </Column>
+          <Column field="ft_order_side" header="Side">
+            <template #body="{ data }">
+              <span :class="data.ft_order_side === 'buy' ? 'text-profit' : 'text-loss'">
+                {{ data.ft_order_side === 'buy' ? 'BUY' : 'SELL' }}
+              </span>
+            </template>
+          </Column>
+          <Column field="order_type" header="Type" />
+          <Column field="safe_price" header="Price" />
+          <Column field="filled" header="Filled" />
+          <Column field="ft_order_tag" header="Tag" />
+          <Column header="Date">
+            <template #body="{ data }">
+              <span class="text-muted whitespace-nowrap">{{ data.order_timestamp ? timestampmsWithTimezone(data.order_timestamp, settingsStore.timezone) : '—' }}</span>
+            </template>
+          </Column>
+        </DataTable>
       </details>
     </section>
   </div>
@@ -206,13 +387,6 @@ defineProps<{
   font-weight: 900;
   letter-spacing: 0;
   text-transform: uppercase;
-}
-.color-up {
-  color: v-bind('colorStore.colorUp');
-}
-
-.color-down {
-  color: v-bind('colorStore.colorDown');
 }
 
 :deep(.flex.w-full) {
@@ -256,93 +430,6 @@ summary {
   font-weight: 900;
 }
 
-.ft-order-list {
-  display: grid;
-  gap: 0.55rem;
-  margin-top: 0.65rem;
-}
-
-.ft-order-card {
-  display: grid;
-  grid-template-columns: minmax(6rem, 0.55fr) minmax(8rem, 1.25fr) minmax(8rem, 1fr);
-  align-items: center;
-  gap: 0.75rem;
-  min-width: 0;
-  padding: 0.72rem 0.8rem;
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  border-radius: var(--ft-card-radius);
-  background: color-mix(in srgb, var(--ft-panel-strong) 46%, transparent);
-}
-
-.ft-order-card header {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.6rem;
-  margin-bottom: 0;
-}
-
-.ft-order-index {
-  color: var(--ft-text-muted);
-  font-family: var(--ft-font-sans);
-  font-variant-numeric: tabular-nums;
-  font-size: 0.78rem;
-  font-weight: 900;
-}
-
-.ft-order-side {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.2rem 0.45rem;
-  border: 1px solid currentColor;
-  border-radius: 0.35rem;
-  background: color-mix(in srgb, var(--ft-panel) 68%, transparent);
-  font-size: 0.72rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.ft-order-side svg {
-  width: 0.82rem;
-  height: 0.82rem;
-}
-
-.ft-order-meta {
-  display: grid;
-  gap: 0.2rem;
-  margin-bottom: 0;
-  color: var(--ft-text-muted);
-  font-size: 0.78rem;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
-}
-
-.ft-order-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.35rem;
-}
-
-.ft-order-grid span {
-  color: var(--ft-text-muted);
-  font-size: 0.72rem;
-  font-weight: 850;
-  text-transform: uppercase;
-}
-
-.ft-order-grid b {
-  display: block;
-  margin-top: 0.12rem;
-  color: var(--ft-text);
-  font-family: var(--ft-font-sans);
-  font-size: 0.9rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 900;
-  text-align: left;
-  overflow-wrap: anywhere;
-}
-
 @media (max-width: 640px) {
   .ft-trade-detail-panel {
     padding: 0.8rem;
@@ -357,33 +444,6 @@ summary {
   :deep([class~='w-4/12']),
   :deep([class~='w-8/12']) {
     width: 100%;
-  }
-
-  .ft-order-card {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 0.55rem 0.75rem;
-    padding: 0.7rem;
-  }
-
-  .ft-order-card header {
-    grid-column: 1 / -1;
-    justify-content: space-between;
-    margin-bottom: 0;
-  }
-
-  .ft-order-meta {
-    margin-bottom: 0;
-  }
-
-  .ft-order-grid {
-    grid-column: 1 / -1;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.45rem;
-  }
-
-  .ft-order-grid b {
-    text-align: left;
   }
 }
 </style>
