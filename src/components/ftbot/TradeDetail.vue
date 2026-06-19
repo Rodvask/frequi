@@ -185,9 +185,10 @@ async function screenshotOrders(trade: Trade) {
 
 <template>
   <div class="ft-trade-detail-grid text-start">
-    <section class="ft-trade-detail-panel">
-      <h5 class="detail-header">General</h5>
-      <ValuePair description="Trade Id">{{ trade.trade_id }}</ValuePair>
+    <article class="ft-dashboard-card">
+      <div class="ft-dashboard-card-header"><span>General</span></div>
+      <div class="ft-dashboard-card-body p-3">
+        <ValuePair description="Trade Id">{{ trade.trade_id }}</ValuePair>
       <ValuePair description="Pair">{{ trade.pair }}</ValuePair>
 
       <ValuePair description="Open date">{{ timestampms(trade.open_timestamp) }}</ValuePair>
@@ -256,9 +257,11 @@ async function screenshotOrders(trade: Trade) {
           }})
         </ValuePair>
       </details>
-    </section>
-    <section class="ft-trade-detail-panel">
-      <h5 class="detail-header">Stoploss</h5>
+        </div>
+      </article>
+    <article class="ft-dashboard-card">
+      <div class="ft-dashboard-card-header"><span>Stoploss</span></div>
+      <div class="ft-dashboard-card-body p-3">
       <ValuePair description="Stoploss">
         {{ formatPercent(trade.stop_loss_ratio) }} |
         {{ formatPrice(trade.stop_loss_abs) }}
@@ -333,7 +336,7 @@ async function screenshotOrders(trade: Trade) {
             :pt="{ root: { class: 'text-xs py-1 px-2' } }"
           />
         </div>
-        <DataTable :value="filteredOrders ?? trade.orders" size="small" class="ft-metric-table" striped-rows>
+        <DataTable :value="filteredOrders ?? props.trade.orders" size="small" class="ft-metric-table">
           <Column field="idx" header="#">
             <template #body="{ data, index }">{{ index + 1 }}</template>
           </Column>
@@ -355,7 +358,8 @@ async function screenshotOrders(trade: Trade) {
           </Column>
         </DataTable>
       </details>
-    </section>
+        </div>
+      </article>
   </div>
 </template>
 <style scoped>
@@ -368,24 +372,12 @@ async function screenshotOrders(trade: Trade) {
   width: 100%;
 }
 
-.ft-trade-detail-panel {
-  min-width: 0;
-  padding: 0.95rem;
-  border: 1px solid var(--ft-panel-border);
-  border-radius: var(--ft-card-radius);
-  background: color-mix(in srgb, var(--ft-panel-strong) 58%, transparent);
-  box-shadow: var(--ft-shadow-soft);
-}
-
 .detail-header {
-  @apply w-full block;
-  margin: 0 0 0.75rem;
-  padding-bottom: 0.5rem;
+  padding: 0.5rem 0;
   border-bottom: 1px solid var(--ft-panel-border);
   color: var(--p-primary-color);
-  font-size: 0.82rem;
+  font-size: 0.93rem;
   font-weight: 900;
-  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -431,10 +423,6 @@ summary {
 }
 
 @media (max-width: 640px) {
-  .ft-trade-detail-panel {
-    padding: 0.8rem;
-  }
-
   :deep(.flex.w-full) {
     display: grid;
     grid-template-columns: 1fr;
