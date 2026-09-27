@@ -142,7 +142,12 @@ async function screenshotOrders(trade: Trade) {
     dx += colWidths[0];
 
     // Side (left, colored)
-    ctx.fillStyle = trade.orders[ri].ft_order_side === 'buy' ? green : red;
+    // `rows` was built from `trade.orders` and the guard above already returned when the list
+    // was empty, so the index is in range. The element is still seen as possibly undefined
+    // inside a callback -- a property read is not narrowed across a closure -- so it is
+    // captured in a local before use.
+    const side = trade.orders?.[ri]?.ft_order_side;
+    ctx.fillStyle = side === 'buy' ? green : red;
     ctx.fillText(vals[1], dx, rowY);
     dx += colWidths[1];
 

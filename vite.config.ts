@@ -66,6 +66,16 @@ export default defineConfig({
   },
   test: {
     environment: 'happy-dom',
+    env: {
+      // Timezone-name rendering (the `z` token) reads the system locale when the code does not
+      // pass one explicitly, and Node's default here follows the host `LANG`. That made
+      // timeformat.spec.ts assert-dependent: on a `LANG=en_GB` host the same code renders
+      // `CEST` instead of the `GMT+2` the suite expects, so the suite passed on one machine
+      // and failed on another for no code reason at all. Pinning LANG makes the expectation
+      // mean what it says. Do not remove this on the assumption the test is "wrong": with
+      // `LANG=en_US` the assertion passes against the unmodified formatter.
+      LANG: 'en_US.UTF-8',
+    },
     exclude: [
       '**/node_modules/**',
       '**/dist/**',

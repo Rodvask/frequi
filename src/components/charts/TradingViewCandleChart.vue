@@ -97,12 +97,20 @@ function chartGridColor() {
   return settingsStore.chartTheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#d7dee8';
 }
 
-function rowValue(row: number[], column: number): number | null {
+/**
+ * Reads one cell of a dataset row.
+ *
+ * The column is a name or an index depending on the caller: the OHLCV columns arrive as
+ * resolved indices, while the indicator badges come from `indicatorColumns()`, which returns
+ * the configured names. Both are legitimate keys for a row, so the parameter is typed as
+ * whatever the dataset can actually be indexed by rather than pretending it is always one.
+ */
+function rowValue(row: number[], column: string | number): number | null {
   const value = Number(row[column]);
   return Number.isFinite(value) ? value : null;
 }
 
-function rowText(row: unknown[], column: number): string {
+function rowText(row: unknown[], column: string | number): string {
   const value = row[column];
   return value === null || value === undefined ? '' : String(value);
 }
@@ -250,7 +258,10 @@ function tradesForTime(time: UTCTimestamp): string[] {
   // Count DCAs per trade for labelling
   const dcaCounts: Record<number, number> = {};
   filteredTrades.value.forEach((trade) => {
-    const opens = [trade.open_timestamp];
+    // `order_timestamp` is optional on the type, so the list holds possible gaps. The filter on
+    // the next line is what makes the count safe, and this annotation is what keeps that true:
+    // without it the push is a type error rather than a documented possibility.
+    const opens: (number | undefined)[] = [trade.open_timestamp];
     if (trade.orders?.length) {
       trade.orders
         .filter((o) => o.ft_order_side === 'buy' && o.status === 'closed')

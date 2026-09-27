@@ -48,7 +48,10 @@ interface LogEntry { date: string; level: string; module: string; msg: string; r
 
 const allLines = computed<LogEntry[]>(() => {
   const logs = botStore.activeBot.lastLogs ?? [];
-  return logs.map((log: string[]) => ({
+  // No annotation here on purpose: `lastLogs` is `LogLine[]`, a tuple whose second slot is
+  // the recorded length, and the store already types it. Declaring the callback parameter as
+  // `string[]` narrowed it away from the tuple and made the whole map() callback unassignable.
+  return logs.map((log) => ({
     date: log[0] || '',
     level: (log[3] || '').padEnd(7),
     module: log[2] || '',
