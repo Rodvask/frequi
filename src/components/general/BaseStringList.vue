@@ -26,7 +26,7 @@ withDefaults(
           severity="secondary"
           variant="outlined"
           title="Delete this value."
-          class="flex align-items-center justify-content-center"
+          class="flex items-center justify-center"
           @click="values.splice(idx, 1)"
         >
           <template #icon>
@@ -38,7 +38,7 @@ withDefaults(
     <Button
       :title="`Add new value`"
       severity="secondary"
-      class="mt-auto flex align-items-center justify-content-center"
+      class="mt-auto flex items-center justify-center"
       @click="values.push('')"
     >
       <template #icon>

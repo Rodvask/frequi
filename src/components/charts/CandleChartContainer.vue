@@ -141,7 +141,7 @@ const singlePairSelection = computed({
 
 <template>
   <div class="flex h-full">
-    <div class="flex-fill w-full flex-col align-items-stretch flex h-full">
+    <div class="grow w-full flex-col items-stretch flex h-full">
       <div class="ft-chart-toolbar flex me-0 items-center md:gap-2">
         <span class="ft-chart-meta md:ms-2 text-nowrap"
           >{{ strategyName }} | {{ timeframe || '' }}</span

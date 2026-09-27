@@ -132,7 +132,7 @@ watch(
             <BaseCheckbox
               v-if="botStore.activeBot.botFeatures.chartLiveData"
               v-model="chartStore.useLiveData"
-              class="align-self-center"
+              class="self-center"
               title="Use live data from the exchange. Only use if you don't have data downloaded locally."
             >
               Use Live Data

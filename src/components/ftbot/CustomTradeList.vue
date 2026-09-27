@@ -53,7 +53,7 @@ const tradeClick = (trade) => {
 
     <span v-if="trades.length === 0" class="mt-5">{{ emptyText }}</span>
 
-    <div class="w-full flex justify-content-between mt-1">
+    <div class="w-full flex justify-between mt-1">
       <Paginator
         v-if="!activeTrades"
         v-model="currentPage"

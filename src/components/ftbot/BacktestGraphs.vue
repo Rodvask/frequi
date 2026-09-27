@@ -19,7 +19,7 @@ const { state: walletData } = useAsyncState(
 );
 </script>
 <template>
-  <div class="text-center flex-fill flex flex-col h-full gap-1">
+  <div class="text-center grow flex flex-col h-full gap-1">
     <TradesLogChart :trades="trades" class="grow chart-equal-height" />
     <TradeDurationChart class="grow chart-equal-height" :trades="trades" :show-title="true" />
     <CumProfitChart :trades="trades" class="grow chart-equal-height" :show-title="true" />

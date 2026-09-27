@@ -159,21 +159,21 @@ watch(
               <BacktestResultAnalysis
                 v-if="hasBacktestResult && botStore.activeBot.selectedBacktestResult"
                 :backtest-result="botStore.activeBot.selectedBacktestResult"
-                class="flex-fill"
+                class="grow"
               />
             </TabPanel>
             <TabPanel value="compare-results">
               <BacktestResultComparison
                 v-if="hasMultiBacktestResult"
                 :backtest-results="botStore.activeBot.backtestHistory"
-                class="flex-fill"
+                class="grow"
               />
             </TabPanel>
             <TabPanel value="visualize-summary">
               <BacktestGraphs
                 v-if="hasBacktestResult && botStore.activeBot.selectedBacktestResult"
                 :trades="botStore.activeBot.selectedBacktestResult.trades"
-                class="flex-fill"
+                class="grow"
               />
             </TabPanel>
             <TabPanel value="visualize" l>

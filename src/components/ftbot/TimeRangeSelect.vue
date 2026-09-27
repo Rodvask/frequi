@@ -67,7 +67,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="flex justify-content-center">
+    <div class="flex justify-center">
       <div>
         <label for="dateFrom">Start Date</label>
         <VueDatePicker

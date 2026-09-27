@@ -35,7 +35,7 @@ const backtestResultFields = computed(() => {
     </div>
     <div class="flex flex-col text-start ms-0 me-2 gap-2">
       <div class="flex flex-col flex-xl-row">
-        <div class="px-0 xl:px-0 pt-2 xl:pt-0 xl:ps-1 flex-fill">
+        <div class="px-0 xl:px-0 pt-2 xl:pt-0 xl:ps-1 grow">
           <DataTable bordered :value="backtestResultStats" size="small" show-gridlines>
             <Column
               v-for="col in backtestResultFields"

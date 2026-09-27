@@ -123,7 +123,7 @@ watch(
 
 <template>
   <div
-    class="flex-fill w-full flex-col align-items-stretch flex"
+    class="grow w-full flex-col items-stretch flex"
     :class="{
       'h-full': isSinglePairView,
       'h-150 border border-r border-b border-surface-300 dark:border-surface-700':

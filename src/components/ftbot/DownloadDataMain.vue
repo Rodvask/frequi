@@ -101,7 +101,7 @@ async function startDownload() {
         <div class="flex flex-col gap-3">
           <div class="flex flex-col lg:flex-row gap-3">
             <!-- Pairs section - keeping template buttons next to input -->
-            <div class="flex-fill">
+            <div class="grow">
               <div class="flex flex-col gap-2">
                 <div class="flex justify-between">
                   <h4 class="text-start font-bold text-lg">Select Pairs</h4>
@@ -136,7 +136,7 @@ async function startDownload() {
             </div>
 
             <!-- Timeframes section -->
-            <div class="flex-fill px-3">
+            <div class="grow px-3">
               <div class="flex flex-col gap-2">
                 <h4 class="text-start font-bold text-lg">Select timeframes</h4>
                 <BaseStringList v-model="timeframes" placeholder="Timeframe" />

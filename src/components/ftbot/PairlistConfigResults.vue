@@ -36,7 +36,7 @@ watch(
           <BaseCheckbox v-model="pair.enabled">{{ pair.pair }}</BaseCheckbox>
         </BListGroupItem>
       </BListGroup>
-      <div class="flex-fill">
+      <div class="grow">
         <ChartView />
       </div>
       <div>

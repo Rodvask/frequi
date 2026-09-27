@@ -42,8 +42,4 @@ watch(() => colorStore.cssVars, applyColorVars, { deep: true });
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
 }
-
-/* * {
-  outline: 1px solid #f00 !important;
-} */
 </style>
