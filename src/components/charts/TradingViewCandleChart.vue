@@ -60,11 +60,6 @@ function accentHex(): string {
   return settingsStore.isDarkTheme ? accent.dark : accent.light;
 }
 
-function accentRgbStr(): string {
-  const accent = colorStore.primaryAccentConfig;
-  return settingsStore.isDarkTheme ? accent.darkRgb : accent.lightRgb;
-}
-
 const filteredTrades = computed(() =>
   props.trades.filter((trade) => trade.pair === props.dataset.pair),
 );

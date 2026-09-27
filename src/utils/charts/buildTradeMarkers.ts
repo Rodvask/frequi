@@ -22,15 +22,6 @@ function asTime(timestamp?: number | null): UTCTimestamp | null {
   return Math.floor(timestamp / 1000) as UTCTimestamp;
 }
 
-function formatChartNumber(value: number | null, decimals = 5): string {
-  if (value === null) return 'N/A';
-  return formatPrice(value, Math.abs(value) >= 100 ? 2 : decimals);
-}
-
-function formatMarkerPrice(value: number | null): string {
-  return value === null ? '' : ` @ ${formatChartNumber(value)}`;
-}
-
 export function buildTradeMarkers(
   dataset: PairHistory,
   trades: Trade[],

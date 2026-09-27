@@ -58,7 +58,13 @@ function fallbackCopy(text: string) {
   ta.style.opacity = '0';
   document.body.appendChild(ta);
   ta.select();
-  try { document.execCommand('copy'); } catch {}
+  // Copy can be rejected by the browser (insecure context, permissions); the textarea is
+  // removed either way and a failed clipboard write must not break the caller.
+  try {
+    document.execCommand('copy');
+  } catch {
+    // Ignored on purpose: no action is possible from here.
+  }
   document.body.removeChild(ta);
 }
 
@@ -70,7 +76,6 @@ async function screenshotOrders(trade: Trade) {
 
   const tz = settingsStore.timezone;
   const font = '12px monospace';
-  const boldFont = 'bold 12px monospace';
   ctx.font = font;
 
   const padX = 16;
@@ -343,7 +348,7 @@ async function screenshotOrders(trade: Trade) {
         </div>
         <DataTable :value="filteredOrders ?? props.trade.orders" size="small" class="ft-metric-table">
           <Column field="idx" header="#">
-            <template #body="{ data, index }">{{ index + 1 }}</template>
+            <template #body="{ index }">{{ index + 1 }}</template>
           </Column>
           <Column field="ft_order_side" header="Side">
             <template #body="{ data }">

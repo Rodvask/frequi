@@ -1,4 +1,4 @@
-import type { Time, UTCTimestamp } from 'lightweight-charts';
+import type { UTCTimestamp } from 'lightweight-charts';
 
 export interface TradeMarkerPoint {
   time: UTCTimestamp;
@@ -28,34 +28,33 @@ export class TradeMarkersPrimitive {
   }
 
   private _createPaneView() {
-    const self = this;
     return {
       zOrder: () => 'top' as const,
       renderer: () => ({
         draw: (target: any) => {
-          const chart = self._chart;
-          const series = self._series;
+          const chart = this._chart;
+          const series = this._series;
           if (!chart || !series || !target.useMediaCoordinateSpace) return;
           target.useMediaCoordinateSpace((scope: any) => {
             const ctx = scope.context as CanvasRenderingContext2D;
             if (!ctx) return;
 
             // Recompute screen coordinates only when invalidated
-            if (self._invalidated) {
-              self._screenMarkers = [];
+            if (this._invalidated) {
+              this._screenMarkers = [];
               const timeScale = chart.timeScale();
-              for (const marker of self._markers) {
+              for (const marker of this._markers) {
                 const x = timeScale.timeToCoordinate(marker.time) as number | null;
                 const y = series.priceToCoordinate(marker.price) as number | null;
                 if (x === null || y === null) continue;
-                self._screenMarkers.push({ x, y, marker });
+                this._screenMarkers.push({ x, y, marker });
               }
-              self._invalidated = false;
+              this._invalidated = false;
             }
 
             // Group by color:shape for batch drawing (single save/restore per group)
             const groups = new Map<string, { x: number; y: number; marker: TradeMarkerPoint }[]>();
-            for (const sm of self._screenMarkers) {
+            for (const sm of this._screenMarkers) {
               const key = `${sm.marker.color}:${sm.marker.shape}`;
               let group = groups.get(key);
               if (!group) {

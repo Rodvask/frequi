@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Favico from 'favico.js';
 import { useRoute } from 'vue-router';
-import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick, h } from 'vue';
+import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import Menu from 'primevue/menu';
 import type { MenuItem } from 'primevue/menuitem';
 import { breakpointsTailwind } from '@vueuse/core';
@@ -14,10 +14,7 @@ import IconChartTimelineVariantShimmer from '~icons/mdi/chart-timeline-variant-s
 import IconChartLine from '~icons/mdi/chart-line';
 import IconFormatListGroup from '~icons/mdi/format-list-group';
 import IconCog from '~icons/mdi/cog';
-import IconPlay from '~icons/mdi/play';
 import IconDownloadBoxOutline from '~icons/mdi/download-box-outline';
-import IconHistory from '~icons/mdi/history';
-import IconSwapHorizontalCircleOutline from '~icons/mdi/swap-horizontal-circle-outline';
 import IconCurrencyUsd from '~icons/mdi/currency-usd';
 import IconFormatListText from '~icons/mdi/format-list-text';
 
