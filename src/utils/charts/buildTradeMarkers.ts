@@ -64,9 +64,15 @@ export function buildTradeMarkers(
         if (!hasSignalValue(row, sigCol)) continue;
         const price = rowValue(row, sigCol);
         if (price === null) continue;
+        const time = asTime(row[colDate]);
+        // A row without a usable date cannot be placed on the time axis, so it is skipped
+        // like a row without a price. This used to be an `as any`, which silenced the null
+        // and then handed a null timestamp to the chart library. Discarding the marker is
+        // the same decision the price guard above already makes.
+        if (time === null) continue;
         const tag = tagCol >= 0 && row[tagCol] ? String(row[tagCol]).slice(0, 24) : '';
         markers.push({
-          time: asTime(row[colDate]) as any,
+          time,
           price,
           color,
           shape: sc.shape,

@@ -18,7 +18,10 @@ import IconDownloadBoxOutline from '~icons/mdi/download-box-outline';
 import IconCurrencyUsd from '~icons/mdi/currency-usd';
 import IconFormatListText from '~icons/mdi/format-list-text';
 
-const iconMap: Record<string, any> = {
+// Icons are rendered with `<component :is="...">`, so the value each key maps to is a Vue
+// component. `Component` says exactly that; `any` said nothing and silenced the check that
+// the keys are read from a string that may not be in the map at all.
+const iconMap: Record<string, Component> = {
   'i-mdi-view-dashboard-outline': IconViewList,
   'i-mdi-swap-horizontal-circle-outline': IconCompareHorizontal,
   'i-mdi-history': IconFolderClock,

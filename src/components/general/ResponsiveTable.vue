@@ -12,10 +12,14 @@ interface ResponsiveColumn {
   hideOnMobile?: boolean;
 }
 
+// A row here is a bag of values addressed by column name, because the columns are data and are
+// read with a dynamic index. `Record<string, unknown>` states that, and it is what forces the
+// narrowing where the template needs a concrete type. `any` stated nothing and let every
+// unchecked field access compile.
 const props = withDefaults(
   defineProps<{
     columns: ResponsiveColumn[];
-    rows: any[];
+    rows: Record<string, unknown>[];
     loading?: boolean;
     paginator?: boolean;
     rowsPerPage?: number;
@@ -103,7 +107,10 @@ function onRowClick(event: DataTableRowClickEvent) {
             {{ row[columns[columns.length - 1]?.field] }}
           </span>
         </div>
-        <b v-if="columns[1]" :class="row[columns[1].field] >= 0 ? 'text-profit' : 'text-loss'">
+        <b
+          v-if="columns[1]"
+          :class="(row[columns[1].field] as number) >= 0 ? 'text-profit' : 'text-loss'"
+        >
           {{ row[columns[1].field] }}
         </b>
       </slot>

@@ -1,4 +1,12 @@
-import type { UTCTimestamp } from 'lightweight-charts';
+import type {
+  IChartApiBase,
+  IPrimitivePaneRenderer,
+  IPanePrimitivePaneView,
+  ISeriesApi,
+  SeriesType,
+  Time,
+  UTCTimestamp,
+} from 'lightweight-charts';
 
 export interface TradeMarkerPoint {
   time: UTCTimestamp;
@@ -10,32 +18,63 @@ export interface TradeMarkerPoint {
 }
 
 /**
+ * The `target` that `draw()` receives.
+ *
+ * `CanvasRenderingTarget2D` is the real parameter type, but lightweight-charts declares it
+ * locally and does not export it, so it cannot be named here. `IPrimitivePaneRenderer['draw']`
+ * is the same type reached through the one public door that exists, so the signature stays
+ * exact and no `any` is needed.
+ */
+type DrawTarget = Parameters<IPrimitivePaneRenderer['draw']>[0];
+
+/**
+ * The rendering scope handed to `useMediaCoordinateSpace`.
+ *
+ * `MediaCoordinatesRenderingScope` is the real type, but it lives in fancy-canvas, which
+ * lightweight-charts depends on but does not re-export, so it cannot be imported by name. The
+ * method is declared `useMediaCoordinateSpace<T>(f: (scope: MediaCoordinatesRenderingScope) => T): T`,
+ * so it is generic: `ReturnType` over the bare signature collapses to `unknown`, and calling it
+ * directly means writing a throwaway callback just to name a type. The scope is reachable
+ * instead through the parameter of the callback that gets handed in, which is not generic and
+ * is exactly the value this call site receives. Going through the target's own method keeps the
+ * signature precise without naming an unexported type, and without an `any`.
+ */
+type MediaScope = Parameters<Parameters<DrawTarget['useMediaCoordinateSpace']>[0]>[0];
+
+/** Metadata the library hands to `attached`, mirrored to avoid depending on its generics. */
+interface AttachedParams {
+  chart: IChartApiBase<Time>;
+  series: ISeriesApi<SeriesType>;
+  requestUpdate: () => void;
+}
+
+/**
  * Custom primitive that renders trade markers with styled labels.
  * Uses Canvas2D for full control over shape and text rendering.
  */
 export class TradeMarkersPrimitive {
-  private _chart: any = null;
-  private _series: any = null;
-  private _requestUpdate: any = null;
+  private _chart: IChartApiBase<Time> | null = null;
+  private _series: ISeriesApi<SeriesType> | null = null;
+  private _requestUpdate: (() => void) | null = null;
   private _markers: TradeMarkerPoint[] = [];
   private _screenMarkers: { x: number; y: number; marker: TradeMarkerPoint }[] = [];
   private _invalidated = true;
-  private _paneView: any;
+  private _paneView: IPanePrimitivePaneView;
 
   constructor(markers: TradeMarkerPoint[]) {
     this._markers = markers;
     this._paneView = this._createPaneView();
   }
 
-  private _createPaneView() {
+  private _createPaneView(): IPanePrimitivePaneView {
     return {
       zOrder: () => 'top' as const,
       renderer: () => ({
-        draw: (target: any) => {
+        draw: (target: DrawTarget) => {
           const chart = this._chart;
           const series = this._series;
           if (!chart || !series || !target.useMediaCoordinateSpace) return;
-          target.useMediaCoordinateSpace((scope: any) => {
+          target.useMediaCoordinateSpace((scope: MediaScope) => {
             const ctx = scope.context as CanvasRenderingContext2D;
             if (!ctx) return;
 
@@ -79,7 +118,7 @@ export class TradeMarkersPrimitive {
     this._requestUpdate?.();
   }
 
-  attached(param: { chart: any; series: any; requestUpdate: () => void }): void {
+  attached(param: AttachedParams): void {
     this._chart = param.chart;
     this._series = param.series;
     this._requestUpdate = param.requestUpdate;
@@ -96,7 +135,7 @@ export class TradeMarkersPrimitive {
     this._invalidated = true;
   }
 
-  paneViews(): any[] {
+  paneViews(): readonly IPanePrimitivePaneView[] {
     return [this._paneView];
   }
 }

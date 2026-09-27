@@ -7,7 +7,7 @@ import IconChartTimelineVariantShimmer from '~icons/mdi/chart-timeline-variant-s
 import IconChartLine from '~icons/mdi/chart-line';
 import IconFormatListGroup from '~icons/mdi/format-list-group';
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, Component> = {
   'i-mdi-monitor-dashboard': IconViewList,
   'i-mdi-swap-horizontal-circle-outline': IconCompareHorizontal,
   'i-mdi-chart-box-outline': IconChartTimelineVariantShimmer,
