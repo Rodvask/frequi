@@ -147,7 +147,11 @@ function handleOk(evt) {
 
 function reset() {
   resetLogin();
-  console.log('reset ', props.existingAuth);
+  // Previously logged props.existingAuth here. That object is an AuthStorage and carries
+  // accessToken and refreshToken, so pressing "edit" on a stored bot printed both bearer
+  // tokens to the browser console. Anyone with access to that devtools panel, or to anything
+  // that captures console output, could replay them against the bot API. The bot name and URL
+  // below are the only fields this function needs, and they are not secrets.
   if (props.existingAuth) {
     botEdit.value = true;
     auth.value.botName = props.existingAuth.botName;
