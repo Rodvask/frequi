@@ -6,8 +6,6 @@ import { registerTransform } from 'echarts';
 import type { BacktestMarketChange } from '@/types';
 import type { EChartsOption } from 'echarts';
 
-
-
 // Define Column labels here to avoid typos
 const CHART_MARKET_CHANGE = 'Market change %';
 

@@ -272,8 +272,7 @@ function tradesForTime(time: UTCTimestamp): string[] {
     if (isInsideCandle(trade.open_timestamp)) {
       const entryTag = trade.enter_tag ? ` ${trade.enter_tag}` : '';
       const direction = trade.is_short ? 'Short' : 'Long';
-      const dcaLabel =
-        (dcaCounts[trade.trade_id] ?? 0) > 0 ? ` +${dcaCounts[trade.trade_id]}` : '';
+      const dcaLabel = (dcaCounts[trade.trade_id] ?? 0) > 0 ? ` +${dcaCounts[trade.trade_id]}` : '';
       labels.push(`${direction} #${trade.trade_id}${entryTag}${dcaLabel}`);
     }
 

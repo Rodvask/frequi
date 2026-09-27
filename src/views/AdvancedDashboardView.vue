@@ -368,61 +368,61 @@ onMounted(() => {
         <div class="ft-dashboard-card-header"><span>Risk alerts</span></div>
         <div class="ft-dashboard-card-body">
           <div class="ft-risk-list">
-          <div
-            v-for="alert in riskAlerts"
-            :key="alert.title"
-            class="ft-risk-alert"
-            :class="`ft-advanced-${alert.tone}`"
-          >
-            <strong>{{ alert.title }}</strong>
-            <span>{{ alert.detail }}</span>
+            <div
+              v-for="alert in riskAlerts"
+              :key="alert.title"
+              class="ft-risk-alert"
+              :class="`ft-advanced-${alert.tone}`"
+            >
+              <strong>{{ alert.title }}</strong>
+              <span>{{ alert.detail }}</span>
+            </div>
           </div>
-        </div>
         </div>
       </article>
 
       <article class="ft-dashboard-card ft-advanced-panel ft-analytics-pair-panel">
         <div class="ft-dashboard-card-header"><span>Pair performance</span></div>
         <div class="ft-dashboard-card-body">
-        <DataTable
-          class="ft-metric-table"
-          size="small"
-          :value="pairPerformance"
-          :paginator="pairPerformance.length > 10"
-          :rows="10"
-          :rows-per-page-options="[10, 20, 30]"
-        >
-          <Column field="key" header="Pair" />
-          <Column field="profitAbs" :header="`Profit ${stakeCurrency}`">
-            <template #body="{ data }">
-              <span :class="data.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
-                {{ formatPrice(data.profitAbs, 2) }}
-              </span>
-            </template>
-          </Column>
-          <Column field="count" header="Trades %">
-            <template #body="{ data }">
-              {{ formatTradeShare(data, pairPerformanceTradeCount) }}
-            </template>
-          </Column>
-          <Column field="count" header="Trades" />
-          <template #empty>No pair performance available.</template>
-        </DataTable>
-        <div class="ft-advanced-mobile-list">
-          <div
-            v-for="row in pairPerformance.slice(0, 10)"
-            :key="row.key"
-            class="ft-mobile-row-card"
+          <DataTable
+            class="ft-metric-table"
+            size="small"
+            :value="pairPerformance"
+            :paginator="pairPerformance.length > 10"
+            :rows="10"
+            :rows-per-page-options="[10, 20, 30]"
           >
-            <div>
-              <strong>{{ row.key }}</strong>
-              <span>{{ row.count }} trades</span>
+            <Column field="key" header="Pair" />
+            <Column field="profitAbs" :header="`Profit ${stakeCurrency}`">
+              <template #body="{ data }">
+                <span :class="data.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
+                  {{ formatPrice(data.profitAbs, 2) }}
+                </span>
+              </template>
+            </Column>
+            <Column field="count" header="Trades %">
+              <template #body="{ data }">
+                {{ formatTradeShare(data, pairPerformanceTradeCount) }}
+              </template>
+            </Column>
+            <Column field="count" header="Trades" />
+            <template #empty>No pair performance available.</template>
+          </DataTable>
+          <div class="ft-advanced-mobile-list">
+            <div
+              v-for="row in pairPerformance.slice(0, 10)"
+              :key="row.key"
+              class="ft-mobile-row-card"
+            >
+              <div>
+                <strong>{{ row.key }}</strong>
+                <span>{{ row.count }} trades</span>
+              </div>
+              <b :class="row.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
+                {{ formatPrice(row.profitAbs, 2) }}
+              </b>
             </div>
-            <b :class="row.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
-              {{ formatPrice(row.profitAbs, 2) }}
-            </b>
           </div>
-        </div>
         </div>
       </article>
 
@@ -430,8 +430,8 @@ onMounted(() => {
         <div class="ft-dashboard-card-header"><span>Trades log</span></div>
         <div class="ft-dashboard-card-body">
           <div class="ft-analytics-chart-frame">
-          <TradesLogChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
-        </div>
+            <TradesLogChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
+          </div>
         </div>
       </article>
 
@@ -439,8 +439,8 @@ onMounted(() => {
         <div class="ft-dashboard-card-header"><span>Wallet history</span></div>
         <div class="ft-dashboard-card-body">
           <div class="ft-analytics-chart-frame">
-          <WalletHistoryChart :wallet-data="botStore.allBalanceHistory" :show-title="false" />
-        </div>
+            <WalletHistoryChart :wallet-data="botStore.allBalanceHistory" :show-title="false" />
+          </div>
         </div>
       </article>
 
@@ -448,110 +448,110 @@ onMounted(() => {
         <div class="ft-dashboard-card-header"><span>Profit distribution</span></div>
         <div class="ft-dashboard-card-body">
           <div class="ft-analytics-chart-frame">
-          <ProfitDistributionChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
-        </div>
+            <ProfitDistributionChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
+          </div>
         </div>
       </article>
 
       <article class="ft-dashboard-card ft-advanced-panel ft-analytics-enter-panel">
         <div class="ft-dashboard-card-header"><span>Enter tag performance</span></div>
         <div class="ft-dashboard-card-body">
-        <DataTable
-          class="ft-metric-table"
-          size="small"
-          :value="enterTagPerformance"
-          :paginator="enterTagPerformance.length > 8"
-          :rows="8"
-          :rows-per-page-options="[8, 12, 20]"
-        >
-          <Column field="key" header="Enter tag" />
-          <Column field="profitAbs" :header="`Profit ${stakeCurrency}`">
-            <template #body="{ data }">
-              <span :class="data.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
-                {{ formatPrice(data.profitAbs, 2) }}
-              </span>
-            </template>
-          </Column>
-          <Column field="count" header="Trades %">
-            <template #body="{ data }">
-              {{ formatTradeShare(data, enterTagTradeCount) }}
-            </template>
-          </Column>
-          <Column field="count" header="Trades" />
-          <template #empty>No enter tag performance available.</template>
-        </DataTable>
-        <div class="ft-advanced-mobile-list">
-          <div
-            v-for="row in enterTagPerformance.slice(0, 12)"
-            :key="row.key"
-            class="ft-mobile-row-card"
+          <DataTable
+            class="ft-metric-table"
+            size="small"
+            :value="enterTagPerformance"
+            :paginator="enterTagPerformance.length > 8"
+            :rows="8"
+            :rows-per-page-options="[8, 12, 20]"
           >
-            <div>
-              <strong>{{ row.key }}</strong>
-              <span>
-                {{ row.count }} trades ·
-                <b>{{ formatTradeShare(row, enterTagTradeCount) }}</b>
-              </span>
+            <Column field="key" header="Enter tag" />
+            <Column field="profitAbs" :header="`Profit ${stakeCurrency}`">
+              <template #body="{ data }">
+                <span :class="data.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
+                  {{ formatPrice(data.profitAbs, 2) }}
+                </span>
+              </template>
+            </Column>
+            <Column field="count" header="Trades %">
+              <template #body="{ data }">
+                {{ formatTradeShare(data, enterTagTradeCount) }}
+              </template>
+            </Column>
+            <Column field="count" header="Trades" />
+            <template #empty>No enter tag performance available.</template>
+          </DataTable>
+          <div class="ft-advanced-mobile-list">
+            <div
+              v-for="row in enterTagPerformance.slice(0, 12)"
+              :key="row.key"
+              class="ft-mobile-row-card"
+            >
+              <div>
+                <strong>{{ row.key }}</strong>
+                <span>
+                  {{ row.count }} trades ·
+                  <b>{{ formatTradeShare(row, enterTagTradeCount) }}</b>
+                </span>
+              </div>
+              <b :class="row.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
+                {{ formatPrice(row.profitAbs, 2) }}
+              </b>
             </div>
-            <b :class="row.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
-              {{ formatPrice(row.profitAbs, 2) }}
-            </b>
+            <div v-if="!enterTagPerformance.length" class="ft-empty-state">
+              No enter tag performance available.
+            </div>
           </div>
-          <div v-if="!enterTagPerformance.length" class="ft-empty-state">
-            No enter tag performance available.
-          </div>
-        </div>
         </div>
       </article>
 
       <article class="ft-dashboard-card ft-advanced-panel ft-analytics-exit-panel">
         <div class="ft-dashboard-card-header"><span>Exit reason performance</span></div>
         <div class="ft-dashboard-card-body">
-        <DataTable
-          class="ft-metric-table"
-          size="small"
-          :value="exitReasonPerformance"
-          :paginator="exitReasonPerformance.length > 8"
-          :rows="8"
-          :rows-per-page-options="[8, 12, 20]"
-        >
-          <Column field="key" header="Exit reason" />
-          <Column field="profitAbs" :header="`Profit ${stakeCurrency}`">
-            <template #body="{ data }">
-              <span :class="data.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
-                {{ formatPrice(data.profitAbs, 2) }}
-              </span>
-            </template>
-          </Column>
-          <Column field="count" header="Trades %">
-            <template #body="{ data }">
-              {{ formatTradeShare(data, exitReasonTradeCount) }}
-            </template>
-          </Column>
-          <Column field="count" header="Trades" />
-          <template #empty>No exit reason performance available.</template>
-        </DataTable>
-        <div class="ft-advanced-mobile-list">
-          <div
-            v-for="row in exitReasonPerformance.slice(0, 12)"
-            :key="row.key"
-            class="ft-mobile-row-card"
+          <DataTable
+            class="ft-metric-table"
+            size="small"
+            :value="exitReasonPerformance"
+            :paginator="exitReasonPerformance.length > 8"
+            :rows="8"
+            :rows-per-page-options="[8, 12, 20]"
           >
-            <div>
-              <strong>{{ row.key }}</strong>
-              <span>
-                {{ row.count }} trades ·
-                <b>{{ formatTradeShare(row, exitReasonTradeCount) }}</b>
-              </span>
+            <Column field="key" header="Exit reason" />
+            <Column field="profitAbs" :header="`Profit ${stakeCurrency}`">
+              <template #body="{ data }">
+                <span :class="data.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
+                  {{ formatPrice(data.profitAbs, 2) }}
+                </span>
+              </template>
+            </Column>
+            <Column field="count" header="Trades %">
+              <template #body="{ data }">
+                {{ formatTradeShare(data, exitReasonTradeCount) }}
+              </template>
+            </Column>
+            <Column field="count" header="Trades" />
+            <template #empty>No exit reason performance available.</template>
+          </DataTable>
+          <div class="ft-advanced-mobile-list">
+            <div
+              v-for="row in exitReasonPerformance.slice(0, 12)"
+              :key="row.key"
+              class="ft-mobile-row-card"
+            >
+              <div>
+                <strong>{{ row.key }}</strong>
+                <span>
+                  {{ row.count }} trades ·
+                  <b>{{ formatTradeShare(row, exitReasonTradeCount) }}</b>
+                </span>
+              </div>
+              <b :class="row.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
+                {{ formatPrice(row.profitAbs, 2) }}
+              </b>
             </div>
-            <b :class="row.profitAbs >= 0 ? 'text-profit' : 'text-loss'">
-              {{ formatPrice(row.profitAbs, 2) }}
-            </b>
+            <div v-if="!exitReasonPerformance.length" class="ft-empty-state">
+              No exit reason performance available.
+            </div>
           </div>
-          <div v-if="!exitReasonPerformance.length" class="ft-empty-state">
-            No exit reason performance available.
-          </div>
-        </div>
         </div>
       </article>
     </section>

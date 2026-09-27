@@ -19,16 +19,34 @@ const botStore = useBotStore();
 const route = useRoute();
 
 const isActive = (to: string) =>
-  to === '/' ? route.path === to : route.path.startsWith(to) && (route.path.length === to.length || route.path[to.length] === '/');
+  to === '/'
+    ? route.path === to
+    : route.path.startsWith(to) &&
+      (route.path.length === to.length || route.path[to.length] === '/');
 
 function iconComp(name: string) {
   return iconMap[name] || null;
 }
 
 const tabs = ref([
-  { label: 'Dashboard', to: '/dashboard', icon: 'i-mdi-monitor-dashboard', visible: computed(() => !botStore.canRunBacktest) },
-  { label: 'Trades', to: '/open_trades', icon: 'i-mdi-swap-horizontal-circle-outline', visible: computed(() => !botStore.canRunBacktest) },
-  { label: 'Analytics', to: '/analytics', icon: 'i-mdi-chart-box-outline', visible: computed(() => !botStore.canRunBacktest) },
+  {
+    label: 'Dashboard',
+    to: '/dashboard',
+    icon: 'i-mdi-monitor-dashboard',
+    visible: computed(() => !botStore.canRunBacktest),
+  },
+  {
+    label: 'Trades',
+    to: '/open_trades',
+    icon: 'i-mdi-swap-horizontal-circle-outline',
+    visible: computed(() => !botStore.canRunBacktest),
+  },
+  {
+    label: 'Analytics',
+    to: '/analytics',
+    icon: 'i-mdi-chart-box-outline',
+    visible: computed(() => !botStore.canRunBacktest),
+  },
   { label: 'Chart', to: '/graph', icon: 'i-mdi-chart-line', visible: true },
   { label: 'Logs', to: '/logs', icon: 'i-mdi-format-list-bulleted-square', visible: true },
 ]);

@@ -14,8 +14,9 @@ const filteredOrders = computed(() => {
   const q = orderSearch.value.toLowerCase().trim();
   if (!q) return undefined;
   return (props.trade.orders || []).filter((o) =>
-    [o.ft_order_side, o.order_type, o.ft_order_tag, String(o.safe_price), String(o.filled)]
-      .some((v) => v?.toLowerCase().includes(q)),
+    [o.ft_order_side, o.order_type, o.ft_order_tag, String(o.safe_price), String(o.filled)].some(
+      (v) => v?.toLowerCase().includes(q),
+    ),
   );
 });
 
@@ -30,15 +31,20 @@ function copyOrders(trade: Trade) {
   // Column widths for alignment
   const cw = [3, 6, 8, 12, 14, 20, 24];
   const header = ['#', 'Side', 'Type', 'Price', 'Filled', 'Tag', 'Date']
-    .map((h, i) => pad(h, cw[i])).join(' ');
+    .map((h, i) => pad(h, cw[i]))
+    .join(' ');
   const sep = cw.map((w) => '-'.repeat(w)).join(' ');
   const rows = trade.orders.map((o, i) => {
     const side = o.ft_order_side === 'buy' ? 'BUY' : 'SELL';
     const date = o.order_timestamp ? timestampmsWithTimezone(o.order_timestamp, tz) : '—';
     const vals = [
-      String(i + 1), side, o.order_type,
-      formatPrice(o.safe_price), formatPrice(o.filled ?? 0),
-      o.ft_order_tag || '—', date,
+      String(i + 1),
+      side,
+      o.order_type,
+      formatPrice(o.safe_price),
+      formatPrice(o.filled ?? 0),
+      o.ft_order_tag || '—',
+      date,
     ];
     return vals.map((v, vi) => pad(v, cw[vi])).join(' ');
   });
@@ -199,177 +205,193 @@ async function screenshotOrders(trade: Trade) {
       <div class="ft-dashboard-card-header"><span>General</span></div>
       <div class="ft-dashboard-card-body p-3">
         <ValuePair description="Trade Id">{{ trade.trade_id }}</ValuePair>
-      <ValuePair description="Pair">{{ trade.pair }}</ValuePair>
+        <ValuePair description="Pair">{{ trade.pair }}</ValuePair>
 
-      <ValuePair description="Open date">{{ timestampms(trade.open_timestamp) }}</ValuePair>
-      <ValuePair v-if="trade.enter_tag" description="Entry tag">{{ trade.enter_tag }}</ValuePair>
-      <ValuePair v-if="trade.is_open" description="Stake">
-        {{ formatPriceCurrency(trade.stake_amount, stakeCurrency) }}
-        <template v-if="trade.trading_mode !== 'spot'">
-          ({{ trade.leverage }}x)
-          <span title="Position value" class="italic">{{
-            formatPriceCurrency(trade.amount * trade.open_rate, stakeCurrency)
-          }}</span>
-        </template>
-      </ValuePair>
-      <ValuePair v-if="!trade.is_open" description="Total Stake">
-        {{ formatPriceCurrency(trade.max_stake_amount ?? trade.stake_amount, stakeCurrency) }}
-        {{ trade.trading_mode !== 'spot' ? `(${trade.leverage}x)` : '' }}
-      </ValuePair>
-      <ValuePair description="Amount">{{ formatPrice(trade.amount) }}</ValuePair>
-      <ValuePair description="Open Rate">{{ formatPrice(trade.open_rate) }}</ValuePair>
-      <ValuePair v-if="trade.is_open && trade.current_rate" description="Current Rate">
-        {{ formatPrice(trade.current_rate) }}
-        <span title="Current Value - In futures mode Collateral + PnL" class="italic">
-          ({{ formatPriceCurrency(trade.stake_amount + (trade.profit_abs ?? 0), stakeCurrency) }})
-        </span>
-      </ValuePair>
-      <ValuePair v-if="!trade.is_open && trade.close_rate" description="Close Rate">{{
-        formatPrice(trade.close_rate)
-      }}</ValuePair>
-
-      <ValuePair v-if="trade.close_timestamp" description="Close date">{{
-        timestampms(trade.close_timestamp)
-      }}</ValuePair>
-      <ValuePair
-        v-if="trade.is_open && trade.realized_profit && !trade.total_profit_abs"
-        description="Realized Profit"
-      >
-        <TradeProfit :trade="trade" mode="realized" />
-      </ValuePair>
-      <ValuePair v-if="trade.is_open && trade.total_profit_abs" description="Total Profit">
-        <TradeProfit :trade="trade" mode="total" />
-      </ValuePair>
-      <ValuePair
-        v-if="trade.profit_ratio && trade.profit_abs"
-        :description="`${trade.is_open ? 'Current Profit' : 'Close Profit'}`"
-      >
-        <TradeProfit :trade="trade" />
-      </ValuePair>
-      <details>
-        <summary>Details</summary>
-        <ValuePair v-if="trade.min_rate" description="Min Rate">{{
-          formatPrice(trade.min_rate)
-        }}</ValuePair>
-        <ValuePair v-if="trade.max_rate" description="Max Rate">{{
-          formatPrice(trade.max_rate)
-        }}</ValuePair>
-        <ValuePair description="Open-Fees">
-          {{ trade.fee_open_cost }} {{ trade.quote_currency }}
-          <span v-if="trade.quote_currency !== trade.fee_open_currency">
-            (in {{ trade.fee_open_currency }})
+        <ValuePair description="Open date">{{ timestampms(trade.open_timestamp) }}</ValuePair>
+        <ValuePair v-if="trade.enter_tag" description="Entry tag">{{ trade.enter_tag }}</ValuePair>
+        <ValuePair v-if="trade.is_open" description="Stake">
+          {{ formatPriceCurrency(trade.stake_amount, stakeCurrency) }}
+          <template v-if="trade.trading_mode !== 'spot'">
+            ({{ trade.leverage }}x)
+            <span title="Position value" class="italic">{{
+              formatPriceCurrency(trade.amount * trade.open_rate, stakeCurrency)
+            }}</span>
+          </template>
+        </ValuePair>
+        <ValuePair v-if="!trade.is_open" description="Total Stake">
+          {{ formatPriceCurrency(trade.max_stake_amount ?? trade.stake_amount, stakeCurrency) }}
+          {{ trade.trading_mode !== 'spot' ? `(${trade.leverage}x)` : '' }}
+        </ValuePair>
+        <ValuePair description="Amount">{{ formatPrice(trade.amount) }}</ValuePair>
+        <ValuePair description="Open Rate">{{ formatPrice(trade.open_rate) }}</ValuePair>
+        <ValuePair v-if="trade.is_open && trade.current_rate" description="Current Rate">
+          {{ formatPrice(trade.current_rate) }}
+          <span title="Current Value - In futures mode Collateral + PnL" class="italic">
+            ({{ formatPriceCurrency(trade.stake_amount + (trade.profit_abs ?? 0), stakeCurrency) }})
           </span>
-          ({{ formatPercent(trade.fee_open) }})
         </ValuePair>
-        <ValuePair v-if="trade.fee_close_cost && trade.fee_close" description="Fees close">
-          {{ trade.fee_close_cost }} {{ trade.fee_close_currency }} ({{
-            formatPercent(trade.fee_close)
-          }})
+        <ValuePair v-if="!trade.is_open && trade.close_rate" description="Close Rate">{{
+          formatPrice(trade.close_rate)
+        }}</ValuePair>
+
+        <ValuePair v-if="trade.close_timestamp" description="Close date">{{
+          timestampms(trade.close_timestamp)
+        }}</ValuePair>
+        <ValuePair
+          v-if="trade.is_open && trade.realized_profit && !trade.total_profit_abs"
+          description="Realized Profit"
+        >
+          <TradeProfit :trade="trade" mode="realized" />
         </ValuePair>
-      </details>
-        </div>
-      </article>
+        <ValuePair v-if="trade.is_open && trade.total_profit_abs" description="Total Profit">
+          <TradeProfit :trade="trade" mode="total" />
+        </ValuePair>
+        <ValuePair
+          v-if="trade.profit_ratio && trade.profit_abs"
+          :description="`${trade.is_open ? 'Current Profit' : 'Close Profit'}`"
+        >
+          <TradeProfit :trade="trade" />
+        </ValuePair>
+        <details>
+          <summary>Details</summary>
+          <ValuePair v-if="trade.min_rate" description="Min Rate">{{
+            formatPrice(trade.min_rate)
+          }}</ValuePair>
+          <ValuePair v-if="trade.max_rate" description="Max Rate">{{
+            formatPrice(trade.max_rate)
+          }}</ValuePair>
+          <ValuePair description="Open-Fees">
+            {{ trade.fee_open_cost }} {{ trade.quote_currency }}
+            <span v-if="trade.quote_currency !== trade.fee_open_currency">
+              (in {{ trade.fee_open_currency }})
+            </span>
+            ({{ formatPercent(trade.fee_open) }})
+          </ValuePair>
+          <ValuePair v-if="trade.fee_close_cost && trade.fee_close" description="Fees close">
+            {{ trade.fee_close_cost }} {{ trade.fee_close_currency }} ({{
+              formatPercent(trade.fee_close)
+            }})
+          </ValuePair>
+        </details>
+      </div>
+    </article>
     <article class="ft-dashboard-card">
       <div class="ft-dashboard-card-header"><span>Stoploss</span></div>
       <div class="ft-dashboard-card-body p-3">
-      <ValuePair description="Stoploss">
-        {{ formatPercent(trade.stop_loss_ratio) }} |
-        {{ formatPrice(trade.stop_loss_abs) }}
-      </ValuePair>
-      <ValuePair
-        description="At risk"
-        help="The amount at risk based on the stake amount. This is how much you would lose if the stoploss is hit."
-      >
-        {{
-          formatPriceCurrency(trade.stake_amount * Math.abs(trade.stop_loss_ratio), stakeCurrency)
-        }}
-      </ValuePair>
-      <ValuePair
-        v-if="trade.is_open && trade.stoploss_current_dist_ratio && trade.stoploss_current_dist"
-        description="Current stoploss dist"
-      >
-        {{ formatPercent(trade.stoploss_current_dist_ratio) }} |
-        {{ formatPrice(trade.stoploss_current_dist) }}
-      </ValuePair>
-      <ValuePair
-        v-if="trade.initial_stop_loss_pct && trade.initial_stop_loss_abs"
-        description="Initial Stoploss"
-      >
-        {{ formatPercent(trade.initial_stop_loss_pct / 100) }} |
-        {{ formatPrice(trade.initial_stop_loss_abs) }}
-      </ValuePair>
-      <ValuePair v-if="trade.stoploss_last_update_timestamp" description="Stoploss last updated">
-        {{ timestampms(trade.stoploss_last_update_timestamp) }}
-      </ValuePair>
-      <div v-if="trade.trading_mode !== undefined && trade.trading_mode !== 'spot'">
-        <h5 class="detail-header">Futures/Margin</h5>
-        <ValuePair description="Direction">
-          {{ trade.is_short ? 'short' : 'long' }} - {{ trade.leverage }}x
+        <ValuePair description="Stoploss">
+          {{ formatPercent(trade.stop_loss_ratio) }} |
+          {{ formatPrice(trade.stop_loss_abs) }}
         </ValuePair>
-        <ValuePair v-if="trade.funding_fees !== undefined" description="Funding fees">
-          {{ formatPrice(trade.funding_fees) }}
+        <ValuePair
+          description="At risk"
+          help="The amount at risk based on the stake amount. This is how much you would lose if the stoploss is hit."
+        >
+          {{
+            formatPriceCurrency(trade.stake_amount * Math.abs(trade.stop_loss_ratio), stakeCurrency)
+          }}
         </ValuePair>
-        <ValuePair v-if="trade.interest_rate !== undefined" description="Interest rate">
-          {{ formatPrice(trade.interest_rate) }}
+        <ValuePair
+          v-if="trade.is_open && trade.stoploss_current_dist_ratio && trade.stoploss_current_dist"
+          description="Current stoploss dist"
+        >
+          {{ formatPercent(trade.stoploss_current_dist_ratio) }} |
+          {{ formatPrice(trade.stoploss_current_dist) }}
         </ValuePair>
-        <ValuePair v-if="trade.liquidation_price !== undefined" description="Liquidation Price">
-          {{ formatPrice(trade.liquidation_price) }}
+        <ValuePair
+          v-if="trade.initial_stop_loss_pct && trade.initial_stop_loss_abs"
+          description="Initial Stoploss"
+        >
+          {{ formatPercent(trade.initial_stop_loss_pct / 100) }} |
+          {{ formatPrice(trade.initial_stop_loss_abs) }}
         </ValuePair>
-      </div>
-      <details v-if="trade.orders?.length">
-        <summary>
-          Orders <span class="text-xs opacity-60">[{{ trade.orders.length }}]</span>
-        </summary>
-        <div class="flex items-center gap-2 px-2 pt-2 pb-1">
-          <button
-            class="text-xs flex items-center gap-1 px-2 py-0.5 rounded transition-all cursor-pointer hover:brightness-125"
-            :style="{ color: 'var(--p-primary-color)', border: '1px solid var(--p-primary-color)', background: 'color-mix(in srgb, var(--p-primary-color) 10%, transparent)' }"
-            title="Copy orders table"
-            @click="copyOrders(trade)"
-          >
-            <i-mdi-content-copy class="text-sm" /> Copy
-          </button>
-          <button
-            class="text-xs flex items-center gap-1 px-2 py-0.5 rounded transition-all cursor-pointer hover:brightness-125"
-            :style="{ color: 'var(--p-primary-color)', border: '1px solid var(--p-primary-color)', background: 'color-mix(in srgb, var(--p-primary-color) 10%, transparent)' }"
-            title="Screenshot orders table"
-            @click="screenshotOrders(trade)"
-          >
-            <i-mdi-download-box-outline class="text-sm" /> Screenshot
-          </button>
-          <span class="flex-1" />
-          <InputText
-            v-model="orderSearch"
+        <ValuePair v-if="trade.stoploss_last_update_timestamp" description="Stoploss last updated">
+          {{ timestampms(trade.stoploss_last_update_timestamp) }}
+        </ValuePair>
+        <div v-if="trade.trading_mode !== undefined && trade.trading_mode !== 'spot'">
+          <h5 class="detail-header">Futures/Margin</h5>
+          <ValuePair description="Direction">
+            {{ trade.is_short ? 'short' : 'long' }} - {{ trade.leverage }}x
+          </ValuePair>
+          <ValuePair v-if="trade.funding_fees !== undefined" description="Funding fees">
+            {{ formatPrice(trade.funding_fees) }}
+          </ValuePair>
+          <ValuePair v-if="trade.interest_rate !== undefined" description="Interest rate">
+            {{ formatPrice(trade.interest_rate) }}
+          </ValuePair>
+          <ValuePair v-if="trade.liquidation_price !== undefined" description="Liquidation Price">
+            {{ formatPrice(trade.liquidation_price) }}
+          </ValuePair>
+        </div>
+        <details v-if="trade.orders?.length">
+          <summary>
+            Orders <span class="text-xs opacity-60">[{{ trade.orders.length }}]</span>
+          </summary>
+          <div class="flex items-center gap-2 px-2 pt-2 pb-1">
+            <button
+              class="text-xs flex items-center gap-1 px-2 py-0.5 rounded transition-all cursor-pointer hover:brightness-125"
+              :style="{
+                color: 'var(--p-primary-color)',
+                border: '1px solid var(--p-primary-color)',
+                background: 'color-mix(in srgb, var(--p-primary-color) 10%, transparent)',
+              }"
+              title="Copy orders table"
+              @click="copyOrders(trade)"
+            >
+              <i-mdi-content-copy class="text-sm" /> Copy
+            </button>
+            <button
+              class="text-xs flex items-center gap-1 px-2 py-0.5 rounded transition-all cursor-pointer hover:brightness-125"
+              :style="{
+                color: 'var(--p-primary-color)',
+                border: '1px solid var(--p-primary-color)',
+                background: 'color-mix(in srgb, var(--p-primary-color) 10%, transparent)',
+              }"
+              title="Screenshot orders table"
+              @click="screenshotOrders(trade)"
+            >
+              <i-mdi-download-box-outline class="text-sm" /> Screenshot
+            </button>
+            <span class="flex-1" />
+            <InputText
+              v-model="orderSearch"
+              size="small"
+              placeholder="Search orders…"
+              class="max-w-[14rem]"
+              :pt="{ root: { class: 'text-xs py-1 px-2' } }"
+            />
+          </div>
+          <DataTable
+            :value="filteredOrders ?? props.trade.orders"
             size="small"
-            placeholder="Search orders…"
-            class="max-w-[14rem]"
-            :pt="{ root: { class: 'text-xs py-1 px-2' } }"
-          />
-        </div>
-        <DataTable :value="filteredOrders ?? props.trade.orders" size="small" class="ft-metric-table">
-          <Column field="idx" header="#">
-            <template #body="{ index }">{{ index + 1 }}</template>
-          </Column>
-          <Column field="ft_order_side" header="Side">
-            <template #body="{ data }">
-              <span :class="data.ft_order_side === 'buy' ? 'text-profit' : 'text-loss'">
-                {{ data.ft_order_side === 'buy' ? 'BUY' : 'SELL' }}
-              </span>
-            </template>
-          </Column>
-          <Column field="order_type" header="Type" />
-          <Column field="safe_price" header="Price" />
-          <Column field="filled" header="Filled" />
-          <Column field="ft_order_tag" header="Tag" />
-          <Column header="Date">
-            <template #body="{ data }">
-              <span class="text-muted whitespace-nowrap">{{ data.order_timestamp ? timestampmsWithTimezone(data.order_timestamp, settingsStore.timezone) : '—' }}</span>
-            </template>
-          </Column>
-        </DataTable>
-      </details>
-        </div>
-      </article>
+            class="ft-metric-table"
+          >
+            <Column field="idx" header="#">
+              <template #body="{ index }">{{ index + 1 }}</template>
+            </Column>
+            <Column field="ft_order_side" header="Side">
+              <template #body="{ data }">
+                <span :class="data.ft_order_side === 'buy' ? 'text-profit' : 'text-loss'">
+                  {{ data.ft_order_side === 'buy' ? 'BUY' : 'SELL' }}
+                </span>
+              </template>
+            </Column>
+            <Column field="order_type" header="Type" />
+            <Column field="safe_price" header="Price" />
+            <Column field="filled" header="Filled" />
+            <Column field="ft_order_tag" header="Tag" />
+            <Column header="Date">
+              <template #body="{ data }">
+                <span class="text-muted whitespace-nowrap">{{
+                  data.order_timestamp
+                    ? timestampmsWithTimezone(data.order_timestamp, settingsStore.timezone)
+                    : '—'
+                }}</span>
+              </template>
+            </Column>
+          </DataTable>
+        </details>
+      </div>
+    </article>
   </div>
 </template>
 <style scoped>

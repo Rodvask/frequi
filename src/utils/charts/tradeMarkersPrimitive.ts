@@ -164,7 +164,10 @@ function drawMarkerShape(
     ctx.fillStyle = 'rgba(0, 0, 0, 0.72)';
     ctx.beginPath();
     const r = 4;
-    const bx = labelX, by = labelY - 11, bw = tw + padX * 2, bh = th;
+    const bx = labelX,
+      by = labelY - 11,
+      bw = tw + padX * 2,
+      bh = th;
     if (typeof ctx.roundRect === 'function') {
       ctx.roundRect(bx, by, bw, bh, r);
     } else {

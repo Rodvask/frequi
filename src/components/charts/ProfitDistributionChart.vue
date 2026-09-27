@@ -5,8 +5,6 @@ import type { EChartsOption } from 'echarts';
 
 import type { ClosedTrade } from '@/types';
 
-
-
 // Define Column labels here to avoid typos
 const CHART_PROFIT = 'Trade count';
 

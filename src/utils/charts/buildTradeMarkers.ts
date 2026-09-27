@@ -85,7 +85,9 @@ export function buildTradeMarkers(
 
     if (!orders || orders.length === 0) {
       // Fallback when orders array is missing
-      const openTime = asTime(roundTimeframe(dataset.timeframe_ms, trade.open_fill_timestamp ?? trade.open_timestamp));
+      const openTime = asTime(
+        roundTimeframe(dataset.timeframe_ms, trade.open_fill_timestamp ?? trade.open_timestamp),
+      );
       const openPrice = trade.open_rate ?? null;
       if (openTime && openPrice !== null) {
         markers.push({
@@ -98,7 +100,9 @@ export function buildTradeMarkers(
         });
       }
 
-      const closeTime = trade.close_timestamp ? asTime(roundTimeframe(dataset.timeframe_ms, trade.close_timestamp)) : null;
+      const closeTime = trade.close_timestamp
+        ? asTime(roundTimeframe(dataset.timeframe_ms, trade.close_timestamp))
+        : null;
       const closePrice = trade.close_rate ?? trade.current_rate ?? null;
       if (closeTime && closePrice !== null) {
         const profitText = isDefined(trade.profit_ratio)
@@ -191,7 +195,5 @@ export function buildTradeMarkers(
     });
   });
 
-  return markers.sort(
-    (left, right) => Number(left.time) - Number(right.time),
-  );
+  return markers.sort((left, right) => Number(left.time) - Number(right.time));
 }
